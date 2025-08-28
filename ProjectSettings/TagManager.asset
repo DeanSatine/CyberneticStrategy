@@ -6,6 +6,8 @@ TagManager:
   tags:
   - Unit
   - Tile
+  - BoardTile
+  - BenchTile
   layers:
   - Default
   - TransparentFX

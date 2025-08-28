@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
+using static UnitAI;
 
 public class Draggable : MonoBehaviour
 {
@@ -88,13 +89,32 @@ public class Draggable : MonoBehaviour
 
         if (closestObject != null)
         {
-            // Snap to the center of the closest object, only affecting X and Z coordinates
             transform.position = new Vector3(closestObject.position.x, transform.position.y, closestObject.position.z);
+
+            var unitAI = GetComponent<UnitAI>();
+
+            if (closestObject.CompareTag("BoardTile"))
+            {
+                unitAI.currentState = UnitState.BoardIdle;
+                Debug.Log($"{gameObject.name} placed on BOARD");
+
+                // Register with GameManager (player team assumed here)
+                GameManager.Instance.RegisterUnit(unitAI, isPlayer: true);
+            }
+            else if (closestObject.CompareTag("BenchTile"))
+            {
+                unitAI.currentState = UnitState.Bench;
+                Debug.Log($"{gameObject.name} placed on BENCH");
+
+                // Remove from combat pool
+                GameManager.Instance.UnregisterUnit(unitAI);
+            }
         }
         else
         {
             transform.position = oldPosition;
         }
+
     }
 
     private Vector3 GetMouseWorldPos()
