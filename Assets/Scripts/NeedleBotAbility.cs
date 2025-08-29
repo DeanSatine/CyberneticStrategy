@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnitAI;
 
-public class NeedleBotAbility : MonoBehaviour
+public class NeedleBotAbility : MonoBehaviour, IUnitAbility
 {
     private UnitAI unitAI;
 
@@ -55,6 +56,10 @@ public class NeedleBotAbility : MonoBehaviour
                 yield return new WaitForSeconds(0.1f); // small delay between throws
             }
         }
+    }
+    public void FireNeedleEvent()
+    {
+        StartCoroutine(FireNeedles());
     }
 
     private List<UnitAI> FindNearestEnemies(int count)

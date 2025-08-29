@@ -60,6 +60,11 @@ public class UnitAI : MonoBehaviour
 
         if (currentState != UnitState.Combat) return; // ✅ do nothing until combat
 
+        if (currentTarget != null && currentState == UnitState.Combat)
+        {
+            FaceTarget(currentTarget.position);
+        }
+
         attackCooldown -= Time.deltaTime;
 
         if (currentTarget == null || !currentTarget.GetComponent<UnitAI>().isAlive)
@@ -85,9 +90,22 @@ public class UnitAI : MonoBehaviour
         }
     }
 
+    private void FaceTarget(Vector3 targetPos)
+    {
+        Vector3 direction = (targetPos - transform.position).normalized;
+        direction.y = 0f; // keep upright
+
+        if (direction != Vector3.zero)
+        {
+            Quaternion lookRotation = Quaternion.LookRotation(direction);
+            transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 10f);
+        }
+    }
 
     private void Attack(Transform target)
     {
+        FaceTarget(target.position);
+
         if (animator) animator.SetTrigger("AttackTrigger");
 
         UnitAI enemy = target.GetComponent<UnitAI>();
@@ -133,15 +151,27 @@ public class UnitAI : MonoBehaviour
 
     private void CastAbility()
     {
+        if (currentTarget != null)
+            FaceTarget(currentTarget.transform.position);
+
         if (animator) animator.SetTrigger("AbilityTrigger");
 
-        // Try attached ability script
-        var ability = GetComponent<NeedleBotAbility>();
-        if (ability != null)
+        // 🔑 Run any ability component on this unit
+        foreach (var ability in GetComponents<MonoBehaviour>())
         {
-            ability.Cast();
+            if (ability is IUnitAbility unitAbility)
+            {
+                unitAbility.Cast();
+                return;
+            }
         }
     }
+
+    public interface IUnitAbility
+    {
+        void Cast();
+    }
+
 
     private Transform FindNearestEnemy()
     {
@@ -162,6 +192,10 @@ public class UnitAI : MonoBehaviour
             }
         }
         return nearest;
+    }
+    public UnitAI GetCurrentTarget()
+    {
+        return currentTarget != null ? currentTarget.GetComponent<UnitAI>() : null;
     }
 
     private void MoveTowards(Vector3 position)

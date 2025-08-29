@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -31,8 +31,8 @@ public class HexGridLayout : MonoBehaviour
         {
             for (int x = 0; x < gridSize.x; x++)
             {
-                GameObject tile = new GameObject($"Hex {x},{y}", typeof(HexRenderer));
-                tile.transform.position = GetPositionForHexFromCoordinate(new Vector2Int(x,y));
+                GameObject tile = new GameObject($"Hex {x},{y}", typeof(HexRenderer), typeof(HexTile));
+                tile.transform.position = GetPositionForHexFromCoordinate(new Vector2Int(x, y));
 
                 HexRenderer hexRenderer = tile.GetComponent<HexRenderer>();
                 hexRenderer.isFlatTopped = isFlatTopped;
@@ -44,6 +44,13 @@ public class HexGridLayout : MonoBehaviour
                 hexRenderer.m_renderer.material = idlematerial;
                 hexRenderer.DrawMesh();
                 tile.transform.SetParent(transform, true);
+
+                // 👇 Decide role
+                HexTile hexTile = tile.GetComponent<HexTile>();
+                if (y == gridSize.y - 1) // last row = bench
+                    hexTile.tileType = TileType.Bench;
+                else
+                    hexTile.tileType = TileType.Board;
             }
         }
     }

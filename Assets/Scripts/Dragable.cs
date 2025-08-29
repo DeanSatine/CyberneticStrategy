@@ -92,28 +92,29 @@ public class Draggable : MonoBehaviour
             transform.position = new Vector3(closestObject.position.x, transform.position.y, closestObject.position.z);
 
             var unitAI = GetComponent<UnitAI>();
+            var tile = closestObject.GetComponent<HexTile>();
 
-            if (closestObject.CompareTag("BoardTile"))
+            if (tile != null)
             {
-                unitAI.currentState = UnitState.BoardIdle;
-                Debug.Log($"{gameObject.name} placed on BOARD");
-
-                // Register with GameManager (player team assumed here)
-                GameManager.Instance.RegisterUnit(unitAI, isPlayer: true);
-            }
-            else if (closestObject.CompareTag("BenchTile"))
-            {
-                unitAI.currentState = UnitState.Bench;
-                Debug.Log($"{gameObject.name} placed on BENCH");
-
-                // Remove from combat pool
-                GameManager.Instance.UnregisterUnit(unitAI);
+                if (tile.tileType == TileType.Board)
+                {
+                    unitAI.currentState = UnitState.BoardIdle;
+                    Debug.Log($"{gameObject.name} placed on BOARD");
+                    GameManager.Instance.RegisterUnit(unitAI, unitAI.team == Team.Player);
+                }
+                else if (tile.tileType == TileType.Bench)
+                {
+                    unitAI.currentState = UnitState.Bench;
+                    Debug.Log($"{gameObject.name} placed on BENCH");
+                    GameManager.Instance.UnregisterUnit(unitAI);
+                }
             }
         }
         else
         {
             transform.position = oldPosition;
         }
+
 
     }
 
