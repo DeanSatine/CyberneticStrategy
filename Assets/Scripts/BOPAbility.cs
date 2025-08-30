@@ -4,23 +4,44 @@ using static UnitAI;
 public class BOPAbility : MonoBehaviour, IUnitAbility
 {
     private UnitAI unitAI;
+
+    [Header("Ability Stats")]
     public float[] damageAmpPerStar = { 30, 40, 50 };
-    public float[] chestBuffPercent = { 0.05f, 0.05f, 0.05f }; // flat +5% per cast (can adjust per star)
+    public float[] chestBuffPercent = { 0.05f, 0.05f, 0.05f }; // +5% per cast
+
+    [Header("Optional VFX")]
+    public GameObject chestVFX;
+    public GameObject strikeVFX;
 
     private void Awake()
     {
         unitAI = GetComponent<UnitAI>();
     }
 
+    // Called by UnitAI when manaa is full
     public void Cast()
     {
-        // ✅ Buff self health
+        // Trigger chest pound animation
+        if (unitAI.animator != null)
+            unitAI.animator.SetTrigger("AbilityTrigger");
+    }
+
+    // 👊 Animation Event: Chest Pound frame
+    public void ApplyChestBuff()
+    {
         float buffAmount = unitAI.maxHealth * chestBuffPercent[Mathf.Clamp(unitAI.starLevel - 1, 0, chestBuffPercent.Length - 1)];
         unitAI.maxHealth += buffAmount;
         unitAI.currentHealth += buffAmount;
 
-        Debug.Log($"{unitAI.unitName} pounds chest! Gained {buffAmount} max HP (now {unitAI.maxHealth}).");
+        if (chestVFX != null)
+            Instantiate(chestVFX, transform.position, Quaternion.identity);
 
+        Debug.Log($"{unitAI.unitName} pounds chest! +{buffAmount} max HP (now {unitAI.maxHealth}).");
+    }
+
+    // 🔨 Animation Event: Bonk Strike frame
+    public void DoBonkDamage()
+    {
         UnitAI target = unitAI.GetCurrentTarget();
         if (target != null && target.isAlive)
         {
@@ -28,6 +49,13 @@ public class BOPAbility : MonoBehaviour, IUnitAbility
             float damage = (unitAI.maxHealth * 0.2f) + damageAmp;
 
             target.TakeDamage(damage);
+
+            if (strikeVFX != null)
+                Instantiate(strikeVFX, target.transform.position, Quaternion.identity);
+
+            Debug.Log($"{unitAI.unitName} BONKS {target.unitName} for {damage} damage!");
         }
     }
+
+
 }

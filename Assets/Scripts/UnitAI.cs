@@ -32,7 +32,7 @@ public class UnitAI : MonoBehaviour
     public bool isAlive = true;
 
     private float attackCooldown = 0f;
-    private Animator animator;
+    [HideInInspector] public Animator animator;
     private Transform currentTarget;
 
     public enum UnitState

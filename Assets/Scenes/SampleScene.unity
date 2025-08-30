@@ -1749,6 +1749,7 @@ MonoBehaviour:
   canMove: 1
   canAttack: 1
   isAlive: 1
+  animator: {fileID: 0}
   currentState: 0
 --- !u!65 &1207917015
 BoxCollider:
@@ -2241,6 +2242,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1830409257912123064, guid: 26987c9f5c7ac64499783608db7a02c6,
+        type: 3}
+      propertyPath: mana
+      value: 40
+      objectReference: {fileID: 0}
     - target: {fileID: 3915463247227310737, guid: 26987c9f5c7ac64499783608db7a02c6,
         type: 3}
       propertyPath: m_Name
