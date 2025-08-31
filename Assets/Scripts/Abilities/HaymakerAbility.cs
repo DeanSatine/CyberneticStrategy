@@ -8,6 +8,7 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
     private UnitAI unitAI;
     private UnitAI clone;
     private int soulCount = 0;
+    private GameObject cloneInstance;
 
     [Header("Ability Stats")]
     public float[] stabDamage = { 125f, 250f, 999f };
@@ -97,15 +98,22 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
     private void Start()
     {
         UnitAI.OnAnyUnitDeath += OnUnitDeath;
-        SpawnClone();
     }
     private void Update()
     {
         // Spawn clone once when placed on board (not bench)
-        if (!cloneSpawned && unitAI.currentState == UnitAI.UnitState.BoardIdle)
+        if (unitAI.currentState == UnitState.BoardIdle && cloneInstance == null)
         {
             SpawnClone();
         }
+        // ✅ If Haymaker is back on bench → destroy clone
+        else if (unitAI.currentState == UnitState.Bench && cloneInstance != null)
+        {
+            Destroy(cloneInstance);
+            cloneInstance = null;
+            Debug.Log("[HaymakerAbility] Clone removed because Haymaker returned to Bench.");
+        }
+
     }
 
   
