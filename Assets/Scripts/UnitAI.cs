@@ -42,16 +42,34 @@ public class UnitAI : MonoBehaviour
 
     [Header("Team Settings")]
     public int teamID = 0;   // 0 = Player team, 1 = Enemy team (expand later)
+    public static event System.Action<UnitAI> OnAnyUnitDeath;
+    public event System.Action<UnitState> OnStateChanged;
+    private UnitState _currentState = UnitState.Bench;
 
+    public UnitState currentState
+    {
+        get => _currentState;
+        set
+        {
+            if (_currentState == value) return;   // only fire on change
+            _currentState = value;
+            OnStateChanged?.Invoke(_currentState);
+        }
+    }
     public enum UnitState
     {
         Bench,
         BoardIdle,
         Combat
     }
-
-    public UnitState currentState = UnitState.Bench;
-
+    public void SetState(UnitState newState)
+    {
+        if (currentState != newState)
+        {
+            currentState = newState;
+            OnStateChanged?.Invoke(newState);
+        }
+    }
     private void Awake()
     {
         animator = GetComponent<Animator>();
@@ -129,6 +147,10 @@ public class UnitAI : MonoBehaviour
         {
             enemy.TakeDamage(attackDamage);
             GainMana(10);
+
+            // 🔑 Check if this unit has KillSwitchAbility
+            var ks = GetComponent<KillSwitchAbility>();
+            if (ks != null) ks.OnAttack(enemy);
         }
     }
 
@@ -151,6 +173,7 @@ public class UnitAI : MonoBehaviour
     private void Die()
     {
         isAlive = false;
+        OnAnyUnitDeath?.Invoke(this);
         if (animator) animator.SetTrigger("DieTrigger");
         Debug.Log($"{unitName} has died!");
         GetComponent<Collider>().enabled = false;

@@ -107,7 +107,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: e87c2fb57ffd89c4ca16bef6487cf218, type: 2}
+      objectReference: {fileID: 2100000, guid: ae4ac85451d029e47a7e0004351b4d96, type: 2}
     - target: {fileID: -5195048882033904264, guid: 2013060faca6a4b4997345f68fa7e83d,
         type: 3}
       propertyPath: m_Layer
@@ -326,6 +326,8 @@ MonoBehaviour:
   unitUIPrefab: {fileID: 6093184905329643714, guid: 4fecc7f632203e842989e0166a25b217,
     type: 3}
   animator: {fileID: 0}
+  currentTarget: {fileID: 0}
+  teamID: 0
   currentState: 0
 --- !u!114 &5542962458511737843
 MonoBehaviour:
