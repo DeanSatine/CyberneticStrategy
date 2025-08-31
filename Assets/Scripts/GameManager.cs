@@ -42,6 +42,7 @@ public class GameManager : Singleton<GameManager>
             if (!enemyUnits.Contains(unit))
                 enemyUnits.Add(unit);
         }
+
     }
 
     public void UnregisterUnit(UnitAI unit)
@@ -73,6 +74,11 @@ public class GameManager : Singleton<GameManager>
             TraitManager.Instance.ApplyTraits(playerUnits);
             TraitManager.Instance.ApplyTraits(enemyUnits); // optional if enemies can also have traits
         }
+    }
+    private void UpdatePlayerTraitUI()
+    {
+        var traitCounts = TraitManager.Instance.CountTraits(playerUnits);
+        TraitUIManager.Instance.UpdateTraitUI(traitCounts);
     }
 
 

@@ -56,7 +56,7 @@ public class TraitManager : MonoBehaviour
         ApplyBonuses(playerUnits, traitCounts);
     }
 
-    private Dictionary<Trait, int> CountTraits(List<UnitAI> units)
+    public Dictionary<Trait, int> CountTraits(List<UnitAI> units)
     {
         Dictionary<Trait, int> counts = new Dictionary<Trait, int>();
 
@@ -73,7 +73,48 @@ public class TraitManager : MonoBehaviour
 
         return counts;
     }
+    public bool IsTraitActive(Trait trait, int count)
+    {
+        switch (trait)
+        {
+            case Trait.Eradicator:
+                return (count >= eradicatorThreshold2 || count >= eradicatorThreshold3);
 
+            case Trait.Bulkhead:
+                return (count >= bulkheadThreshold);
+
+            case Trait.Clobbertron:
+                return (count >= clobbertronThreshold);
+
+            case Trait.Strikebyte:
+                return (count >= strikebyteThreshold2 || count >= strikebyteThreshold3);
+        }
+        return false;
+    }
+    public int GetCurrentTier(Trait trait, int count)
+    {
+        switch (trait)
+        {
+            case Trait.Eradicator:
+                if (count >= eradicatorThreshold3) return 3;
+                if (count >= eradicatorThreshold2) return 2;
+                break;
+
+            case Trait.Bulkhead:
+                if (count >= bulkheadThreshold) return 2;
+                break;
+
+            case Trait.Clobbertron:
+                if (count >= clobbertronThreshold) return 2;
+                break;
+
+            case Trait.Strikebyte:
+                if (count >= strikebyteThreshold3) return 3;
+                if (count >= strikebyteThreshold2) return 2;
+                break;
+        }
+        return 0;
+    }
     private void ApplyBonuses(List<UnitAI> playerUnits, Dictionary<Trait, int> activeTraits)
     {
         foreach (var kvp in activeTraits)
