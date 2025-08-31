@@ -140,7 +140,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 4091e2ca91237fd4cb9e277c8685a4e6,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.7071068
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 4091e2ca91237fd4cb9e277c8685a4e6,
         type: 3}
@@ -150,7 +150,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 4091e2ca91237fd4cb9e277c8685a4e6,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.7071068
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 4091e2ca91237fd4cb9e277c8685a4e6,
         type: 3}
@@ -165,7 +165,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 4091e2ca91237fd4cb9e277c8685a4e6,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: -90
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 4091e2ca91237fd4cb9e277c8685a4e6,
         type: 3}
@@ -382,7 +382,11 @@ Animation:
   m_Enabled: 1
   serializedVersion: 3
   m_Animation: {fileID: 0}
-  m_Animations: []
+  m_Animations:
+  - {fileID: -203655887218126122, guid: c7e994702a16b4641a1d71575b9d66a7, type: 3}
+  - {fileID: -203655887218126122, guid: 084a337d0af3582468a8b305428a5c3d, type: 3}
+  - {fileID: -203655887218126122, guid: c7cc6bd1c149f574eadfdba9f17eb8e4, type: 3}
+  - {fileID: -203655887218126122, guid: 662e16ecc52ae9f45ad95b8dc60828e1, type: 3}
   m_WrapMode: 0
   m_PlayAutomatically: 1
   m_AnimatePhysics: 0
@@ -424,6 +428,7 @@ MonoBehaviour:
   mana: 0
   maxMana: 50
   currentMana: 0
+  traits: 
   canMove: 1
   canAttack: 1
   isAlive: 1
@@ -431,7 +436,6 @@ MonoBehaviour:
   animator: {fileID: 0}
   currentTarget: {fileID: 0}
   teamID: 0
-  currentState: 0
 --- !u!65 &1499806241345368472
 BoxCollider:
   m_ObjectHideFlags: 0

@@ -67,6 +67,12 @@ public class GameManager : Singleton<GameManager>
             if (unit != null && unit.isAlive)
                 unit.currentState = UnitState.Combat;
         }
+
+        if (TraitManager.Instance != null)
+        {
+            TraitManager.Instance.ApplyTraits(playerUnits);
+            TraitManager.Instance.ApplyTraits(enemyUnits); // optional if enemies can also have traits
+        }
     }
 
 

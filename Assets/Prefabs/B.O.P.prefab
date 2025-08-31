@@ -317,6 +317,7 @@ MonoBehaviour:
   mana: 0
   maxMana: 40
   currentMana: 0
+  traits: 0100000002000000
   canMove: 1
   canAttack: 1
   isAlive: 1
@@ -325,7 +326,6 @@ MonoBehaviour:
   animator: {fileID: 0}
   currentTarget: {fileID: 0}
   teamID: 0
-  currentState: 0
 --- !u!114 &6517958316986358636
 MonoBehaviour:
   m_ObjectHideFlags: 0

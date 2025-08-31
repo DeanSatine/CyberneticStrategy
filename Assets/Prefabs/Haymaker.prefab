@@ -428,6 +428,7 @@ MonoBehaviour:
   mana: 0
   maxMana: 50
   currentMana: 0
+  traits: 0200000003000000
   canMove: 1
   canAttack: 1
   isAlive: 1
@@ -457,6 +458,7 @@ MonoBehaviour:
   - 400
   clonePrefab: {fileID: 3571069488247416756, guid: e500d4b71aabe274b88679a3f9566bed,
     type: 3}
+  benchSpawnPoint: {fileID: 0}
 --- !u!65 &1499806241345368472
 BoxCollider:
   m_ObjectHideFlags: 0

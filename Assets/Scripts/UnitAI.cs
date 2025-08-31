@@ -26,6 +26,8 @@ public class UnitAI : MonoBehaviour
     public float mana = 0f;
     public float maxMana = 50f;
     [HideInInspector] public float currentMana = 0f;
+    [Header("Traits")]
+    public List<Trait> traits = new List<Trait>();
 
     [Header("AI Settings")]
     public bool canMove = true;
@@ -56,6 +58,7 @@ public class UnitAI : MonoBehaviour
             OnStateChanged?.Invoke(_currentState);
         }
     }
+
     public enum UnitState
     {
         Bench,

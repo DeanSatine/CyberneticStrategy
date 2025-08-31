@@ -311,6 +311,7 @@ MonoBehaviour:
   mana: 0
   maxMana: 30
   currentMana: 0
+  traits: 0000000003000000
   canMove: 1
   canAttack: 1
   isAlive: 1
@@ -318,7 +319,6 @@ MonoBehaviour:
   animator: {fileID: 0}
   currentTarget: {fileID: 0}
   teamID: 0
-  currentState: 0
 --- !u!114 &7161809393136151176
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -357,8 +357,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.59937763, y: 1.8785505, z: 1}
-  m_Center: {x: -0.010702133, y: 0.9639697, z: 0}
+  m_Size: {x: 0.59937763, y: 1.933275, z: 1}
+  m_Center: {x: -0.010702131, y: 0.9366076, z: 1.4204743e-18}
 --- !u!54 &3346549499708274473
 Rigidbody:
   m_ObjectHideFlags: 0
