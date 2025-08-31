@@ -25,15 +25,23 @@ public class UnitAI : MonoBehaviour
     public float attackRange = 1.5f;
     public float mana = 0f;
     public float maxMana = 50f;
+    [HideInInspector] public float currentMana = 0f;
 
     [Header("AI Settings")]
     public bool canMove = true;
     public bool canAttack = true;
     public bool isAlive = true;
 
+    [Header("UI")]
+    public GameObject unitUIPrefab;
+    private UnitUI ui;
+
     private float attackCooldown = 0f;
     [HideInInspector] public Animator animator;
-    private Transform currentTarget;
+    public Transform currentTarget;
+
+    [Header("Team Settings")]
+    public int teamID = 0;   // 0 = Player team, 1 = Enemy team (expand later)
 
     public enum UnitState
     {
@@ -52,6 +60,14 @@ public class UnitAI : MonoBehaviour
     private void Start()
     {
         currentHealth = maxHealth;
+        currentMana = 0f;
+
+        if (unitUIPrefab != null)
+        {
+            GameObject uiObj = Instantiate(unitUIPrefab, transform);
+            ui = uiObj.GetComponent<UnitUI>();
+            ui.Init(transform, maxHealth, maxMana);
+        }
     }
 
     private void Update()
@@ -123,6 +139,8 @@ public class UnitAI : MonoBehaviour
         GainMana(1);
 
         Debug.Log($"{unitName} took {reducedDamage} damage. HP: {currentHealth}/{maxHealth}");
+        if (ui != null)
+            ui.UpdateHealth(currentHealth);   // ✅ refresh bar
 
         if (currentHealth <= 0)
         {
@@ -136,18 +154,28 @@ public class UnitAI : MonoBehaviour
         if (animator) animator.SetTrigger("DieTrigger");
         Debug.Log($"{unitName} has died!");
         GetComponent<Collider>().enabled = false;
+
+        if (ui != null) ui.gameObject.SetActive(false); // hide bars
+
         this.enabled = false;
     }
 
+
     private void GainMana(float amount)
     {
-        mana += amount;
-        if (mana >= maxMana)
+        currentMana += amount;
+        if (ui != null)
+            ui.UpdateMana(currentMana);   // ✅ refresh bar
+
+        if (currentMana >= maxMana)
         {
             CastAbility();
-            mana = 0;
+            currentMana = 0;
+            if (ui != null)
+                ui.UpdateMana(currentMana);   // reset bar
         }
     }
+
 
     private void CastAbility()
     {
