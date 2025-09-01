@@ -119,11 +119,16 @@ public class UnitAI : MonoBehaviour
                     Attack(currentTarget);
                     attackCooldown = 1f / attackSpeed;
                 }
+                if (animator) animator.SetBool("IsRunning", false);
             }
             else if (canMove)
             {
                 MoveTowards(currentTarget.position);
             }
+        }
+        else
+        {
+            if (animator) animator.SetBool("IsRunning", false);
         }
     }
 
@@ -255,5 +260,7 @@ public class UnitAI : MonoBehaviour
     private void MoveTowards(Vector3 position)
     {
         transform.position = Vector3.MoveTowards(transform.position, position, Time.deltaTime * 2f);
+
+        if (animator) animator.SetBool("IsRunning", true);
     }
 }
