@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class TraitManager : MonoBehaviour
@@ -138,6 +138,24 @@ public class TraitManager : MonoBehaviour
                 return (0, strikebyteThreshold2);
         }
         return (0, 0);
+    }
+    public void EvaluateTraits(List<UnitAI> playerUnits)
+    {
+        Dictionary<Trait, int> traitCounts = new Dictionary<Trait, int>();
+
+        foreach (var unit in playerUnits)
+        {
+            if (unit == null) continue;
+            foreach (var trait in unit.traits)
+            {
+                if (!traitCounts.ContainsKey(trait))
+                    traitCounts[trait] = 0;
+                traitCounts[trait]++;
+            }
+        }
+
+        // ✅ push to UI
+        TraitUIManager.Instance.UpdateTraitUI(traitCounts);
     }
 
     private void ApplyBonuses(List<UnitAI> playerUnits, Dictionary<Trait, int> activeTraits)

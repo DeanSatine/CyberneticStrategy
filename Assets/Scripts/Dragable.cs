@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -38,11 +38,10 @@ public class Draggable : MonoBehaviour
     }
 
     private void SnapToClosestObject()
-        //TODO CURRENT ISSUES: Works for most part need to include on hextiles too but
-        //Seems like circle colliders might be effecting placement on table even with ignore.
-        //Unsure if code issue or unity issue.
-        //NEW IDEA: CircleColliders are only needed during battle so turn off during placement to prevent conflicts.
+  
     {
+        TraitManager.Instance.EvaluateTraits(GameManager.Instance.playerUnits);
+
         Collider[] colliders = Physics.OverlapCapsule(transform.position - Vector3.up * 0.5f, transform.position + Vector3.up * 0.5f, 0.5f); // Adjust the height and radius as needed
 
 

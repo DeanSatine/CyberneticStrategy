@@ -6,61 +6,54 @@ public class TraitUIManager : MonoBehaviour
     public static TraitUIManager Instance;
 
     [System.Serializable]
-    public class TraitPrefabRef
+    public class TraitPanelRef
     {
         public Trait trait;
-        public GameObject prefab; // prefab of your designed UI element
+        public TraitUIPanel panel;
     }
 
-    [Header("Trait UI Settings")]
-    public Transform traitUIParent; // The parent container (a Canvas or empty under it)
-    public List<TraitPrefabRef> traitPrefabs;
+    [Header("Preplaced Panels")]
+    public List<TraitPanelRef> traitPanels;
 
-    private Dictionary<Trait, TraitUIPanel> activePanels = new Dictionary<Trait, TraitUIPanel>();
+    private Dictionary<Trait, TraitUIPanel> panelMap = new Dictionary<Trait, TraitUIPanel>();
 
     private void Awake()
     {
         Instance = this;
+
+        foreach (var refPair in traitPanels)
+        {
+            if (!panelMap.ContainsKey(refPair.trait))
+                panelMap.Add(refPair.trait, refPair.panel);
+
+            if (refPair.panel != null)
+                refPair.panel.gameObject.SetActive(false);
+        }
     }
 
     public void UpdateTraitUI(Dictionary<Trait, int> traitCounts)
     {
-        foreach (var kvp in traitCounts)
+        foreach (var kvp in panelMap)
         {
             Trait trait = kvp.Key;
-            int count = kvp.Value;
+            TraitUIPanel panel = kvp.Value;
+
+            int count = traitCounts.ContainsKey(trait) ? traitCounts[trait] : 0;
 
             if (count == 0)
             {
-                // remove if it exists
-                if (activePanels.ContainsKey(trait))
-                {
-                    Destroy(activePanels[trait].gameObject);
-                    activePanels.Remove(trait);
-                }
+                panel.gameObject.SetActive(false);
                 continue;
             }
 
-            // spawn if missing
-            if (!activePanels.ContainsKey(trait))
-            {
-                var prefabRef = traitPrefabs.Find(x => x.trait == trait);
-                if (prefabRef != null && prefabRef.prefab != null)
-                {
-                    GameObject uiObj = Instantiate(prefabRef.prefab, traitUIParent);
-                    TraitUIPanel panel = uiObj.GetComponent<TraitUIPanel>();
-                    activePanels.Add(trait, panel);
-                }
-            }
+            panel.gameObject.SetActive(true);
 
-            // update texts
-            if (activePanels.TryGetValue(trait, out TraitUIPanel panelRef))
-            {
-                int activeTier = TraitManager.Instance.GetCurrentTier(trait, count);
-                (int activeThreshold, int nextThreshold) = TraitManager.Instance.GetBreakpoints(trait, count);
+            int activeTier = TraitManager.Instance.GetCurrentTier(trait, count);
+            (int activeThreshold, int nextThreshold) = TraitManager.Instance.GetBreakpoints(trait, count);
 
-                panelRef.UpdateTexts(count, activeThreshold, nextThreshold);
-            }
+            bool isActive = activeTier > 0;
+
+            panel.UpdateTexts(count, activeThreshold, nextThreshold, isActive);
         }
     }
 }
