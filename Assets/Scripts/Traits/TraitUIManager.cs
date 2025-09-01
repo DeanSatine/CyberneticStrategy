@@ -30,6 +30,24 @@ public class TraitUIManager : MonoBehaviour
                 refPair.panel.gameObject.SetActive(false);
         }
     }
+    public void EvaluateTraits(List<UnitAI> activeUnits)
+    {
+        Dictionary<Trait, int> traitCounts = new Dictionary<Trait, int>();
+
+        foreach (var unit in activeUnits)
+        {
+            if (unit == null) continue;
+            foreach (var trait in unit.traits)
+            {
+                if (!traitCounts.ContainsKey(trait))
+                    traitCounts[trait] = 0;
+                traitCounts[trait]++;
+            }
+        }
+
+        TraitUIManager.Instance.UpdateTraitUI(traitCounts);
+    }
+
 
     public void UpdateTraitUI(Dictionary<Trait, int> traitCounts)
     {

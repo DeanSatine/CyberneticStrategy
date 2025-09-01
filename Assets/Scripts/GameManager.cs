@@ -43,13 +43,24 @@ public class GameManager : Singleton<GameManager>
                 enemyUnits.Add(unit);
         }
 
+        // ✅ Only count Board units
+        TraitManager.Instance.EvaluateTraits(GetActivePlayerUnits());
     }
 
     public void UnregisterUnit(UnitAI unit)
     {
         playerUnits.Remove(unit);
         enemyUnits.Remove(unit);
+
+        // ✅ Only count Board units
+        TraitManager.Instance.EvaluateTraits(GetActivePlayerUnits());
     }
+
+    public List<UnitAI> GetActivePlayerUnits()
+    {
+        return playerUnits.FindAll(u => u != null && u.isAlive && u.currentState == UnitAI.UnitState.BoardIdle || u.currentState == UnitAI.UnitState.Combat);
+    }
+
     public void StartCombat()
     {
         if (combatStarted) return;

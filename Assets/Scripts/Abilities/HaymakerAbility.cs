@@ -6,9 +6,7 @@ using static UnitAI;
 public class HaymakerAbility : MonoBehaviour, IUnitAbility
 {
     private UnitAI unitAI;
-    private UnitAI clone;
     private int soulCount = 0;
-    private GameObject cloneInstance;
 
     [Header("Ability Stats")]
     public float[] stabDamage = { 125f, 250f, 999f };
@@ -16,124 +14,111 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
 
     [Header("Passive Clone")]
     public GameObject clonePrefab;   // assign in Inspector
-    private bool cloneSpawned = false;
-    public Transform benchSpawnPoint;
+    private GameObject cloneInstance;
+
     private void Awake()
     {
         unitAI = GetComponent<UnitAI>();
         unitAI.OnStateChanged += HandleStateChanged;
-    }
-    private void OnEnable()
-    {
-        unitAI = GetComponent<UnitAI>();
-        unitAI.OnStateChanged += HandleStateChanged;
-
-        // If you want pre-placed Haymaker in scene to also spawn:
-        if (!cloneSpawned && unitAI.currentState == UnitState.BoardIdle)
-            SpawnClone();
+        UnitAI.OnAnyUnitDeath += OnUnitDeath;
     }
 
-    private void OnDisable()
+    private void OnDestroy()
     {
-        if (unitAI != null)
-            unitAI.OnStateChanged -= HandleStateChanged;
+        unitAI.OnStateChanged -= HandleStateChanged;
+        UnitAI.OnAnyUnitDeath -= OnUnitDeath;
     }
 
     private void HandleStateChanged(UnitState state)
     {
-        Debug.Log($"[HaymakerAbility] State changed to {state}");
-        if (!cloneSpawned && state == UnitState.BoardIdle)
+        Debug.Log($"[HaymakerAbility] Haymaker state → {state}");
+
+        if (state == UnitState.BoardIdle)
         {
-            SpawnClone();
+            if (cloneInstance == null)
+                SpawnClone();
+        }
+        else if (state == UnitState.Bench || !unitAI.isAlive)
+        {
+            if (cloneInstance != null)
+                DestroyClone();
         }
     }
 
     private void SpawnClone()
     {
-        if (cloneSpawned) return;
+        // pick closest hex next to Haymaker
+        Vector3 spawnPos = FindClosestEmptyHex(transform.position);
 
-        // choose source object
-        GameObject source = clonePrefab != null ? clonePrefab : gameObject;
+        cloneInstance = Instantiate(clonePrefab, spawnPos, Quaternion.identity);
+        cloneInstance.name = $"{unitAI.unitName} Clone";
 
-        // pick a spawn position (bench or beside Haymaker)
-        Vector3 spawnPos = benchSpawnPoint != null
-            ? benchSpawnPoint.position
-            : transform.position + Vector3.right * 1.5f;
+        var cloneAI = cloneInstance.GetComponent<UnitAI>();
 
-        GameObject cloneObj = Instantiate(source, spawnPos, Quaternion.identity);
-        cloneObj.name = $"{unitAI.unitName} Clone";
-
-        var cloneAI = cloneObj.GetComponent<UnitAI>();
-
-        // if we duplicated ourselves, strip ability so the clone won't spawn another clone
-        if (clonePrefab == null)
-        {
-            var selfAbility = cloneObj.GetComponent<HaymakerAbility>();
-            if (selfAbility) Destroy(selfAbility);
-        }
-
-        // stat scaling
+        // scale stats
         cloneAI.maxHealth = unitAI.maxHealth * 0.25f;
         cloneAI.currentHealth = cloneAI.maxHealth;
         cloneAI.attackDamage = unitAI.attackDamage * 0.25f;
         cloneAI.starLevel = unitAI.starLevel;
         cloneAI.team = unitAI.team;
         cloneAI.currentMana = 0f;
+        cloneAI.isAlive = true;
 
-        // clone should be placeable like any other unit → start it on Bench
-        cloneAI.currentState = UnitState.Bench;
+        // put the clone directly into BoardIdle so it participates in combat
+        cloneAI.currentState = UnitState.BoardIdle;
 
-        // optional: disable trait scripts so it doesn’t contribute to synergies
-        foreach (var mb in cloneObj.GetComponents<MonoBehaviour>())
+        // prevent infinite cloning
+        var selfAbility = cloneInstance.GetComponent<HaymakerAbility>();
+        if (selfAbility) Destroy(selfAbility);
+
+        // disable traits so clone doesn’t affect synergies
+        foreach (var mb in cloneInstance.GetComponents<MonoBehaviour>())
         {
-            var typeName = mb.GetType().Name;
-            if (typeName.Contains("Trait"))
+            if (mb.GetType().Name.Contains("Trait"))
                 mb.enabled = false;
         }
 
-        cloneSpawned = true;
-        Debug.Log("[HaymakerAbility] Clone spawned and set to Bench.");
+        // register with GameManager
+        GameManager.Instance.RegisterUnit(cloneAI, cloneAI.team == Team.Player);
+
+        Debug.Log("[HaymakerAbility] Clone spawned next to Haymaker.");
     }
 
-    private void Start()
+    private void DestroyClone()
     {
-        UnitAI.OnAnyUnitDeath += OnUnitDeath;
-    }
-    private void Update()
-    {
-        // Spawn clone once when placed on board (not bench)
-        if (unitAI.currentState == UnitState.BoardIdle && cloneInstance == null)
+        if (cloneInstance != null)
         {
-            SpawnClone();
-        }
-        // ✅ If Haymaker is back on bench → destroy clone
-        else if (unitAI.currentState == UnitState.Bench && cloneInstance != null)
-        {
+            GameManager.Instance.UnregisterUnit(cloneInstance.GetComponent<UnitAI>());
             Destroy(cloneInstance);
             cloneInstance = null;
-            Debug.Log("[HaymakerAbility] Clone removed because Haymaker returned to Bench.");
+            Debug.Log("[HaymakerAbility] Clone destroyed.");
         }
-
     }
 
-  
+    private Vector3 FindClosestEmptyHex(Vector3 haymakerPos)
+    {
+        // 🔑 You can expand this with your HexTile system.
+        // For now: spawn 1.5 units to the right of Haymaker.
+        return haymakerPos + Vector3.right * 1.5f;
+    }
 
     // Passive: absorb souls when units die
-    public void OnUnitDeath(UnitAI deadUnit)
+    private void OnUnitDeath(UnitAI deadUnit)
     {
         if (!unitAI.isAlive) return;
-        if (deadUnit.team == unitAI.team) return; // absorb only enemies?
+        if (deadUnit.team == unitAI.team) return;
 
         soulCount++;
-        if (soulCount % 5 == 0 && clone != null)
+        if (soulCount % 5 == 0 && cloneInstance != null)
         {
-            clone.maxHealth *= 1.01f;
-            clone.attackDamage *= 1.01f;
-            Debug.Log($"Clone empowered! Souls: {soulCount} → {clone.maxHealth} HP / {clone.attackDamage} dmg");
+            var cloneAI = cloneInstance.GetComponent<UnitAI>();
+            cloneAI.maxHealth *= 1.01f;
+            cloneAI.attackDamage *= 1.01f;
+            Debug.Log($"Clone empowered! Souls: {soulCount}");
         }
     }
 
-    // Active: Stab + Slam
+    // Active ability (unchanged)
     public void Cast()
     {
         StartCoroutine(PerformAbility());
@@ -144,18 +129,15 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         UnitAI target = unitAI.GetCurrentTarget();
         if (target == null) yield break;
 
-        // Stab
         if (unitAI.animator) unitAI.animator.SetTrigger("StabTrigger");
-        yield return new WaitForSeconds(0.3f); // wait for stab animation impact
+        yield return new WaitForSeconds(0.3f);
         float dmg = stabDamage[Mathf.Clamp(unitAI.starLevel - 1, 0, stabDamage.Length - 1)];
         target.TakeDamage(dmg + unitAI.attackDamage);
 
-        // Jump & Slam
         if (unitAI.animator) unitAI.animator.SetTrigger("JumpTrigger");
-        yield return new WaitForSeconds(0.5f); // travel time
+        yield return new WaitForSeconds(0.5f);
 
-        // Find largest group of enemies
-        List<UnitAI> enemies = FindEnemiesInRadius(5f); // search radius
+        List<UnitAI> enemies = FindEnemiesInRadius(5f);
         if (enemies.Count == 0) yield break;
 
         UnitAI center = enemies[0];
@@ -164,22 +146,10 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         float slamDmg = slamDamage[Mathf.Clamp(unitAI.starLevel - 1, 0, slamDamage.Length - 1)];
         if (unitAI.animator) unitAI.animator.SetTrigger("SlamTrigger");
 
-        yield return new WaitForSeconds(0.2f); // impact frame
+        yield return new WaitForSeconds(0.2f);
 
         foreach (var e in aoeTargets)
-        {
             e.TakeDamage(slamDmg + unitAI.attackDamage);
-        }
-
-        // Check for kill
-        bool killed = aoeTargets.Exists(e => !e.isAlive);
-        if (killed)
-        {
-            foreach (var e in aoeTargets)
-            {
-                e.TakeDamage((slamDmg * 0.5f) + unitAI.attackDamage);
-            }
-        }
     }
 
     private List<UnitAI> FindEnemiesInRadius(float radius, Vector3? center = null)
