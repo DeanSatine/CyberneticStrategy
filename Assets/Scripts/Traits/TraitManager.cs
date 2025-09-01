@@ -115,6 +115,31 @@ public class TraitManager : MonoBehaviour
         }
         return 0;
     }
+    public (int activeThreshold, int nextThreshold) GetBreakpoints(Trait trait, int count)
+    {
+        switch (trait)
+        {
+            case Trait.Eradicator:
+                if (count >= eradicatorThreshold3) return (eradicatorThreshold3, 0);
+                if (count >= eradicatorThreshold2) return (eradicatorThreshold2, eradicatorThreshold3);
+                return (0, eradicatorThreshold2);
+
+            case Trait.Bulkhead:
+                if (count >= bulkheadThreshold) return (bulkheadThreshold, 0);
+                return (0, bulkheadThreshold);
+
+            case Trait.Clobbertron:
+                if (count >= clobbertronThreshold) return (clobbertronThreshold, 0);
+                return (0, clobbertronThreshold);
+
+            case Trait.Strikebyte:
+                if (count >= strikebyteThreshold3) return (strikebyteThreshold3, 0);
+                if (count >= strikebyteThreshold2) return (strikebyteThreshold2, strikebyteThreshold3);
+                return (0, strikebyteThreshold2);
+        }
+        return (0, 0);
+    }
+
     private void ApplyBonuses(List<UnitAI> playerUnits, Dictionary<Trait, int> activeTraits)
     {
         foreach (var kvp in activeTraits)
