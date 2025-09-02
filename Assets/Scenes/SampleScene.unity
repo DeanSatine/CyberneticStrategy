@@ -135,6 +135,7 @@ GameObject:
   - component: {fileID: 29781452}
   - component: {fileID: 29781451}
   - component: {fileID: 29781450}
+  - component: {fileID: 29781454}
   m_Layer: 8
   m_Name: CharacterTile (1)
   m_TagString: BenchTile
@@ -228,6 +229,20 @@ Transform:
   m_Father: {fileID: 1030519446}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &29781454
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 29781449}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 101156935389e6a4b87e27ffd27a5e8c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tileType: 1
+  occupyingUnit: {fileID: 0}
 --- !u!1 &40608313
 GameObject:
   m_ObjectHideFlags: 0
@@ -1208,6 +1223,7 @@ GameObject:
   - component: {fileID: 268239288}
   - component: {fileID: 268239287}
   - component: {fileID: 268239286}
+  - component: {fileID: 268239290}
   m_Layer: 8
   m_Name: CharacterTile (3)
   m_TagString: BenchTile
@@ -1301,6 +1317,20 @@ Transform:
   m_Father: {fileID: 1030519446}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &268239290
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 268239285}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 101156935389e6a4b87e27ffd27a5e8c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tileType: 1
+  occupyingUnit: {fileID: 0}
 --- !u!1001 &295101489
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2520,6 +2550,7 @@ GameObject:
   - component: {fileID: 466429343}
   - component: {fileID: 466429342}
   - component: {fileID: 466429341}
+  - component: {fileID: 466429344}
   m_Layer: 8
   m_Name: CharacterTile (9)
   m_TagString: BenchTile
@@ -2613,6 +2644,20 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 466429339}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &466429344
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 466429339}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 101156935389e6a4b87e27ffd27a5e8c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tileType: 1
+  occupyingUnit: {fileID: 0}
 --- !u!1 &489185130
 GameObject:
   m_ObjectHideFlags: 0
@@ -3802,6 +3847,7 @@ GameObject:
   - component: {fileID: 833295740}
   - component: {fileID: 833295739}
   - component: {fileID: 833295738}
+  - component: {fileID: 833295742}
   m_Layer: 8
   m_Name: CharacterTile (4)
   m_TagString: BenchTile
@@ -3895,6 +3941,20 @@ Transform:
   m_Father: {fileID: 1030519446}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &833295742
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 833295737}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 101156935389e6a4b87e27ffd27a5e8c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tileType: 1
+  occupyingUnit: {fileID: 0}
 --- !u!1 &835031861
 GameObject:
   m_ObjectHideFlags: 0
@@ -4014,6 +4074,7 @@ GameObject:
   - component: {fileID: 914466462}
   - component: {fileID: 914466461}
   - component: {fileID: 914466460}
+  - component: {fileID: 914466464}
   m_Layer: 8
   m_Name: CharacterTile (5)
   m_TagString: BenchTile
@@ -4107,6 +4168,20 @@ Transform:
   m_Father: {fileID: 1030519446}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &914466464
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 914466459}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 101156935389e6a4b87e27ffd27a5e8c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tileType: 1
+  occupyingUnit: {fileID: 0}
 --- !u!1 &923416037
 GameObject:
   m_ObjectHideFlags: 0
@@ -4558,6 +4633,7 @@ GameObject:
   - component: {fileID: 977838440}
   - component: {fileID: 977838439}
   - component: {fileID: 977838438}
+  - component: {fileID: 977838442}
   m_Layer: 8
   m_Name: CharacterTile (2)
   m_TagString: BenchTile
@@ -4651,6 +4727,20 @@ Transform:
   m_Father: {fileID: 1030519446}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &977838442
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 977838437}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 101156935389e6a4b87e27ffd27a5e8c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tileType: 1
+  occupyingUnit: {fileID: 0}
 --- !u!1001 &1008510960
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5231,6 +5321,7 @@ GameObject:
   - component: {fileID: 1144176912}
   - component: {fileID: 1144176911}
   - component: {fileID: 1144176910}
+  - component: {fileID: 1144176913}
   m_Layer: 8
   m_Name: CharacterTile (7)
   m_TagString: BenchTile
@@ -5324,6 +5415,20 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1144176908}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1144176913
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1144176908}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 101156935389e6a4b87e27ffd27a5e8c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tileType: 1
+  occupyingUnit: {fileID: 0}
 --- !u!1 &1145285893
 GameObject:
   m_ObjectHideFlags: 0
@@ -5894,6 +5999,7 @@ GameObject:
   - component: {fileID: 1460421025}
   - component: {fileID: 1460421024}
   - component: {fileID: 1460421023}
+  - component: {fileID: 1460421027}
   m_Layer: 8
   m_Name: CharacterTile (6)
   m_TagString: BenchTile
@@ -5987,6 +6093,20 @@ Transform:
   m_Father: {fileID: 1030519446}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1460421027
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1460421022}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 101156935389e6a4b87e27ffd27a5e8c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tileType: 1
+  occupyingUnit: {fileID: 0}
 --- !u!1 &1464028171
 GameObject:
   m_ObjectHideFlags: 0
@@ -7130,6 +7250,7 @@ GameObject:
   - component: {fileID: 1899137420}
   - component: {fileID: 1899137419}
   - component: {fileID: 1899137418}
+  - component: {fileID: 1899137421}
   m_Layer: 8
   m_Name: CharacterTile (8)
   m_TagString: BenchTile
@@ -7223,6 +7344,20 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1899137416}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1899137421
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1899137416}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 101156935389e6a4b87e27ffd27a5e8c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tileType: 1
+  occupyingUnit: {fileID: 0}
 --- !u!1 &2000388090
 GameObject:
   m_ObjectHideFlags: 0
@@ -7235,6 +7370,7 @@ GameObject:
   - component: {fileID: 2000388094}
   - component: {fileID: 2000388093}
   - component: {fileID: 2000388092}
+  - component: {fileID: 2000388095}
   m_Layer: 8
   m_Name: CharacterTile (0)
   m_TagString: BenchTile
@@ -7328,6 +7464,20 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2000388090}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &2000388095
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2000388090}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 101156935389e6a4b87e27ffd27a5e8c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tileType: 1
+  occupyingUnit: {fileID: 0}
 --- !u!4 &2001041864 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4403770261894367275, guid: 26987c9f5c7ac64499783608db7a02c6,
