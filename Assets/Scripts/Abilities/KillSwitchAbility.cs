@@ -5,43 +5,44 @@ using static UnitAI;
 public class KillSwitchAbility : MonoBehaviour, IUnitAbility
 {
     private UnitAI unitAI;
-
     private UnitAI lastTarget;
     private int attackCounter = 0;
 
     [Header("Ability Stats")]
-    public float[] slamDamagePerStar = { 100f, 150f, 250f }; // you can tune
+    public float[] slamDamagePerStar = { 100f, 150f, 250f };
     public float passiveSlamDamage = 100f;
     public float healOnTargetSwap = 200f;
     public float armorShred = 3f;
+
+    [Header("Timings (no animation events)")]
+    public float leapDuration = 0.5f;
+    public float slamDuration = 0.7f;
+    public float leapHeight = 2f;
 
     private void Awake()
     {
         unitAI = GetComponent<UnitAI>();
     }
 
-    // Called by UnitAI when mana is full
-    public void Cast()
+    // ✅ Now accepts a target passed in from UnitAI
+    public void Cast(UnitAI target)
     {
-        StartCoroutine(LeapAndSlam());
+        if (target != null)
+            StartCoroutine(LeapAndSlam(target));
     }
 
-    // Passive hook: call this from UnitAI.Attack after dealing damage
     public void OnAttack(UnitAI target)
     {
         attackCounter++;
 
-        // Every other attack → shred armor
         if (attackCounter % 2 == 0 && target != null)
         {
             target.armor = Mathf.Max(0, target.armor - armorShred);
             Debug.Log($"{unitAI.unitName} shredded {target.unitName}'s armor! Now {target.armor}");
         }
 
-        // Check for target swap
         if (lastTarget != null && lastTarget != target)
         {
-            // Slam old target
             float dmg = passiveSlamDamage + unitAI.attackDamage;
             lastTarget.TakeDamage(dmg);
             unitAI.currentHealth = Mathf.Min(unitAI.maxHealth, unitAI.currentHealth + healOnTargetSwap);
@@ -52,41 +53,39 @@ public class KillSwitchAbility : MonoBehaviour, IUnitAbility
         lastTarget = target;
     }
 
-    private IEnumerator LeapAndSlam()
+    private IEnumerator LeapAndSlam(UnitAI target)
     {
-        // Find farthest enemy within 3 hexes (replace with your board system if needed)
-        UnitAI[] allUnits = FindObjectsOfType<UnitAI>();
-        UnitAI farthest = null;
-        float maxDist = 0f;
+        Vector3 startPos = unitAI.transform.position;
+        Vector3 endPos = target.transform.position;
 
-        foreach (var u in allUnits)
-        {
-            if (u == unitAI || !u.isAlive || u.team == unitAI.team) continue;
-            float dist = Vector3.Distance(unitAI.transform.position, u.transform.position);
-            if (dist <= 3f && dist > maxDist)
-            {
-                maxDist = dist;
-                farthest = u;
-            }
-        }
-
-        if (farthest == null) yield break;
-
-        // Trigger leap animation
         if (unitAI.animator) unitAI.animator.SetTrigger("LeapTrigger");
 
-        // Simulate leap delay (0.5s)
-        yield return new WaitForSeconds(0.5f);
+        float elapsed = 0f;
+        while (elapsed < leapDuration)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / leapDuration;
 
-        // Slam damage
+            Vector3 midPoint = Vector3.Lerp(startPos, endPos, t);
+            midPoint.y += Mathf.Sin(t * Mathf.PI) * leapHeight;
+
+            unitAI.transform.position = midPoint;
+            yield return null;
+        }
+
+        unitAI.transform.position = endPos;
+
+        if (unitAI.animator) unitAI.animator.SetTrigger("AbilityTrigger");
+
+        yield return new WaitForSeconds(slamDuration);
+
         float damage = slamDamagePerStar[Mathf.Clamp(unitAI.starLevel - 1, 0, slamDamagePerStar.Length - 1)]
                        + unitAI.attackDamage;
-        farthest.TakeDamage(damage);
+        target.TakeDamage(damage);
 
-        Debug.Log($"{unitAI.unitName} leapt and slammed {farthest.unitName} for {damage}!");
+        Debug.Log($"{unitAI.unitName} leapt and slammed {target.unitName} for {damage}!");
 
-        // Attack speed buff
-        StartCoroutine(TemporaryAttackSpeedBuff(1.5f, 4f)); // 50% boost for 4s
+        StartCoroutine(TemporaryAttackSpeedBuff(1.5f, 4f));
     }
 
     private IEnumerator TemporaryAttackSpeedBuff(float multiplier, float duration)

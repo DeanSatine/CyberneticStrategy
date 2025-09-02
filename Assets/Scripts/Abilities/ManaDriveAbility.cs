@@ -22,7 +22,7 @@ public class ManaDriveAbility : MonoBehaviour, IUnitAbility
     }
 
     // Called by UnitAI when mana is full
-    public void Cast()
+    public void Cast(UnitAI target)
     {
         if (unitAI.animator != null)
             unitAI.animator.SetTrigger("AbilityTrigger");
@@ -31,6 +31,7 @@ public class ManaDriveAbility : MonoBehaviour, IUnitAbility
         if (castVFX != null)
             Instantiate(castVFX, transform.position, Quaternion.identity);
     }
+
 
     // ⚡ Animation Event: Overload impact frame
     public void DoOverloadDamage()

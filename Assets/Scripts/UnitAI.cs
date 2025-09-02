@@ -231,29 +231,22 @@ public class UnitAI : MonoBehaviour
 
         if (animator) animator.SetTrigger("AbilityTrigger");
 
-        // ✅ The real ability will be fired from an Animation Event
-    }
-
-    // 🔹 Called by animation event (NeedlebotAbility animation)
-    public void TriggerAbilityCast()
-    {
+        // ✅ Pass target directly to abilities
         foreach (var ability in GetComponents<MonoBehaviour>())
         {
             if (ability is IUnitAbility unitAbility)
             {
-                unitAbility.Cast();
+                unitAbility.Cast(currentTarget?.GetComponent<UnitAI>());
                 return;
             }
         }
     }
 
-
-
+    // ✅ Only one interface definition now
     public interface IUnitAbility
     {
-        void Cast();
+        void Cast(UnitAI target);
     }
-
 
     private Transform FindNearestEnemy()
     {

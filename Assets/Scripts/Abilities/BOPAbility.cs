@@ -18,13 +18,14 @@ public class BOPAbility : MonoBehaviour, IUnitAbility
         unitAI = GetComponent<UnitAI>();
     }
 
-    // Called by UnitAI when manaa is full
-    public void Cast()
+    // Called by UnitAI when mana is full
+    public void Cast(UnitAI target)
     {
         // Trigger chest pound animation
         if (unitAI.animator != null)
             unitAI.animator.SetTrigger("AbilityTrigger");
     }
+
 
     // 👊 Animation Event: Chest Pound frame
     public void ApplyChestBuff()

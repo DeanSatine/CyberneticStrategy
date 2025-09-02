@@ -118,11 +118,12 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         }
     }
 
-    // Active ability (unchanged)
-    public void Cast()
+    // Active ability
+    public void Cast(UnitAI target)
     {
         StartCoroutine(PerformAbility());
     }
+
 
     private IEnumerator PerformAbility()
     {

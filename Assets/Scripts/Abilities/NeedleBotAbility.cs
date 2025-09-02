@@ -20,7 +20,7 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
         needlesPerCast = baseNeedleCount;
     }
 
-    public void Cast()
+    public void Cast(UnitAI target)
     {
         StartCoroutine(FireNeedles());
     }
