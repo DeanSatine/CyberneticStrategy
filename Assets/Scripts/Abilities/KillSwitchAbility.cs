@@ -18,17 +18,22 @@ public class KillSwitchAbility : MonoBehaviour, IUnitAbility
     public float leapDuration = 0.5f;
     public float slamDuration = 0.7f;
     public float leapHeight = 2f;
+    public float maxLeapRange = 3f; // 🔹 3 hexes
 
     private void Awake()
     {
         unitAI = GetComponent<UnitAI>();
     }
 
-    // ✅ Now accepts a target passed in from UnitAI
-    public void Cast(UnitAI target)
+    // Called by UnitAI
+    public void Cast(UnitAI _ignored)
     {
+        // 🔹 Find nearest enemy in range instead of relying on passed target
+        UnitAI target = FindNearestEnemyInRange(maxLeapRange);
         if (target != null)
             StartCoroutine(LeapAndSlam(target));
+        else
+            Debug.Log($"{unitAI.unitName} tried to leap, but no enemies within {maxLeapRange}!");
     }
 
     public void OnAttack(UnitAI target)
@@ -58,6 +63,7 @@ public class KillSwitchAbility : MonoBehaviour, IUnitAbility
         Vector3 startPos = unitAI.transform.position;
         Vector3 endPos = target.transform.position;
 
+        // 🔹 Play Leap animation
         if (unitAI.animator) unitAI.animator.SetTrigger("LeapTrigger");
 
         float elapsed = 0f;
@@ -73,12 +79,15 @@ public class KillSwitchAbility : MonoBehaviour, IUnitAbility
             yield return null;
         }
 
+        // 🔹 Land directly on enemy
         unitAI.transform.position = endPos;
 
+        // 🔹 Play Ability animation immediately after landing
         if (unitAI.animator) unitAI.animator.SetTrigger("AbilityTrigger");
 
         yield return new WaitForSeconds(slamDuration);
 
+        // Deal damage
         float damage = slamDamagePerStar[Mathf.Clamp(unitAI.starLevel - 1, 0, slamDamagePerStar.Length - 1)]
                        + unitAI.attackDamage;
         target.TakeDamage(damage);
@@ -96,5 +105,27 @@ public class KillSwitchAbility : MonoBehaviour, IUnitAbility
         yield return new WaitForSeconds(duration);
 
         unitAI.attackSpeed = original;
+    }
+
+    // 🔹 Find nearest enemy within a given range
+    private UnitAI FindNearestEnemyInRange(float range)
+    {
+        UnitAI[] allUnits = FindObjectsOfType<UnitAI>();
+        UnitAI nearest = null;
+        float minDist = Mathf.Infinity;
+
+        foreach (var unit in allUnits)
+        {
+            if (unit == unitAI || !unit.isAlive) continue;
+            if (unit.team == unitAI.team) continue; // don’t target allies
+
+            float dist = Vector3.Distance(unitAI.transform.position, unit.transform.position);
+            if (dist < minDist && dist <= range)
+            {
+                minDist = dist;
+                nearest = unit;
+            }
+        }
+        return nearest;
     }
 }
