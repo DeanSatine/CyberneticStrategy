@@ -1,18 +1,17 @@
 using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
 
 public class ShopUIManager : MonoBehaviour
 {
     public static ShopUIManager Instance;
 
-    [Header("Shop Slots")]
-    public Button[] shopButtons;   // assign 5 buttons in inspector
-    public TextMeshProUGUI[] shopTexts; // assign TMP labels for the 5 slots
+    [Header("Shop UI Setup")]
+    public Transform[] shopSlots;      // assign Slot0–4 here in inspector
+    public GameObject shopCardPrefab;  // prefab with image+button
 
     [Header("Extra UI")]
-    public Button rerollButton;
-    public TextMeshProUGUI goldText;  // assign in inspector
+    public GameObject rerollButton;
+    public TextMeshProUGUI goldText;
 
     private void Awake()
     {
@@ -20,47 +19,28 @@ public class ShopUIManager : MonoBehaviour
         else Destroy(gameObject);
     }
 
-    private void Start()
-    {
-        RefreshShopUI();
-
-        // Hook reroll
-        rerollButton.onClick.AddListener(() =>
-        {
-            ShopManager.Instance.RerollShop();
-            RefreshShopUI();
-        });
-    }
-
     public void RefreshShopUI()
     {
-        for (int i = 0; i < shopButtons.Length; i++)
+        for (int i = 0; i < shopSlots.Length; i++)
         {
+            // clear previous card from slot
+            foreach (Transform child in shopSlots[i])
+                Destroy(child.gameObject);
+
             if (i < ShopManager.Instance.currentShop.Count)
             {
                 ShopUnit unit = ShopManager.Instance.currentShop[i];
-                shopTexts[i].text = $"{unit.unitName}\n{unit.cost}g";
 
-                int index = i; // local copy for lambda
-                shopButtons[i].onClick.RemoveAllListeners();
-                shopButtons[i].onClick.AddListener(() => TryBuyUnit(index));
+                // create card inside slot
+                GameObject card = Instantiate(shopCardPrefab, shopSlots[i]);
+                card.transform.localPosition = Vector3.zero;
+                card.transform.localScale = Vector3.one;
 
-                shopButtons[i].interactable = true;
-            }
-            else
-            {
-                shopTexts[i].text = "Empty";
-                shopButtons[i].interactable = false;
+                // init card with data
+                card.GetComponent<ShopCardUI>().Init(unit);
             }
         }
 
-        // update gold display
         goldText.text = $"Gold: {EconomyManager.Instance.currentGold}";
-    }
-
-    private void TryBuyUnit(int index)
-    {
-        ShopManager.Instance.BuyUnit(index);
-        RefreshShopUI();
     }
 }

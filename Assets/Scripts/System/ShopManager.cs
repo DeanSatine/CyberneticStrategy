@@ -13,6 +13,16 @@ public class ShopManager : MonoBehaviour
     public List<ShopUnit> currentShop = new List<ShopUnit>();
     public int shopSize = 5;
 
+    private void Start()
+    {
+        // Ensure shop generates when play starts
+        GenerateShop();
+        if (ShopUIManager.Instance != null)
+            ShopUIManager.Instance.RefreshShopUI();
+        else
+            Debug.LogError("ShopUIManager not found in scene!");
+    }
+
 
     private void Awake()
     {
