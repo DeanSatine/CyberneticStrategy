@@ -94,13 +94,13 @@ public class UnitAI : MonoBehaviour
     private void Update()
     {
         if (!isAlive) return;
+        if (currentState != UnitState.Combat) return;
 
-        if (currentState != UnitState.Combat) return; // ✅ do nothing until combat
+        // ✅ Keep animator synced with attack speed
+        if (animator) animator.SetFloat("AttackSpeed", attackSpeed);
 
-        if (currentTarget != null && currentState == UnitState.Combat)
-        {
+        if (currentTarget != null)
             FaceTarget(currentTarget.position);
-        }
 
         attackCooldown -= Time.deltaTime;
 
@@ -117,7 +117,7 @@ public class UnitAI : MonoBehaviour
                 if (attackCooldown <= 0f)
                 {
                     Attack(currentTarget);
-                    attackCooldown = 1f / attackSpeed;
+                    attackCooldown = 1f / attackSpeed; // ✅ scales properly
                 }
                 if (animator) animator.SetBool("IsRunning", false);
             }
@@ -132,6 +132,25 @@ public class UnitAI : MonoBehaviour
         }
     }
 
+    private void Attack(Transform target)
+    {
+        FaceTarget(target.position);
+
+        if (animator) animator.SetTrigger("AttackTrigger");
+
+        // ✅ Deal damage immediately (like old script, no animation event required)
+        if (target.TryGetComponent(out UnitAI enemy))
+        {
+            enemy.TakeDamage(attackDamage);
+            GainMana(10);
+
+            var ks = GetComponent<KillSwitchAbility>();
+            if (ks != null) ks.OnAttack(enemy);
+        }
+    }
+
+
+
     private void FaceTarget(Vector3 targetPos)
     {
         Vector3 direction = (targetPos - transform.position).normalized;
@@ -144,14 +163,11 @@ public class UnitAI : MonoBehaviour
         }
     }
 
-    private void Attack(Transform target)
+
+    // 🔹 Call this from the auto attack animation (Animation Event)
+    public void DealAutoAttackDamage()
     {
-        FaceTarget(target.position);
-
-        if (animator) animator.SetTrigger("AttackTrigger");
-
-        UnitAI enemy = target.GetComponent<UnitAI>();
-        if (enemy != null)
+        if (currentTarget != null && currentTarget.TryGetComponent(out UnitAI enemy))
         {
             enemy.TakeDamage(attackDamage);
             GainMana(10);
@@ -215,7 +231,12 @@ public class UnitAI : MonoBehaviour
 
         if (animator) animator.SetTrigger("AbilityTrigger");
 
-        // 🔑 Run any ability component on this unit
+        // ✅ The real ability will be fired from an Animation Event
+    }
+
+    // 🔹 Called by animation event (NeedlebotAbility animation)
+    public void TriggerAbilityCast()
+    {
         foreach (var ability in GetComponents<MonoBehaviour>())
         {
             if (ability is IUnitAbility unitAbility)
@@ -225,6 +246,8 @@ public class UnitAI : MonoBehaviour
             }
         }
     }
+
+
 
     public interface IUnitAbility
     {
