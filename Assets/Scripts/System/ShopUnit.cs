@@ -3,11 +3,9 @@ using UnityEngine;
 [System.Serializable]
 public class ShopUnit
 {
-    public string unitName;
-    public GameObject prefab;
-    [Range(1, 5)] public int cost;   // 1 = Needlebot, 2 = B.O.P., etc.
-    public Trait[] traits;
-
-    [Header("Shop Card Art")]
-    public Sprite shopSprite; // card image (with cost/name baked in)
+    public string unitName;     // "Needlebot", "B.O.P.", etc.
+    public GameObject prefab;   // Prefab that spawns on bench
+    [Range(1, 5)]
+    public int cost;            // Gold cost (1–5)
+    public Sprite icon;         // Optional: used in UI
 }

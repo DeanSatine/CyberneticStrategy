@@ -1,46 +1,23 @@
 using UnityEngine;
-using TMPro;
 
 public class ShopUIManager : MonoBehaviour
 {
     public static ShopUIManager Instance;
 
-    [Header("Shop UI Setup")]
-    public Transform[] shopSlots;      // assign Slot0–4 here in inspector
-    public GameObject shopCardPrefab;  // prefab with image+button
-
-    [Header("Extra UI")]
-    public GameObject rerollButton;
-    public TextMeshProUGUI goldText;
+    public ShopSlotUI[] shopSlots; // assign your 5 ShopSlot_X here
 
     private void Awake()
     {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
+        Instance = this;
     }
 
     public void RefreshShopUI()
     {
-        for (int i = 0; i < shopSlots.Length; i++)
-        {
-            // clear previous card from slot
-            foreach (Transform child in shopSlots[i])
-                Destroy(child.gameObject);
+        // deactivate all slots first
+        foreach (var slot in shopSlots)
+            slot.gameObject.SetActive(false);
 
-            if (i < ShopManager.Instance.currentShop.Count)
-            {
-                ShopUnit unit = ShopManager.Instance.currentShop[i];
-
-                // create card inside slot
-                GameObject card = Instantiate(shopCardPrefab, shopSlots[i]);
-                card.transform.localPosition = Vector3.zero;
-                card.transform.localScale = Vector3.one;
-
-                // init card with data
-                card.GetComponent<ShopCardUI>().Init(unit);
-            }
-        }
-
-        goldText.text = $"Gold: {EconomyManager.Instance.currentGold}";
+        // ask ShopManager what the shop should be
+        ShopManager.Instance.FillShop(shopSlots);
     }
 }
