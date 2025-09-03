@@ -20,4 +20,12 @@ public class ShopSlotUI : MonoBehaviour
     {
         ShopManager.Instance.TryBuyUnit(this);
     }
+    public GameObject GetUnitPrefab()
+    {
+        // Spawn with default forward rotation
+        GameObject obj = Instantiate(unitPrefab);
+        obj.transform.rotation = Quaternion.Euler(0,90,0); // force forward
+        return obj;
+    }
+
 }

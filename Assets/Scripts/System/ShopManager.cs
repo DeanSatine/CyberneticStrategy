@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class ShopManager : MonoBehaviour
 {
@@ -52,7 +52,14 @@ public class ShopManager : MonoBehaviour
         }
 
         // Spawn unit on free bench slot
+        // Spawn unit on free bench slot
         GameObject unit = Instantiate(slot.unitPrefab, freeSlot.position, Quaternion.identity);
+
+        // ✅ Force facing forward
+        unit.transform.rotation = Quaternion.Euler(0f, -90f, 0f); 
+
+        unit.transform.SetParent(freeSlot); // parent it so it "sticks" to slot
+        Debug.Log($"Bought {slot.unitPrefab.name} for {slot.cost} gold, placed on bench!");
         unit.transform.SetParent(freeSlot); // parent it so it "sticks" to slot
         Debug.Log($"Bought {slot.unitPrefab.name} for {slot.cost} gold, placed on bench!");
     }
