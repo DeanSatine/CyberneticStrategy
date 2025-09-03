@@ -49,6 +49,11 @@ public class UnitAI : MonoBehaviour
     public event System.Action<UnitState> OnStateChanged;
     private UnitState _currentState = UnitState.Bench;
     [HideInInspector] public HexTile currentTile;
+    [Header("Movement")]
+    [Tooltip("Random micro-offset so units don't perfectly stack on tile centers.")]
+    [SerializeField] private float moveOffsetRange = 0.2f;
+
+    private Vector3 moveOffset;
     public UnitState currentState
     {
         get => _currentState;
@@ -81,6 +86,9 @@ public class UnitAI : MonoBehaviour
 
     private void Start()
     {
+        float offsetRange = 0.2f; // tweak this for spacing
+        moveOffset = new Vector3(Random.Range(-offsetRange, offsetRange), 0, Random.Range(-offsetRange, offsetRange));
+
         currentHealth = maxHealth;
         currentMana = 0f;
 
@@ -109,6 +117,7 @@ public class UnitAI : MonoBehaviour
         if (currentTarget == null || !currentTarget.GetComponent<UnitAI>().isAlive)
         {
             currentTarget = FindNearestEnemy();
+            currentPath.Clear(); // ✅ recalc path on new target
         }
 
         if (currentTarget != null && canAttack)
@@ -142,19 +151,18 @@ public class UnitAI : MonoBehaviour
 
     private void Attack(Transform target)
     {
+        if (target == null) return;
+        if (!target.TryGetComponent(out UnitAI enemy) || !enemy.isAlive) return; // ✅ skip dead
+
         FaceTarget(target.position);
 
         if (animator) animator.SetTrigger("AttackTrigger");
 
-        // ✅ Deal damage immediately (like old script, no animation event required)
-        if (target.TryGetComponent(out UnitAI enemy))
-        {
-            enemy.TakeDamage(attackDamage);
-            GainMana(10);
+        enemy.TakeDamage(attackDamage);
+        GainMana(10);
 
-            var ks = GetComponent<KillSwitchAbility>();
-            if (ks != null) ks.OnAttack(enemy);
-        }
+        var ks = GetComponent<KillSwitchAbility>();
+        if (ks != null) ks.OnAttack(enemy);
     }
 
 
@@ -168,6 +176,32 @@ public class UnitAI : MonoBehaviour
         {
             Quaternion lookRotation = Quaternion.LookRotation(direction);
             transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 10f);
+        }
+    }
+    private void HandleUnitDeath(UnitAI deadUnit)
+    {
+        if (currentTarget == deadUnit)
+        {
+            currentTarget = FindNearestEnemy();
+            currentPath.Clear();
+
+            if (currentTarget != null && currentTarget.TryGetComponent<UnitAI>(out UnitAI newEnemy))
+            {
+                // Make sure melee units move to a free neighbor, not inside the enemy
+                if (attackRange <= 1.6f && newEnemy.currentTile != null) // melee
+                {
+                    HexTile neighbor = BoardManager.Instance.GetClosestFreeNeighbor(newEnemy.currentTile, currentTile);
+                    if (neighbor != null)
+                    {
+                        var path = BoardManager.Instance.FindPath(currentTile, neighbor);
+                        if (path.Count > 1)
+                        {
+                            currentPath = new Queue<HexTile>(path);
+                            currentPath.Dequeue(); // drop current tile
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -338,45 +372,62 @@ public class UnitAI : MonoBehaviour
     {
         if (currentTile == null) return;
 
-        // If we don't have a path or we reached the end, compute one
         if (currentPath.Count == 0)
         {
-            HexTile goalTile = BoardManager.Instance.GetTileFromWorld(targetPos);
+            HexTile goalTile = null;
+
+            if (currentTarget != null && currentTarget.TryGetComponent<UnitAI>(out UnitAI enemy) && enemy.currentTile != null)
+            {
+                // ✅ If melee, go for a free neighbor instead of the enemy's tile
+                if (attackRange <= 1.6f)
+                {
+                    goalTile = BoardManager.Instance.GetClosestFreeNeighbor(enemy.currentTile, currentTile);
+                }
+                else
+                {
+                    goalTile = enemy.currentTile; // ranged can target directly
+                }
+            }
+            else
+            {
+                goalTile = BoardManager.Instance.GetTileFromWorld(targetPos);
+            }
 
             if (goalTile != null)
             {
                 var path = BoardManager.Instance.FindPath(currentTile, goalTile);
-
-                if (path.Count > 1) // first is currentTile
+                if (path.Count > 1)
                 {
                     currentPath = new Queue<HexTile>(path);
-                    currentPath.Dequeue(); // drop current tile
+                    currentPath.Dequeue(); // drop the starting tile
                 }
             }
         }
 
-        // Move toward next step
         if (currentPath.Count > 0)
         {
             HexTile nextTile = currentPath.Peek();
-            Vector3 nextPos = nextTile.transform.position;
+            Vector3 nextPos = nextTile.transform.position + moveOffset; // ✅ add offset
+            nextPos.y = transform.position.y; // stay flat
 
-            // ✅ Keep Y locked to current height (flat board fix)
-            nextPos.y = transform.position.y;
+            float moveSpeed = 3f;
+            transform.position = Vector3.MoveTowards(transform.position, nextPos, moveSpeed * Time.deltaTime);
 
-            transform.position = Vector3.MoveTowards(transform.position, nextPos, Time.deltaTime * 2f);
+            // Face the movement direction
+            Vector3 dir = (nextPos - transform.position).normalized;
+            if (dir.sqrMagnitude > 0.001f)
+            {
+                Quaternion lookRot = Quaternion.LookRotation(dir, Vector3.up);
+                transform.rotation = Quaternion.Slerp(transform.rotation, lookRot, Time.deltaTime * 10f);
+            }
 
             if (Vector3.Distance(transform.position, nextPos) < 0.05f)
             {
-                // Arrived → claim tile
-                if (nextTile.TryClaim(this))
-                {
-                    if (currentTile != null && currentTile != nextTile)
-                        currentTile.Free(this);
+                if (currentTile != null && currentTile.occupyingUnit == this)
+                    currentTile.occupyingUnit = null;
 
-                    currentTile = nextTile;
-                }
-
+                currentTile = nextTile;
+                currentTile.occupyingUnit = this;
                 currentPath.Dequeue();
             }
 
@@ -387,5 +438,4 @@ public class UnitAI : MonoBehaviour
             if (animator) animator.SetBool("IsRunning", false);
         }
     }
-
 }
