@@ -1462,6 +1462,7 @@ GameObject:
   - component: {fileID: 144175689}
   - component: {fileID: 144175688}
   - component: {fileID: 144175687}
+  - component: {fileID: 144175690}
   m_Layer: 5
   m_Name: BOPCard
   m_TagString: Untagged
@@ -1535,19 +1536,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 144175688}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 2052790677}
-        m_TargetAssemblyTypeName: ShopManager, Assembly-CSharp
-        m_MethodName: BuyUnit
-        m_Mode: 3
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 1
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &144175688
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1586,6 +1575,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 144175685}
   m_CullTransparentMesh: 1
+--- !u!114 &144175690
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 144175685}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37dac688397797445b6178a96c2cbf01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unitPrefab: {fileID: 3915463247227310737, guid: 26987c9f5c7ac64499783608db7a02c6,
+    type: 3}
+  cost: 2
+  buyButton: {fileID: 144175687}
 --- !u!1 &147021513
 GameObject:
   m_ObjectHideFlags: 0
@@ -3616,6 +3621,7 @@ GameObject:
   - component: {fileID: 322294115}
   - component: {fileID: 322294114}
   - component: {fileID: 322294113}
+  - component: {fileID: 322294116}
   m_Layer: 5
   m_Name: HayMakerCard
   m_TagString: Untagged
@@ -3689,19 +3695,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 322294114}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 2052790677}
-        m_TargetAssemblyTypeName: ShopManager, Assembly-CSharp
-        m_MethodName: BuyUnit
-        m_Mode: 3
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 2
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &322294114
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3740,6 +3734,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 322294111}
   m_CullTransparentMesh: 1
+--- !u!114 &322294116
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 322294111}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37dac688397797445b6178a96c2cbf01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unitPrefab: {fileID: 3571069488247416756, guid: 62f7bf3b63d05814f83e726ff7722286,
+    type: 3}
+  cost: 5
+  buyButton: {fileID: 322294113}
 --- !u!1 &326435512
 GameObject:
   m_ObjectHideFlags: 0
@@ -5259,6 +5269,7 @@ GameObject:
   - component: {fileID: 412805736}
   - component: {fileID: 412805735}
   - component: {fileID: 412805734}
+  - component: {fileID: 412805737}
   m_Layer: 5
   m_Name: NeedleBotCard
   m_TagString: Untagged
@@ -5383,6 +5394,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 412805732}
   m_CullTransparentMesh: 1
+--- !u!114 &412805737
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 412805732}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37dac688397797445b6178a96c2cbf01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unitPrefab: {fileID: 8772506818969043707, guid: 7256c73d0061944429316472747e5688,
+    type: 3}
+  cost: 1
+  buyButton: {fileID: 412805734}
 --- !u!1 &426283961
 GameObject:
   m_ObjectHideFlags: 0
@@ -6477,13 +6504,14 @@ GameObject:
   - component: {fileID: 548275734}
   - component: {fileID: 548275733}
   - component: {fileID: 548275732}
+  - component: {fileID: 548275735}
   m_Layer: 5
   m_Name: ManaDriveCard
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &548275731
 RectTransform:
   m_ObjectHideFlags: 0
@@ -6550,19 +6578,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 548275733}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 2052790677}
-        m_TargetAssemblyTypeName: ShopManager, Assembly-CSharp
-        m_MethodName: BuyUnit
-        m_Mode: 3
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 2
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &548275733
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6601,6 +6617,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 548275730}
   m_CullTransparentMesh: 1
+--- !u!114 &548275735
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 548275730}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37dac688397797445b6178a96c2cbf01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unitPrefab: {fileID: 397472728585410053, guid: b689bbdbdf465954c83df41e4f755ca5,
+    type: 3}
+  cost: 3
+  buyButton: {fileID: 548275732}
 --- !u!1 &583656723
 GameObject:
   m_ObjectHideFlags: 0
@@ -7466,7 +7498,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &711819141
 Transform:
   m_ObjectHideFlags: 0
@@ -7499,6 +7531,7 @@ GameObject:
   - component: {fileID: 726072999}
   - component: {fileID: 726072998}
   - component: {fileID: 726072997}
+  - component: {fileID: 726073000}
   m_Layer: 5
   m_Name: HayMakerCard
   m_TagString: Untagged
@@ -7623,6 +7656,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 726072995}
   m_CullTransparentMesh: 1
+--- !u!114 &726073000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 726072995}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37dac688397797445b6178a96c2cbf01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unitPrefab: {fileID: 3571069488247416756, guid: 62f7bf3b63d05814f83e726ff7722286,
+    type: 3}
+  cost: 5
+  buyButton: {fileID: 726072997}
 --- !u!1 &728927279
 GameObject:
   m_ObjectHideFlags: 0
@@ -8077,6 +8126,7 @@ GameObject:
   - component: {fileID: 748375948}
   - component: {fileID: 748375947}
   - component: {fileID: 748375946}
+  - component: {fileID: 748375949}
   m_Layer: 5
   m_Name: KillSwitchCard
   m_TagString: Untagged
@@ -8202,6 +8252,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 748375944}
   m_CullTransparentMesh: 1
+--- !u!114 &748375949
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 748375944}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37dac688397797445b6178a96c2cbf01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unitPrefab: {fileID: 27990592220160999, guid: 5dd27c72c33bded4f93fab8fe596bc98,
+    type: 3}
+  cost: 4
+  buyButton: {fileID: 748375946}
 --- !u!1 &749749597
 GameObject:
   m_ObjectHideFlags: 0
@@ -9982,6 +10048,7 @@ GameObject:
   - component: {fileID: 929096013}
   - component: {fileID: 929096012}
   - component: {fileID: 929096011}
+  - component: {fileID: 929096014}
   m_Layer: 5
   m_Name: NeedleBotCard
   m_TagString: Untagged
@@ -10055,19 +10122,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 929096012}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 2052790677}
-        m_TargetAssemblyTypeName: ShopManager, Assembly-CSharp
-        m_MethodName: BuyUnit
-        m_Mode: 3
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 2
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &929096012
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10106,6 +10161,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 929096009}
   m_CullTransparentMesh: 1
+--- !u!114 &929096014
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 929096009}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37dac688397797445b6178a96c2cbf01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unitPrefab: {fileID: 8772506818969043707, guid: 7256c73d0061944429316472747e5688,
+    type: 3}
+  cost: 1
+  buyButton: {fileID: 929096011}
 --- !u!1 &937282564
 GameObject:
   m_ObjectHideFlags: 0
@@ -10459,7 +10530,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   shopSlots:
-  - {fileID: 1704590734}
+  - {fileID: 0}
   - {fileID: 704649757}
   - {fileID: 943347649}
   - {fileID: 1802958898}
@@ -10643,6 +10714,7 @@ GameObject:
   - component: {fileID: 975749038}
   - component: {fileID: 975749037}
   - component: {fileID: 975749036}
+  - component: {fileID: 975749039}
   m_Layer: 5
   m_Name: 'ManaDriveCard '
   m_TagString: Untagged
@@ -10767,6 +10839,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 975749034}
   m_CullTransparentMesh: 1
+--- !u!114 &975749039
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 975749034}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37dac688397797445b6178a96c2cbf01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unitPrefab: {fileID: 397472728585410053, guid: b689bbdbdf465954c83df41e4f755ca5,
+    type: 3}
+  cost: 3
+  buyButton: {fileID: 975749036}
 --- !u!1 &977838437
 GameObject:
   m_ObjectHideFlags: 0
@@ -11641,6 +11729,7 @@ GameObject:
   - component: {fileID: 1037277364}
   - component: {fileID: 1037277363}
   - component: {fileID: 1037277362}
+  - component: {fileID: 1037277365}
   m_Layer: 5
   m_Name: BOPCard
   m_TagString: Untagged
@@ -11714,19 +11803,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1037277363}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 2052790677}
-        m_TargetAssemblyTypeName: ShopManager, Assembly-CSharp
-        m_MethodName: BuyUnit
-        m_Mode: 3
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 2
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &1037277363
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11765,6 +11842,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1037277360}
   m_CullTransparentMesh: 1
+--- !u!114 &1037277365
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1037277360}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37dac688397797445b6178a96c2cbf01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unitPrefab: {fileID: 3915463247227310737, guid: 26987c9f5c7ac64499783608db7a02c6,
+    type: 3}
+  cost: 2
+  buyButton: {fileID: 1037277362}
 --- !u!1 &1040466561
 GameObject:
   m_ObjectHideFlags: 0
@@ -11777,6 +11870,7 @@ GameObject:
   - component: {fileID: 1040466565}
   - component: {fileID: 1040466564}
   - component: {fileID: 1040466563}
+  - component: {fileID: 1040466566}
   m_Layer: 5
   m_Name: 'KillSwitchCard '
   m_TagString: Untagged
@@ -11902,6 +11996,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1040466561}
   m_CullTransparentMesh: 1
+--- !u!114 &1040466566
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1040466561}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37dac688397797445b6178a96c2cbf01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unitPrefab: {fileID: 27990592220160999, guid: 5dd27c72c33bded4f93fab8fe596bc98,
+    type: 3}
+  cost: 4
+  buyButton: {fileID: 1040466563}
 --- !u!1 &1044456927
 GameObject:
   m_ObjectHideFlags: 0
@@ -12058,6 +12168,7 @@ GameObject:
   - component: {fileID: 1054002247}
   - component: {fileID: 1054002246}
   - component: {fileID: 1054002245}
+  - component: {fileID: 1054002248}
   m_Layer: 5
   m_Name: NeedleBotCard
   m_TagString: Untagged
@@ -12182,6 +12293,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1054002243}
   m_CullTransparentMesh: 1
+--- !u!114 &1054002248
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1054002243}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37dac688397797445b6178a96c2cbf01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unitPrefab: {fileID: 8772506818969043707, guid: 7256c73d0061944429316472747e5688,
+    type: 3}
+  cost: 1
+  buyButton: {fileID: 1054002245}
 --- !u!1 &1069825503
 GameObject:
   m_ObjectHideFlags: 0
@@ -12837,6 +12964,7 @@ GameObject:
   - component: {fileID: 1131331173}
   - component: {fileID: 1131331172}
   - component: {fileID: 1131331171}
+  - component: {fileID: 1131331174}
   m_Layer: 5
   m_Name: ManaDriveCard
   m_TagString: Untagged
@@ -12910,19 +13038,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1131331172}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 2052790677}
-        m_TargetAssemblyTypeName: ShopManager, Assembly-CSharp
-        m_MethodName: BuyUnit
-        m_Mode: 3
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 1
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &1131331172
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12961,6 +13077,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1131331169}
   m_CullTransparentMesh: 1
+--- !u!114 &1131331174
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1131331169}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37dac688397797445b6178a96c2cbf01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unitPrefab: {fileID: 397472728585410053, guid: b689bbdbdf465954c83df41e4f755ca5,
+    type: 3}
+  cost: 3
+  buyButton: {fileID: 1131331171}
 --- !u!1 &1138075786
 GameObject:
   m_ObjectHideFlags: 0
@@ -12973,6 +13105,7 @@ GameObject:
   - component: {fileID: 1138075790}
   - component: {fileID: 1138075789}
   - component: {fileID: 1138075788}
+  - component: {fileID: 1138075791}
   m_Layer: 5
   m_Name: 'HayMakerCard '
   m_TagString: Untagged
@@ -13097,6 +13230,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1138075786}
   m_CullTransparentMesh: 1
+--- !u!114 &1138075791
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1138075786}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37dac688397797445b6178a96c2cbf01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unitPrefab: {fileID: 3571069488247416756, guid: 62f7bf3b63d05814f83e726ff7722286,
+    type: 3}
+  cost: 5
+  buyButton: {fileID: 1138075788}
 --- !u!1 &1142593994
 GameObject:
   m_ObjectHideFlags: 0
@@ -14939,6 +15088,7 @@ GameObject:
   - component: {fileID: 1360824910}
   - component: {fileID: 1360824909}
   - component: {fileID: 1360824908}
+  - component: {fileID: 1360824911}
   m_Layer: 5
   m_Name: KillSwitchCard
   m_TagString: Untagged
@@ -15064,6 +15214,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1360824906}
   m_CullTransparentMesh: 1
+--- !u!114 &1360824911
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1360824906}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37dac688397797445b6178a96c2cbf01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unitPrefab: {fileID: 27990592220160999, guid: 5dd27c72c33bded4f93fab8fe596bc98,
+    type: 3}
+  cost: 4
+  buyButton: {fileID: 1360824908}
 --- !u!1 &1389181074
 GameObject:
   m_ObjectHideFlags: 0
@@ -15954,13 +16120,14 @@ GameObject:
   - component: {fileID: 1474986659}
   - component: {fileID: 1474986658}
   - component: {fileID: 1474986657}
+  - component: {fileID: 1474986660}
   m_Layer: 5
   m_Name: 'BOPCard '
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1474986656
 RectTransform:
   m_ObjectHideFlags: 0
@@ -16027,19 +16194,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1474986658}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 2052790677}
-        m_TargetAssemblyTypeName: ShopManager, Assembly-CSharp
-        m_MethodName: BuyUnit
-        m_Mode: 3
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 3
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &1474986658
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16078,6 +16233,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1474986655}
   m_CullTransparentMesh: 1
+--- !u!114 &1474986660
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1474986655}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37dac688397797445b6178a96c2cbf01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unitPrefab: {fileID: 3915463247227310737, guid: 26987c9f5c7ac64499783608db7a02c6,
+    type: 3}
+  cost: 2
+  buyButton: {fileID: 1474986657}
 --- !u!1 &1477359836
 GameObject:
   m_ObjectHideFlags: 0
@@ -16364,6 +16535,7 @@ GameObject:
   - component: {fileID: 1516870029}
   - component: {fileID: 1516870028}
   - component: {fileID: 1516870027}
+  - component: {fileID: 1516870030}
   m_Layer: 5
   m_Name: NeedleBotCard
   m_TagString: Untagged
@@ -16437,19 +16609,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1516870028}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 2052790677}
-        m_TargetAssemblyTypeName: ShopManager, Assembly-CSharp
-        m_MethodName: BuyUnit
-        m_Mode: 3
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 1
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &1516870028
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16488,6 +16648,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1516870025}
   m_CullTransparentMesh: 1
+--- !u!114 &1516870030
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1516870025}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37dac688397797445b6178a96c2cbf01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unitPrefab: {fileID: 8772506818969043707, guid: 7256c73d0061944429316472747e5688,
+    type: 3}
+  cost: 1
+  buyButton: {fileID: 1516870027}
 --- !u!1 &1518486199
 GameObject:
   m_ObjectHideFlags: 0
@@ -16576,6 +16752,7 @@ GameObject:
   - component: {fileID: 1520849393}
   - component: {fileID: 1520849392}
   - component: {fileID: 1520849391}
+  - component: {fileID: 1520849394}
   m_Layer: 5
   m_Name: ManaDriveCard
   m_TagString: Untagged
@@ -16700,6 +16877,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1520849389}
   m_CullTransparentMesh: 1
+--- !u!114 &1520849394
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1520849389}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37dac688397797445b6178a96c2cbf01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unitPrefab: {fileID: 397472728585410053, guid: b689bbdbdf465954c83df41e4f755ca5,
+    type: 3}
+  cost: 3
+  buyButton: {fileID: 1520849391}
 --- !u!1 &1552898093
 GameObject:
   m_ObjectHideFlags: 0
@@ -16712,6 +16905,7 @@ GameObject:
   - component: {fileID: 1552898097}
   - component: {fileID: 1552898096}
   - component: {fileID: 1552898095}
+  - component: {fileID: 1552898098}
   m_Layer: 5
   m_Name: 'BOPCard '
   m_TagString: Untagged
@@ -16836,6 +17030,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1552898093}
   m_CullTransparentMesh: 1
+--- !u!114 &1552898098
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1552898093}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37dac688397797445b6178a96c2cbf01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unitPrefab: {fileID: 3915463247227310737, guid: 26987c9f5c7ac64499783608db7a02c6,
+    type: 3}
+  cost: 2
+  buyButton: {fileID: 1552898095}
 --- !u!1 &1555290471
 GameObject:
   m_ObjectHideFlags: 0
@@ -18037,7 +18247,6 @@ GameObject:
   - component: {fileID: 1704590731}
   - component: {fileID: 1704590733}
   - component: {fileID: 1704590732}
-  - component: {fileID: 1704590734}
   m_Layer: 5
   m_Name: Slot1
   m_TagString: Untagged
@@ -18108,22 +18317,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1704590730}
   m_CullTransparentMesh: 1
---- !u!114 &1704590734
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1704590730}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 37dac688397797445b6178a96c2cbf01, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  unitPrefab: {fileID: 3915463247227310737, guid: 26987c9f5c7ac64499783608db7a02c6,
-    type: 3}
-  cost: 2
-  buyButton: {fileID: 144175687}
 --- !u!1 &1715790473
 GameObject:
   m_ObjectHideFlags: 0
@@ -19640,6 +19833,7 @@ GameObject:
   - component: {fileID: 1901587119}
   - component: {fileID: 1901587118}
   - component: {fileID: 1901587117}
+  - component: {fileID: 1901587120}
   m_Layer: 5
   m_Name: HayMakerCard
   m_TagString: Untagged
@@ -19713,19 +19907,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1901587118}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 2052790677}
-        m_TargetAssemblyTypeName: ShopManager, Assembly-CSharp
-        m_MethodName: BuyUnit
-        m_Mode: 3
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 1
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &1901587118
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19764,6 +19946,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1901587115}
   m_CullTransparentMesh: 1
+--- !u!114 &1901587120
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1901587115}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37dac688397797445b6178a96c2cbf01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unitPrefab: {fileID: 3571069488247416756, guid: 62f7bf3b63d05814f83e726ff7722286,
+    type: 3}
+  cost: 5
+  buyButton: {fileID: 1901587117}
 --- !u!1 &1902268867
 GameObject:
   m_ObjectHideFlags: 0
@@ -19776,6 +19974,7 @@ GameObject:
   - component: {fileID: 1902268871}
   - component: {fileID: 1902268870}
   - component: {fileID: 1902268869}
+  - component: {fileID: 1902268872}
   m_Layer: 5
   m_Name: 'ManaDriveCard '
   m_TagString: Untagged
@@ -19900,6 +20099,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1902268867}
   m_CullTransparentMesh: 1
+--- !u!114 &1902268872
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1902268867}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37dac688397797445b6178a96c2cbf01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unitPrefab: {fileID: 397472728585410053, guid: b689bbdbdf465954c83df41e4f755ca5,
+    type: 3}
+  cost: 3
+  buyButton: {fileID: 1902268869}
 --- !u!1 &1906178258
 GameObject:
   m_ObjectHideFlags: 0
@@ -19912,13 +20127,14 @@ GameObject:
   - component: {fileID: 1906178262}
   - component: {fileID: 1906178261}
   - component: {fileID: 1906178260}
+  - component: {fileID: 1906178263}
   m_Layer: 5
   m_Name: KillSwitchCard
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1906178259
 RectTransform:
   m_ObjectHideFlags: 0
@@ -19986,19 +20202,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1906178261}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 2052790677}
-        m_TargetAssemblyTypeName: ShopManager, Assembly-CSharp
-        m_MethodName: BuyUnit
-        m_Mode: 3
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 1
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &1906178261
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20037,6 +20241,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1906178258}
   m_CullTransparentMesh: 1
+--- !u!114 &1906178263
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1906178258}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37dac688397797445b6178a96c2cbf01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unitPrefab: {fileID: 27990592220160999, guid: 5dd27c72c33bded4f93fab8fe596bc98,
+    type: 3}
+  cost: 4
+  buyButton: {fileID: 1906178260}
 --- !u!1 &1907624680
 GameObject:
   m_ObjectHideFlags: 0
@@ -20049,13 +20269,14 @@ GameObject:
   - component: {fileID: 1907624684}
   - component: {fileID: 1907624683}
   - component: {fileID: 1907624682}
+  - component: {fileID: 1907624685}
   m_Layer: 5
   m_Name: 'NeedleBotCard '
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1907624681
 RectTransform:
   m_ObjectHideFlags: 0
@@ -20173,6 +20394,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1907624680}
   m_CullTransparentMesh: 1
+--- !u!114 &1907624685
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1907624680}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37dac688397797445b6178a96c2cbf01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unitPrefab: {fileID: 8772506818969043707, guid: 7256c73d0061944429316472747e5688,
+    type: 3}
+  cost: 1
+  buyButton: {fileID: 1907624682}
 --- !u!1 &1914686309
 GameObject:
   m_ObjectHideFlags: 0
@@ -20459,6 +20696,7 @@ GameObject:
   - component: {fileID: 1952763233}
   - component: {fileID: 1952763232}
   - component: {fileID: 1952763231}
+  - component: {fileID: 1952763234}
   m_Layer: 5
   m_Name: KillSwitchCard
   m_TagString: Untagged
@@ -20533,19 +20771,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1952763232}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 2052790677}
-        m_TargetAssemblyTypeName: ShopManager, Assembly-CSharp
-        m_MethodName: BuyUnit
-        m_Mode: 3
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 2
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &1952763232
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20584,6 +20810,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1952763229}
   m_CullTransparentMesh: 1
+--- !u!114 &1952763234
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1952763229}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37dac688397797445b6178a96c2cbf01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unitPrefab: {fileID: 27990592220160999, guid: 5dd27c72c33bded4f93fab8fe596bc98,
+    type: 3}
+  cost: 4
+  buyButton: {fileID: 1952763231}
 --- !u!1 &2000388090
 GameObject:
   m_ObjectHideFlags: 0
@@ -21202,13 +21444,14 @@ GameObject:
   - component: {fileID: 2038669326}
   - component: {fileID: 2038669325}
   - component: {fileID: 2038669324}
+  - component: {fileID: 2038669327}
   m_Layer: 5
   m_Name: 'HayMakerCard '
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &2038669323
 RectTransform:
   m_ObjectHideFlags: 0
@@ -21326,6 +21569,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2038669322}
   m_CullTransparentMesh: 1
+--- !u!114 &2038669327
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2038669322}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37dac688397797445b6178a96c2cbf01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unitPrefab: {fileID: 3571069488247416756, guid: 62f7bf3b63d05814f83e726ff7722286,
+    type: 3}
+  cost: 5
+  buyButton: {fileID: 2038669324}
 --- !u!1 &2052790673
 GameObject:
   m_ObjectHideFlags: 0
@@ -21372,7 +21631,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c514caf8a440976428b53a6bedec7b9d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startingGold: 5
+  startingGold: 20
   currentGold: 0
 --- !u!114 &2052790676
 MonoBehaviour:
@@ -21920,6 +22179,7 @@ GameObject:
   - component: {fileID: 2078726693}
   - component: {fileID: 2078726692}
   - component: {fileID: 2078726691}
+  - component: {fileID: 2078726694}
   m_Layer: 5
   m_Name: 'BOPCard '
   m_TagString: Untagged
@@ -22044,6 +22304,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2078726689}
   m_CullTransparentMesh: 1
+--- !u!114 &2078726694
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2078726689}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37dac688397797445b6178a96c2cbf01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unitPrefab: {fileID: 3915463247227310737, guid: 26987c9f5c7ac64499783608db7a02c6,
+    type: 3}
+  cost: 2
+  buyButton: {fileID: 2078726691}
 --- !u!1 &2088304877
 GameObject:
   m_ObjectHideFlags: 0
