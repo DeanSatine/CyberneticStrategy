@@ -51,6 +51,10 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         Vector3 spawnPos = FindClosestEmptyHex(transform.position);
 
         cloneInstance = Instantiate(clonePrefab, spawnPos, Quaternion.identity);
+
+        // ✅ Force facing direction
+        cloneInstance.transform.rotation = Quaternion.Euler(0f, -90f, 0f);
+
         cloneInstance.name = $"{unitAI.unitName} Clone";
 
         var cloneAI = cloneInstance.GetComponent<UnitAI>();
