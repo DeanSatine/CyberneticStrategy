@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 1.0102471, g: 0.9191335, b: 0.49684954, a: 1}
+  m_IndirectSpecularColor: {r: 1.010596, g: 0.91950285, b: 0.49734762, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -6272,7 +6272,6 @@ GameObject:
   - component: {fileID: 504690613}
   - component: {fileID: 504690615}
   - component: {fileID: 504690614}
-  - component: {fileID: 504690616}
   m_Layer: 5
   m_Name: Slot5
   m_TagString: Untagged
@@ -6343,21 +6342,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 504690612}
   m_CullTransparentMesh: 1
---- !u!114 &504690616
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 504690612}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 37dac688397797445b6178a96c2cbf01, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  unitPrefab: {fileID: 0}
-  cost: 2
-  buyButton: {fileID: 2078726691}
 --- !u!1 &507991644
 GameObject:
   m_ObjectHideFlags: 0
@@ -7339,7 +7323,6 @@ GameObject:
   - component: {fileID: 704649754}
   - component: {fileID: 704649756}
   - component: {fileID: 704649755}
-  - component: {fileID: 704649757}
   m_Layer: 5
   m_Name: Slot2
   m_TagString: Untagged
@@ -7410,21 +7393,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 704649753}
   m_CullTransparentMesh: 1
---- !u!114 &704649757
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 704649753}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 37dac688397797445b6178a96c2cbf01, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  unitPrefab: {fileID: 0}
-  cost: 2
-  buyButton: {fileID: 1037277362}
 --- !u!1 &707089621
 GameObject:
   m_ObjectHideFlags: 0
@@ -10405,7 +10373,6 @@ GameObject:
   - component: {fileID: 943347646}
   - component: {fileID: 943347648}
   - component: {fileID: 943347647}
-  - component: {fileID: 943347649}
   m_Layer: 5
   m_Name: Slot3
   m_TagString: Untagged
@@ -10476,21 +10443,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 943347645}
   m_CullTransparentMesh: 1
---- !u!114 &943347649
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 943347645}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 37dac688397797445b6178a96c2cbf01, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  unitPrefab: {fileID: 0}
-  cost: 2
-  buyButton: {fileID: 1474986657}
 --- !u!1 &949686856
 GameObject:
   m_ObjectHideFlags: 0
@@ -10612,10 +10564,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   shopSlots:
   - {fileID: 0}
-  - {fileID: 704649757}
-  - {fileID: 943347649}
-  - {fileID: 1802958898}
-  - {fileID: 504690616}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
 --- !u!1 &952664372
 GameObject:
   m_ObjectHideFlags: 0
@@ -19207,7 +19159,6 @@ GameObject:
   - component: {fileID: 1802958895}
   - component: {fileID: 1802958897}
   - component: {fileID: 1802958896}
-  - component: {fileID: 1802958898}
   m_Layer: 5
   m_Name: Slot4
   m_TagString: Untagged
@@ -19278,21 +19229,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1802958894}
   m_CullTransparentMesh: 1
---- !u!114 &1802958898
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1802958894}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 37dac688397797445b6178a96c2cbf01, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  unitPrefab: {fileID: 0}
-  cost: 2
-  buyButton: {fileID: 1552898095}
 --- !u!1 &1814539131
 GameObject:
   m_ObjectHideFlags: 0
