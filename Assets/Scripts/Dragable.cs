@@ -83,29 +83,27 @@ public class Draggable : MonoBehaviour
 
         if (targetTile != null)
         {
-            // Check occupancy BEFORE snapping
-            if (targetTile.occupyingUnit != null)
+            // Ask the tile to claim itself atomically
+            if (!targetTile.TryClaim(unitAI))
             {
-                Debug.Log($"Tile {targetTile.name} is already occupied by {targetTile.occupyingUnit.unitName}");
-                transform.position = oldPosition; // snap back
+                Debug.Log($"Tile {targetTile.name} already occupied. Placement rejected.");
+                transform.position = oldPosition;
                 return;
             }
 
-            // ✅ Free old tile if needed
-            if (unitAI.currentTile != null && unitAI.currentTile.occupyingUnit == unitAI)
-                unitAI.currentTile.occupyingUnit = null;
+            // ✅ Free old tile first (important: do AFTER successful claim, so we don't lose both)
+            if (unitAI.currentTile != null && unitAI.currentTile != targetTile)
+            {
+                unitAI.currentTile.Free(unitAI);
+            }
 
-            // ✅ Now safe to snap
+            // Snap to this tile
             transform.position = new Vector3(
                 targetTile.transform.position.x,
                 transform.position.y,
                 targetTile.transform.position.z);
 
-            // Claim tile
-            targetTile.occupyingUnit = unitAI;
-            unitAI.currentTile = targetTile;
-
-            // State management
+            // State logic
             if (targetTile.tileType == TileType.Board)
             {
                 unitAI.currentState = UnitState.BoardIdle;
@@ -119,7 +117,6 @@ public class Draggable : MonoBehaviour
 
             return;
         }
-
 
         // No tile found → snap back
         transform.position = oldPosition;

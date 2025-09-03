@@ -47,10 +47,12 @@ public class HexGridLayout : MonoBehaviour
 
                 // 👇 Decide role
                 HexTile hexTile = tile.GetComponent<HexTile>();
+                hexTile.gridPosition = new Vector2Int(x, y);   // ✅ assign coords here
                 if (y == gridSize.y - 1) // last row = bench
                     hexTile.tileType = TileType.Bench;
                 else
                     hexTile.tileType = TileType.Board;
+                BoardManager.Instance.RegisterTile(hexTile.gridPosition, hexTile);
             }
         }
     }

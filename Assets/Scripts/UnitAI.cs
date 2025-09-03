@@ -37,6 +37,7 @@ public class UnitAI : MonoBehaviour
     [Header("UI")]
     public GameObject unitUIPrefab;
     private UnitUI ui;
+    private Queue<HexTile> currentPath = new Queue<HexTile>();
 
     private float attackCooldown = 0f;
     [HideInInspector] public Animator animator;
@@ -91,6 +92,7 @@ public class UnitAI : MonoBehaviour
         }
     }
 
+
     private void Update()
     {
         if (!isAlive) return;
@@ -112,12 +114,22 @@ public class UnitAI : MonoBehaviour
         if (currentTarget != null && canAttack)
         {
             float dist = Vector3.Distance(transform.position, currentTarget.position);
+
+            // ✅ If enemy is on an adjacent hex, force it "in range"
+            if (currentTile != null && currentTarget.TryGetComponent<UnitAI>(out UnitAI enemy))
+            {
+                if (BoardManager.Instance.AreNeighbors(currentTile, enemy.currentTile))
+                {
+                    dist = attackRange; // trick the system → allows attacking
+                }
+            }
+
             if (dist <= attackRange)
             {
                 if (attackCooldown <= 0f)
                 {
                     Attack(currentTarget);
-                    attackCooldown = 1f / attackSpeed; // ✅ scales properly
+                    attackCooldown = 1f / attackSpeed;
                 }
                 if (animator) animator.SetBool("IsRunning", false);
             }
@@ -125,10 +137,6 @@ public class UnitAI : MonoBehaviour
             {
                 MoveTowards(currentTarget.position);
             }
-        }
-        else
-        {
-            if (animator) animator.SetBool("IsRunning", false);
         }
     }
 
@@ -204,23 +212,62 @@ public class UnitAI : MonoBehaviour
         }
     }
 
-    // modify Die() to free the tile before disabling the unit:
+    private IEnumerator FadeAndDestroy(float fadeDuration = 1.5f)
+    {
+        Renderer[] renderers = GetComponentsInChildren<Renderer>();
+        List<Material> materials = new List<Material>();
+
+        // Create unique instances of all materials so we don’t modify shared ones
+        foreach (var r in renderers)
+        {
+            foreach (var mat in r.materials)
+            {
+                materials.Add(mat);
+            }
+        }
+
+        float elapsed = 0f;
+        while (elapsed < fadeDuration)
+        {
+            elapsed += Time.deltaTime;
+            float alpha = Mathf.Lerp(1f, 0f, elapsed / fadeDuration);
+
+            foreach (var mat in materials)
+            {
+                if (mat.HasProperty("_Color"))
+                {
+                    Color c = mat.color;
+                    c.a = alpha;
+                    mat.color = c;
+                }
+            }
+
+            yield return null;
+        }
+
+        Destroy(gameObject); // fully gone after fade
+    }
+
     private void Die()
     {
         isAlive = false;
         OnAnyUnitDeath?.Invoke(this);
+
         if (animator) animator.SetTrigger("DieTrigger");
         Debug.Log($"{unitName} has died!");
-        GetComponent<Collider>().enabled = false;
 
-        if (ui != null) ui.gameObject.SetActive(false); // hide bars
+        Collider col = GetComponent<Collider>();
+        if (col != null) col.enabled = false;
 
-        // FREE its tile so another unit can occupy it
         ClearTile();
+        if (ui != null) ui.gameObject.SetActive(false);
 
+        // 🔹 Start fade BEFORE disabling script
+        StartCoroutine(FadeAndDestroy(2.5f));
+
+        // Now disable Update loop
         this.enabled = false;
     }
-
 
     private void GainMana(float amount)
     {
@@ -287,10 +334,58 @@ public class UnitAI : MonoBehaviour
         return currentTarget != null ? currentTarget.GetComponent<UnitAI>() : null;
     }
 
-    private void MoveTowards(Vector3 position)
+    private void MoveTowards(Vector3 targetPos)
     {
-        transform.position = Vector3.MoveTowards(transform.position, position, Time.deltaTime * 2f);
+        if (currentTile == null) return;
 
-        if (animator) animator.SetBool("IsRunning", true);
+        // If we don't have a path or we reached the end, compute one
+        if (currentPath.Count == 0)
+        {
+            HexTile goalTile = BoardManager.Instance.GetTileFromWorld(targetPos);
+
+            if (goalTile != null)
+            {
+                var path = BoardManager.Instance.FindPath(currentTile, goalTile);
+
+                if (path.Count > 1) // first is currentTile
+                {
+                    currentPath = new Queue<HexTile>(path);
+                    currentPath.Dequeue(); // drop current tile
+                }
+            }
+        }
+
+        // Move toward next step
+        if (currentPath.Count > 0)
+        {
+            HexTile nextTile = currentPath.Peek();
+            Vector3 nextPos = nextTile.transform.position;
+
+            // ✅ Keep Y locked to current height (flat board fix)
+            nextPos.y = transform.position.y;
+
+            transform.position = Vector3.MoveTowards(transform.position, nextPos, Time.deltaTime * 2f);
+
+            if (Vector3.Distance(transform.position, nextPos) < 0.05f)
+            {
+                // Arrived → claim tile
+                if (nextTile.TryClaim(this))
+                {
+                    if (currentTile != null && currentTile != nextTile)
+                        currentTile.Free(this);
+
+                    currentTile = nextTile;
+                }
+
+                currentPath.Dequeue();
+            }
+
+            if (animator) animator.SetBool("IsRunning", true);
+        }
+        else
+        {
+            if (animator) animator.SetBool("IsRunning", false);
+        }
     }
+
 }
