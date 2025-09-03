@@ -47,7 +47,7 @@ public class UnitAI : MonoBehaviour
     public static event System.Action<UnitAI> OnAnyUnitDeath;
     public event System.Action<UnitState> OnStateChanged;
     private UnitState _currentState = UnitState.Bench;
-
+    [HideInInspector] public HexTile currentTile;
     public UnitState currentState
     {
         get => _currentState;
@@ -194,6 +194,17 @@ public class UnitAI : MonoBehaviour
         }
     }
 
+    public void ClearTile()
+    {
+        if (currentTile != null)
+        {
+            if (currentTile.occupyingUnit == this)
+                currentTile.occupyingUnit = null;
+            currentTile = null;
+        }
+    }
+
+    // modify Die() to free the tile before disabling the unit:
     private void Die()
     {
         isAlive = false;
@@ -203,6 +214,9 @@ public class UnitAI : MonoBehaviour
         GetComponent<Collider>().enabled = false;
 
         if (ui != null) ui.gameObject.SetActive(false); // hide bars
+
+        // FREE its tile so another unit can occupy it
+        ClearTile();
 
         this.enabled = false;
     }
