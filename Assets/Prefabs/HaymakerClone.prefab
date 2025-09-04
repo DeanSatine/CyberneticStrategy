@@ -388,7 +388,7 @@ Animation:
   - {fileID: -203655887218126122, guid: c7cc6bd1c149f574eadfdba9f17eb8e4, type: 3}
   - {fileID: -203655887218126122, guid: 662e16ecc52ae9f45ad95b8dc60828e1, type: 3}
   m_WrapMode: 0
-  m_PlayAutomatically: 1
+  m_PlayAutomatically: 0
   m_AnimatePhysics: 0
   m_CullingType: 0
 --- !u!114 &5753153993130708360
@@ -432,10 +432,14 @@ MonoBehaviour:
   canMove: 1
   canAttack: 1
   isAlive: 1
+  isCastingAbility: 0
   unitUIPrefab: {fileID: 0}
   animator: {fileID: 0}
   currentTarget: {fileID: 0}
   teamID: 0
+  currentTile: {fileID: 0}
+  moveOffsetRange: 0.2
+  deathAnimLength: 1.2
 --- !u!65 &1499806241345368472
 BoxCollider:
   m_ObjectHideFlags: 0

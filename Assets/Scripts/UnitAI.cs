@@ -54,6 +54,8 @@ public class UnitAI : MonoBehaviour
     [Tooltip("Random micro-offset so units don't perfectly stack on tile centers.")]
     [SerializeField] private float moveOffsetRange = 0.2f;
 
+    [Header("Animation Settings")]
+    [SerializeField] private float deathAnimLength = 1.2f; // match clip length
     private Vector3 moveOffset;
     public UnitState currentState
     {
@@ -259,24 +261,60 @@ public class UnitAI : MonoBehaviour
 
     private void Die()
     {
+        // ✅ Guard: prevent multiple death calls
+        if (!isAlive) return;
+
         isAlive = false;
         OnAnyUnitDeath?.Invoke(this);
 
-        if (animator) animator.SetTrigger("DieTrigger");
-        Debug.Log($"{unitName} has died!");
+        // ✅ Snap to ground (align with tile or y = 0)
+        Vector3 pos = transform.position;
+        pos.y = currentTile != null ? currentTile.transform.position.y : 0f;
+        transform.position = pos;
 
+        // ✅ Reset move offset so unit doesn't "die in the air"
+        moveOffset = Vector3.zero;
+
+        if (animator)
+        {
+            animator.SetTrigger("DieTrigger");
+
+            // Get death animation length safely
+            AnimatorStateInfo state = animator.GetCurrentAnimatorStateInfo(0);
+            float animLength = state.length > 0 ? state.length : 1.0f; // fallback to 1s
+
+            StartCoroutine(DeathSequence(animLength));
+        }
+        else
+        {
+            // No animator → just fade out
+            StartCoroutine(FadeAndDestroy(2.5f));
+        }
+
+        // Disable collider so others can move onto this tile
         Collider col = GetComponent<Collider>();
         if (col != null) col.enabled = false;
 
         ClearTile();
-        if (ui != null) ui.gameObject.SetActive(false);
 
-        // 🔹 Start fade BEFORE disabling script
-        StartCoroutine(FadeAndDestroy(2.5f));
+        if (ui != null)
+            ui.gameObject.SetActive(false);
 
-        // Now disable Update loop
+        // Stop Update loop
         this.enabled = false;
     }
+
+    private IEnumerator DeathSequence(float animLength)
+    {
+        // ✅ wait for death animation
+        yield return new WaitForSeconds(animLength);
+
+        // Then fade and destroy
+        StartCoroutine(FadeAndDestroy(2.5f));
+    }
+
+
+
 
     private void GainMana(float amount)
     {

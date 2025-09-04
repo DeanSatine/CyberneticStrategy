@@ -287,7 +287,7 @@ Animation:
   - {fileID: -203655887218126122, guid: 648a81418ccdd5d4d9c3d7878436d8b8, type: 3}
   - {fileID: -203655887218126122, guid: 4faead4203c8687488d0244f41e1ebe1, type: 3}
   m_WrapMode: 0
-  m_PlayAutomatically: 1
+  m_PlayAutomatically: 0
   m_AnimatePhysics: 0
   m_CullingType: 0
 --- !u!114 &3779365374025380167
@@ -326,6 +326,7 @@ MonoBehaviour:
   teamID: 0
   currentTile: {fileID: 0}
   moveOffsetRange: 0.2
+  deathAnimLength: 1.2
 --- !u!114 &1845309957721737311
 MonoBehaviour:
   m_ObjectHideFlags: 0

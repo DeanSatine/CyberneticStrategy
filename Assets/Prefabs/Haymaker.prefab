@@ -386,9 +386,14 @@ Animation:
   m_Enabled: 1
   serializedVersion: 3
   m_Animation: {fileID: 0}
-  m_Animations: []
+  m_Animations:
+  - {fileID: -203655887218126122, guid: 662e16ecc52ae9f45ad95b8dc60828e1, type: 3}
+  - {fileID: -203655887218126122, guid: c7cc6bd1c149f574eadfdba9f17eb8e4, type: 3}
+  - {fileID: -203655887218126122, guid: 084a337d0af3582468a8b305428a5c3d, type: 3}
+  - {fileID: -203655887218126122, guid: c7e994702a16b4641a1d71575b9d66a7, type: 3}
+  - {fileID: -203655887218126122, guid: 0459e7c5d4121cf4aa006cd5b4da6b67, type: 3}
   m_WrapMode: 0
-  m_PlayAutomatically: 1
+  m_PlayAutomatically: 0
   m_AnimatePhysics: 0
   m_CullingType: 0
 --- !u!114 &5753153993130708360
@@ -440,6 +445,7 @@ MonoBehaviour:
   teamID: 0
   currentTile: {fileID: 0}
   moveOffsetRange: 0.2
+  deathAnimLength: 1.2
 --- !u!114 &2341522245247770583
 MonoBehaviour:
   m_ObjectHideFlags: 0
