@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 1.010596, g: 0.91950285, b: 0.49734762, a: 1}
+  m_IndirectSpecularColor: {r: 1.0102471, g: 0.9191335, b: 0.49684954, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -10051,7 +10051,8 @@ MonoBehaviour:
   eradicatorThreshold3: 3
   eradicatorExecuteThreshold2: 0.1
   eradicatorExecuteThreshold3: 0.15
-  hydraulicPressPrefab: {fileID: 0}
+  hydraulicPressPrefab: {fileID: 2473233024819058413, guid: 04f1e0603fc4dc64a9986c89910764f8,
+    type: 3}
   bulkheadThreshold: 2
   bulkheadBonusHealthPercent: 0.25
   bulkheadDeathSharePercent: 0.5

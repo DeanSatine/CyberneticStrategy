@@ -43,8 +43,11 @@ public class GameManager : Singleton<GameManager>
                 enemyUnits.Add(unit);
         }
 
-        // ✅ Only count Board units
+        // ✅ update trait UI
         TraitManager.Instance.EvaluateTraits(GetActivePlayerUnits());
+
+        // ✅ apply trait abilities in planning phase
+        TraitManager.Instance.ApplyTraits(playerUnits);
     }
 
     public void UnregisterUnit(UnitAI unit)
@@ -54,12 +57,21 @@ public class GameManager : Singleton<GameManager>
 
         // ✅ Only count Board units
         TraitManager.Instance.EvaluateTraits(GetActivePlayerUnits());
+
+        // ✅ also update trait abilities in planning phase
+        TraitManager.Instance.ApplyTraits(playerUnits);
     }
+
 
     public List<UnitAI> GetActivePlayerUnits()
     {
-        return playerUnits.FindAll(u => u != null && u.isAlive && u.currentState == UnitAI.UnitState.BoardIdle || u.currentState == UnitAI.UnitState.Combat);
+        return playerUnits.FindAll(u =>
+            u != null &&
+            u.isAlive &&
+            (u.currentState == UnitAI.UnitState.BoardIdle || u.currentState == UnitAI.UnitState.Combat)
+        );
     }
+
 
     public void StartCombat()
     {
@@ -86,6 +98,8 @@ public class GameManager : Singleton<GameManager>
             TraitManager.Instance.ApplyTraits(enemyUnits); // optional if enemies can also have traits
         }
     }
+
+
     private void UpdatePlayerTraitUI()
     {
         var traitCounts = TraitManager.Instance.CountTraits(playerUnits);

@@ -171,21 +171,28 @@ public class TraitManager : MonoBehaviour
                 // ERADICATOR
                 // =====================
                 case Trait.Eradicator:
-                    if (count >= eradicatorThreshold2)
+                    foreach (var unit in playerUnits)
                     {
-                        foreach (var unit in playerUnits)
+                        if (unit.traits.Contains(Trait.Eradicator))
                         {
-                            if (unit.traits.Contains(Trait.Eradicator))
-                            {
-                                var ability = unit.GetComponent<EradicatorTrait>();
-                                if (ability == null) ability = unit.gameObject.AddComponent<EradicatorTrait>();
+                            var ability = unit.GetComponent<EradicatorTrait>();
+                            if (ability == null) ability = unit.gameObject.AddComponent<EradicatorTrait>();
 
-                                if (count >= eradicatorThreshold3)
-                                    ability.executeThreshold = eradicatorExecuteThreshold3;
-                                else
-                                    ability.executeThreshold = eradicatorExecuteThreshold2;
+                            if (count >= eradicatorThreshold2)
+                            {
+                                ability.executeThreshold = (count >= eradicatorThreshold3)
+                                    ? eradicatorExecuteThreshold3
+                                    : eradicatorExecuteThreshold2;
 
                                 ability.pressPrefab = hydraulicPressPrefab;
+
+                                // ✅ make sure press exists during planning & combat
+                                ability.SpawnPressIfNeeded();
+                            }
+                            else
+                            {
+                                // ✅ not enough Eradicators anymore → despawn press
+                                ability.DespawnPress();
                             }
                         }
                     }

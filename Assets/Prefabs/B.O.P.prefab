@@ -309,7 +309,7 @@ MonoBehaviour:
   starLevel: 1
   team: 0
   maxHealth: 900
-  currentHealth: 0
+  currentHealth: 900
   attackDamage: 35
   attackSpeed: 0.7
   armor: 50
@@ -321,11 +321,14 @@ MonoBehaviour:
   canMove: 1
   canAttack: 1
   isAlive: 1
+  isCastingAbility: 0
   unitUIPrefab: {fileID: 6093184905329643714, guid: 4fecc7f632203e842989e0166a25b217,
     type: 3}
   animator: {fileID: 0}
   currentTarget: {fileID: 0}
   teamID: 0
+  currentTile: {fileID: 0}
+  moveOffsetRange: 0.2
 --- !u!114 &6517958316986358636
 MonoBehaviour:
   m_ObjectHideFlags: 0
