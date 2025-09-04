@@ -432,10 +432,14 @@ MonoBehaviour:
   canMove: 1
   canAttack: 1
   isAlive: 1
-  unitUIPrefab: {fileID: 0}
+  isCastingAbility: 0
+  unitUIPrefab: {fileID: 6939982145822855837, guid: 63931d92c48ef65418d45ec02069a522,
+    type: 3}
   animator: {fileID: 0}
   currentTarget: {fileID: 0}
   teamID: 0
+  currentTile: {fileID: 0}
+  moveOffsetRange: 0.2
 --- !u!114 &2341522245247770583
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -458,7 +462,6 @@ MonoBehaviour:
   - 400
   clonePrefab: {fileID: 3571069488247416756, guid: e500d4b71aabe274b88679a3f9566bed,
     type: 3}
-  benchSpawnPoint: {fileID: 0}
 --- !u!65 &1499806241345368472
 BoxCollider:
   m_ObjectHideFlags: 0

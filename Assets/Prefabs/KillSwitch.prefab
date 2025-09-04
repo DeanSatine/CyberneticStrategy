@@ -315,10 +315,14 @@ MonoBehaviour:
   canMove: 1
   canAttack: 1
   isAlive: 1
-  unitUIPrefab: {fileID: 0}
+  isCastingAbility: 0
+  unitUIPrefab: {fileID: 6939982145822855837, guid: 63931d92c48ef65418d45ec02069a522,
+    type: 3}
   animator: {fileID: 0}
   currentTarget: {fileID: 0}
   teamID: 0
+  currentTile: {fileID: 0}
+  moveOffsetRange: 0.2
 --- !u!114 &7161809393136151176
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -338,6 +342,10 @@ MonoBehaviour:
   passiveSlamDamage: 100
   healOnTargetSwap: 200
   armorShred: 3
+  leapDuration: 0.5
+  slamDuration: 0.7
+  leapHeight: 2
+  maxLeapRange: 3
 --- !u!65 &7128019543044565119
 BoxCollider:
   m_ObjectHideFlags: 0

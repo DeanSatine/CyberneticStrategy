@@ -322,7 +322,7 @@ MonoBehaviour:
   canAttack: 1
   isAlive: 1
   isCastingAbility: 0
-  unitUIPrefab: {fileID: 6093184905329643714, guid: 4fecc7f632203e842989e0166a25b217,
+  unitUIPrefab: {fileID: 6939982145822855837, guid: 63931d92c48ef65418d45ec02069a522,
     type: 3}
   animator: {fileID: 0}
   currentTarget: {fileID: 0}

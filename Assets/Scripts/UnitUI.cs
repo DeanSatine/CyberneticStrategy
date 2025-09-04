@@ -3,53 +3,46 @@ using UnityEngine.UI;
 
 public class UnitUI : MonoBehaviour
 {
-    public Slider healthBar;
-    public Slider manaBar;
+    [Header("Bars")]
+    public Image healthFill;
+    public Image manaFill;
 
-    private Transform target;
-    private Camera cam;
+    private Transform target; // unit to follow
+    private float maxHealth;
+    private float maxMana;
+    private Vector3 offset = new Vector3(0, 2f, 0); // adjustable in inspector
 
-    [Header("Offset")]
-    public Vector3 offset = new Vector3(0, 2.5f, 0); // height above unit
-
-    [Header("Scaling")]
-    public float baseScale = 0.01f;   // adjust to taste
-    public float scaleFactor = 0.02f; // how much size adjusts by distance
-
-    public void Init(Transform followTarget, float maxHealth, float maxMana)
+    public void Init(Transform followTarget, float maxHp, float maxMp)
     {
         target = followTarget;
-        cam = Camera.main;
+        maxHealth = maxHp;
+        maxMana = maxMp;
 
-        healthBar.maxValue = maxHealth;
-        healthBar.value = maxHealth;
-
-        manaBar.maxValue = maxMana;
-        manaBar.value = 0;
+        UpdateHealth(maxHp);
+        UpdateMana(0f);
     }
 
     private void LateUpdate()
     {
-        if (target == null || cam == null) return;
+        if (target == null) return;
 
-        // Position above unit
+        // follow above unit’s head
         transform.position = target.position + offset;
 
-        // Always face camera
-        transform.rotation = cam.transform.rotation;
-
-        // Auto-scale by distance (so UI stays readable)
-        float distance = Vector3.Distance(cam.transform.position, target.position);
-        transform.localScale = Vector3.one * (baseScale + distance * scaleFactor);
+        // face the camera
+        if (Camera.main != null)
+            transform.rotation = Camera.main.transform.rotation;
     }
 
-    public void UpdateHealth(float current)
+    public void UpdateHealth(float currentHealth)
     {
-        healthBar.value = current;
+        if (healthFill != null)
+            healthFill.fillAmount = Mathf.Clamp01(currentHealth / maxHealth);
     }
 
-    public void UpdateMana(float current)
+    public void UpdateMana(float currentMana)
     {
-        manaBar.value = current;
+        if (manaFill != null)
+            manaFill.fillAmount = Mathf.Clamp01(currentMana / maxMana);
     }
 }
