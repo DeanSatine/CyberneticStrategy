@@ -33,6 +33,7 @@ public class UnitAI : MonoBehaviour
     public bool canMove = true;
     public bool canAttack = true;
     public bool isAlive = true;
+    [HideInInspector] public bool isCastingAbility = false;
 
     [Header("UI")]
     public GameObject unitUIPrefab;
@@ -105,6 +106,7 @@ public class UnitAI : MonoBehaviour
     {
         if (!isAlive) return;
         if (currentState != UnitState.Combat) return;
+        if (!isAlive || currentState != UnitState.Combat || isCastingAbility) return;
 
         // ✅ Keep animator synced with attack speed
         if (animator) animator.SetFloat("AttackSpeed", attackSpeed);
@@ -178,33 +180,6 @@ public class UnitAI : MonoBehaviour
             transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 10f);
         }
     }
-    private void HandleUnitDeath(UnitAI deadUnit)
-    {
-        if (currentTarget == deadUnit)
-        {
-            currentTarget = FindNearestEnemy();
-            currentPath.Clear();
-
-            if (currentTarget != null && currentTarget.TryGetComponent<UnitAI>(out UnitAI newEnemy))
-            {
-                // Make sure melee units move to a free neighbor, not inside the enemy
-                if (attackRange <= 1.6f && newEnemy.currentTile != null) // melee
-                {
-                    HexTile neighbor = BoardManager.Instance.GetClosestFreeNeighbor(newEnemy.currentTile, currentTile);
-                    if (neighbor != null)
-                    {
-                        var path = BoardManager.Instance.FindPath(currentTile, neighbor);
-                        if (path.Count > 1)
-                        {
-                            currentPath = new Queue<HexTile>(path);
-                            currentPath.Dequeue(); // drop current tile
-                        }
-                    }
-                }
-            }
-        }
-    }
-
 
     // 🔹 Call this from the auto attack animation (Animation Event)
     public void DealAutoAttackDamage()
@@ -306,11 +281,15 @@ public class UnitAI : MonoBehaviour
     private void GainMana(float amount)
     {
         currentMana += amount;
+
         if (ui != null)
             ui.UpdateMana(currentMana);   // ✅ refresh bar
 
+        Debug.Log($"[{unitName}] gained {amount} mana → {currentMana}/{maxMana}");
+
         if (currentMana >= maxMana)
         {
+            Debug.Log($"[{unitName}] Mana full! Casting ability...");
             CastAbility();
             currentMana = 0;
             if (ui != null)
@@ -321,21 +300,33 @@ public class UnitAI : MonoBehaviour
 
     private void CastAbility()
     {
+        if (isCastingAbility) return; // already casting
+        isCastingAbility = true;
+
         if (currentTarget != null)
             FaceTarget(currentTarget.transform.position);
 
         if (animator) animator.SetTrigger("AbilityTrigger");
 
-        // ✅ Pass target directly to abilities
         foreach (var ability in GetComponents<MonoBehaviour>())
         {
             if (ability is IUnitAbility unitAbility)
             {
                 unitAbility.Cast(currentTarget?.GetComponent<UnitAI>());
-                return;
+                break;
             }
         }
+
+        // Optional: reset after a fixed time if ability doesn’t reset itself
+        StartCoroutine(EndAbilityAfterDelay(1.5f));
     }
+
+    private IEnumerator EndAbilityAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        isCastingAbility = false;
+    }
+
 
     // ✅ Only one interface definition now
     public interface IUnitAbility
