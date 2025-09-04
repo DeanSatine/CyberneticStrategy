@@ -36,6 +36,9 @@ public class EradicatorTrait : MonoBehaviour
         {
             if (enemy == null || !enemy.isAlive) continue;
 
+            // ✅ Only target units on board in combat
+            if (enemy.currentState != UnitAI.UnitState.Combat) continue;
+
             float hpPercent = (float)enemy.currentHealth / enemy.maxHealth;
             if (hpPercent <= executeThreshold)
             {
