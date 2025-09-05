@@ -47,13 +47,11 @@ public class CombatManager : MonoBehaviour
 
         if (!anyEnemiesAlive)
         {
-            Debug.Log("✅ Player wins the round!");
-            StageManager.Instance.NextRound();
+            StageManager.Instance.OnCombatEnd(true);
         }
         else if (!anyPlayersAlive)
         {
-            Debug.Log("❌ Player loses the round!");
-            StageManager.Instance.NextRound();
+            StageManager.Instance.OnCombatEnd(false);
         }
     }
 }

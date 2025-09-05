@@ -14,21 +14,10 @@ public class GameManager : Singleton<GameManager>
     public List<UnitAI> playerUnits = new List<UnitAI>();
     public List<UnitAI> enemyUnits = new List<UnitAI>();
 
-    //HexGrid
-    public GameObject HexMap;
-
     //Scripts
     public Draggable draggable;
 
     private bool combatStarted = false;
-
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Space)) // TEMP: press space to test
-        {
-            StartCombat();
-        }
-    }
 
     public void RegisterUnit(UnitAI unit, bool isPlayer)
     {
@@ -72,7 +61,6 @@ public class GameManager : Singleton<GameManager>
         );
     }
 
-
     public void StartCombat()
     {
         if (combatStarted) return;
@@ -95,31 +83,12 @@ public class GameManager : Singleton<GameManager>
         if (TraitManager.Instance != null)
         {
             TraitManager.Instance.ApplyTraits(playerUnits);
-            TraitManager.Instance.ApplyTraits(enemyUnits); // optional if enemies can also have traits
+            TraitManager.Instance.ApplyTraits(enemyUnits);
         }
     }
 
-
-    private void UpdatePlayerTraitUI()
+    public void ResetCombatFlag()
     {
-        var traitCounts = TraitManager.Instance.CountTraits(playerUnits);
-        TraitUIManager.Instance.UpdateTraitUI(traitCounts);
+        combatStarted = false; // ✅ reset between rounds
     }
-
-
-    private void GridShow()
-    {
-        if (draggable.isDragging == true)
-        {
-            HexMap.SetActive(true);
-        }
-        else
-        {
-            HexMap.SetActive(false);
-        }
-
-
-            
-    }
-   
 }

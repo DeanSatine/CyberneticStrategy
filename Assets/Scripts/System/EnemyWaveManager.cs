@@ -22,7 +22,7 @@ public class EnemyWaveManager : MonoBehaviour
 
     public void SpawnEnemyWave(int stage)
     {
-        ClearOldWave();
+        ClearEnemies();
 
         int enemyCount = Random.Range(minUnits, maxUnits + 1);
 
@@ -34,13 +34,12 @@ public class EnemyWaveManager : MonoBehaviour
             Transform hex = GetFreeEnemyHex();
             if (hex == null) break;
 
-            // after you pick: HexTile chosen = BoardManager.Instance.GetEnemyTiles()...
             HexTile chosen = BoardManager.Instance.GetEnemyTiles().Find(t => t.occupyingUnit == null);
             if (chosen == null) break;
 
             GameObject enemyObj = Instantiate(chosenUnit.prefab, hex.position, Quaternion.identity);
 
-            // keep enemies on ground
+            // keep enemies above ground
             Vector3 pos = enemyObj.transform.position;
             pos.y = 0.6f;
             enemyObj.transform.position = pos;
@@ -52,23 +51,21 @@ public class EnemyWaveManager : MonoBehaviour
             enemyObj.transform.rotation = Quaternion.Euler(0, -90f, 0);
 
             // ✅ assign enemy to its hex
-            HexTile tile = BoardManager.Instance.GetTileFromWorld(hex.position);
-            if (tile != null)
+            if (chosen != null)
             {
-                enemyAI.currentTile = tile;
-                tile.occupyingUnit = enemyAI;
+                enemyAI.currentTile = chosen;
+                chosen.occupyingUnit = enemyAI;
             }
 
             // ✅ register with GameManager so combat sees them
             activeEnemies.Add(enemyAI);
             GameManager.Instance.RegisterUnit(enemyAI, false);
-
         }
 
         Debug.Log($"Spawned {activeEnemies.Count} enemies for Stage {stage}");
     }
 
-    private void ClearOldWave()
+    public void ClearEnemies()
     {
         foreach (var enemy in activeEnemies)
         {
