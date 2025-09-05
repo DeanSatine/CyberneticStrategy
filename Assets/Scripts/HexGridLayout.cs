@@ -49,11 +49,8 @@ public class HexGridLayout : MonoBehaviour
                 HexTile hexTile = tile.GetComponent<HexTile>();
                 hexTile.gridPosition = new Vector2Int(x, y);   // ✅ assign coords here
 
-                // Bench or Board
-                if (y == gridSize.y - 1)
-                    hexTile.tileType = TileType.Bench;
-                else
-                    hexTile.tileType = TileType.Board;
+                // All generated hexes are board tiles
+                hexTile.tileType = TileType.Board;
 
                 // ✅ Assign ownership based on coordinates
                 if ((x >= 4 && x <= 7) && (y >= 0 && y <= 7))
