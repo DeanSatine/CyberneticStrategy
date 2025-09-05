@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class StageManager : MonoBehaviour
 {
@@ -11,6 +11,11 @@ public class StageManager : MonoBehaviour
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
+    }
+
+    private void Start()
+    {
+        EnemyWaveManager.Instance.SpawnEnemyWave(currentStage);
     }
 
     public void NextRound()
@@ -27,5 +32,8 @@ public class StageManager : MonoBehaviour
         {
             Debug.Log($"Round advanced! Stage {currentStage}, Round {roundInStage}");
         }
+
+        // ✅ Spawn a new wave every round
+        EnemyWaveManager.Instance.SpawnEnemyWave(currentStage);
     }
 }

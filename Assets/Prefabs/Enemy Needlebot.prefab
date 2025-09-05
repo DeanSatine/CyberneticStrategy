@@ -107,7 +107,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: ae4ac85451d029e47a7e0004351b4d96, type: 2}
+      objectReference: {fileID: 2100000, guid: 592e6e20f85d9d44086827001f3e2adb, type: 2}
     - target: {fileID: -5195048882033904264, guid: 2013060faca6a4b4997345f68fa7e83d,
         type: 3}
       propertyPath: m_Layer
@@ -185,7 +185,7 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 2013060faca6a4b4997345f68fa7e83d,
         type: 3}
       propertyPath: m_Name
-      value: Needlebot
+      value: Enemy Needlebot
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 2013060faca6a4b4997345f68fa7e83d,
         type: 3}
@@ -310,7 +310,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   unitName: NeedleBot
   starLevel: 1
-  team: 0
+  team: 1
   maxHealth: 400
   currentHealth: 400
   attackDamage: 55
@@ -320,13 +320,12 @@ MonoBehaviour:
   mana: 0
   maxMana: 50
   currentMana: 0
-  traits: 0000000003000000
+  traits: 
   canMove: 1
   canAttack: 1
   isAlive: 1
   isCastingAbility: 0
-  projectilePrefab: {fileID: 1611075903630885449, guid: 386d059c0a7daa44cb93872afa6086aa,
-    type: 3}
+  projectilePrefab: {fileID: 0}
   firePoint: {fileID: 0}
   projectileSpeed: 15
   unitUIPrefab: {fileID: 6939982145822855837, guid: 63931d92c48ef65418d45ec02069a522,

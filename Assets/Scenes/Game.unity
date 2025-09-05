@@ -654,6 +654,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tileType: 1
+  owner: 0
   occupyingUnit: {fileID: 0}
   gridPosition: {x: 0, y: 0}
 --- !u!1 &40608313
@@ -1432,7 +1433,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &116289198
 Transform:
   m_ObjectHideFlags: 0
@@ -3178,6 +3179,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tileType: 1
+  owner: 0
   occupyingUnit: {fileID: 0}
   gridPosition: {x: 0, y: 0}
 --- !u!1 &285924198
@@ -7252,6 +7254,50 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 608332674}
   m_CullTransparentMesh: 1
+--- !u!1 &614802538
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 614802539}
+  - component: {fileID: 614802540}
+  m_Layer: 0
+  m_Name: CombatManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &614802539
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 614802538}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 835031862}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &614802540
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 614802538}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9f5173c91c2b8e4abad63bd991cd1a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &704649753
 GameObject:
   m_ObjectHideFlags: 0
@@ -9411,6 +9457,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tileType: 1
+  owner: 0
   occupyingUnit: {fileID: 0}
   gridPosition: {x: 0, y: 0}
 --- !u!1 &835031861
@@ -9445,6 +9492,8 @@ Transform:
   - {fileID: 923416039}
   - {fileID: 2052790674}
   - {fileID: 1159658795}
+  - {fileID: 1206706191}
+  - {fileID: 614802539}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -9841,6 +9890,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tileType: 1
+  owner: 0
   occupyingUnit: {fileID: 0}
   gridPosition: {x: 0, y: 0}
 --- !u!1 &923416037
@@ -10930,6 +10980,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tileType: 1
+  owner: 0
   occupyingUnit: {fileID: 0}
   gridPosition: {x: 0, y: 0}
 --- !u!1 &980698905
@@ -13281,6 +13332,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tileType: 1
+  owner: 0
   occupyingUnit: {fileID: 0}
   gridPosition: {x: 0, y: 0}
 --- !u!1 &1145285893
@@ -13554,8 +13606,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f728d61d8050e1a42a9034b2a4ddee17, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  neighborDistance: 0
-  neighborTolerance: 0.15
 --- !u!1 &1175056504
 GameObject:
   m_ObjectHideFlags: 0
@@ -14102,6 +14152,77 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1199864224}
   m_CullTransparentMesh: 1
+--- !u!1 &1206706190
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1206706191}
+  - component: {fileID: 1206706192}
+  m_Layer: 0
+  m_Name: EnemyWaveManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1206706191
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1206706190}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 835031862}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1206706192
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1206706190}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6aaafccbe930fa40aedf5a8eef59817, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enemyHexes: []
+  minUnits: 2
+  maxUnits: 5
+  allUnits:
+  - unitName: ManaDrive
+    prefab: {fileID: 397472728585410053, guid: d5d81c0f1289d4640a7855d83e53a332, type: 3}
+    cost: 3
+    icon: {fileID: 0}
+  - unitName: Needlebot
+    prefab: {fileID: 8772506818969043707, guid: 6a388368b433d664ea6a6e2ba76adbad,
+      type: 3}
+    cost: 0
+    icon: {fileID: 0}
+  - unitName: KillSwitch
+    prefab: {fileID: 27990592220160999, guid: aa78c32e8abf8924a83cfd6b532978d2, type: 3}
+    cost: 4
+    icon: {fileID: 0}
+  - unitName: B.O.P
+    prefab: {fileID: 3915463247227310737, guid: 7442cc27438675149861c97c8d4f043c,
+      type: 3}
+    cost: 2
+    icon: {fileID: 0}
+  - unitName: HayMaker
+    prefab: {fileID: 3571069488247416756, guid: 41202446e30667148857f2028683a5a7,
+      type: 3}
+    cost: 5
+    icon: {fileID: 0}
 --- !u!1 &1223263293
 GameObject:
   m_ObjectHideFlags: 0
@@ -15796,6 +15917,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tileType: 1
+  owner: 0
   occupyingUnit: {fileID: 0}
   gridPosition: {x: 0, y: 0}
 --- !u!1 &1464028171
@@ -19632,6 +19754,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tileType: 1
+  owner: 0
   occupyingUnit: {fileID: 0}
   gridPosition: {x: 0, y: 0}
 --- !u!1 &1901587115
@@ -20758,6 +20881,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tileType: 1
+  owner: 0
   occupyingUnit: {fileID: 0}
   gridPosition: {x: 0, y: 0}
 --- !u!1 &2001475846

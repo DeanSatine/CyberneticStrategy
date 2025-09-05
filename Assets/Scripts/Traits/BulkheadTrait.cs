@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class BulkheadTrait : MonoBehaviour
 {
@@ -7,30 +7,32 @@ public class BulkheadTrait : MonoBehaviour
 
     private UnitAI unitAI;
     private bool applied = false;
+    private float baseMaxHealth;
 
     private void Awake()
     {
         unitAI = GetComponent<UnitAI>();
+        baseMaxHealth = unitAI.maxHealth;
     }
 
-    private void Start()
+    private void OnEnable()
     {
-        // Apply bonus health only once
-        if (!applied)
-        {
-            float bonus = unitAI.maxHealth * bonusHealthPercent;
-            unitAI.maxHealth += bonus;
-            unitAI.currentHealth += bonus;
-            applied = true;
-        }
-
-        // Hook into death
+        ApplyBonusHealth();
         UnitAI.OnAnyUnitDeath += OnUnitDeath;
     }
 
-    private void OnDestroy()
+    private void OnDisable()
     {
         UnitAI.OnAnyUnitDeath -= OnUnitDeath;
+    }
+
+    private void ApplyBonusHealth()
+    {
+        if (applied) return;
+        float bonus = baseMaxHealth * bonusHealthPercent;
+        unitAI.maxHealth += bonus;
+        unitAI.currentHealth += bonus;
+        applied = true;
     }
 
     private void OnUnitDeath(UnitAI deadUnit)
@@ -41,8 +43,8 @@ public class BulkheadTrait : MonoBehaviour
             if (nearest != null)
             {
                 float healthShare = unitAI.maxHealth * deathSharePercent;
-                nearest.currentHealth = Mathf.Min(nearest.maxHealth, nearest.currentHealth + healthShare);
-                Debug.Log($"{unitAI.unitName} shared {healthShare} HP with {nearest.unitName}");
+                nearest.currentHealth += healthShare; // ✅ allow overheal
+                Debug.Log($"{unitAI.unitName} shared {healthShare} HP with {nearest.unitName} (now {nearest.currentHealth}/{nearest.maxHealth}+)");
             }
         }
     }
@@ -59,7 +61,12 @@ public class BulkheadTrait : MonoBehaviour
             if (ally.team != unitAI.team) continue;
 
             float dist = Vector3.Distance(unitAI.transform.position, ally.transform.position);
-            if (dist < minDist)
+
+            // ✅ Prioritize Bulkheads, then fallback to anyone
+            bool allyIsBulkhead = ally.traits.Contains(Trait.Bulkhead);
+            bool nearestIsBulkhead = nearest != null && nearest.traits.Contains(Trait.Bulkhead);
+
+            if ((allyIsBulkhead && !nearestIsBulkhead) || dist < minDist)
             {
                 minDist = dist;
                 nearest = ally;

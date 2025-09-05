@@ -6,10 +6,16 @@ public enum TileType
     Board,
     Bench
 }
-
+public enum TileOwner
+{
+    Neutral,
+    Player,
+    Enemy
+}
 public class HexTile : MonoBehaviour
 {
     public TileType tileType;
+    public TileOwner owner = TileOwner.Neutral; // ✅ new field
     public UnitAI occupyingUnit; // ✅ Track which unit is on this tile
     public Vector2Int gridPosition;
   

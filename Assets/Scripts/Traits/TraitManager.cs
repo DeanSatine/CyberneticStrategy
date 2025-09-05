@@ -232,7 +232,6 @@ public class TraitManager : MonoBehaviour
                                 if (ability == null) ability = unit.gameObject.AddComponent<ClobbertronTrait>();
 
                                 ability.bonusArmor = clobbertronBonusArmor;
-                                ability.bonusDamageAmp = clobbertronBonusDamageAmp;
                                 ability.crashRadius = clobbertronCrashRadius;
                                 ability.crashDamage = clobbertronCrashDamage;
                             }

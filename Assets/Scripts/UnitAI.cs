@@ -34,6 +34,13 @@ public class UnitAI : MonoBehaviour
     public bool canAttack = true;
     public bool isAlive = true;
     [HideInInspector] public bool isCastingAbility = false;
+    public delegate void AttackEvent(UnitAI target);
+    public event System.Action<UnitAI> OnAttackEvent;
+
+    [Header("Combat VFX")]
+    public GameObject projectilePrefab; // assign for ranged units
+    public Transform firePoint;         // optional: empty child object for projectile spawn
+    public float projectileSpeed = 15f;
 
     [Header("UI")]
     public GameObject unitUIPrefab;
@@ -156,20 +163,92 @@ public class UnitAI : MonoBehaviour
     private void Attack(Transform target)
     {
         if (target == null) return;
-        if (!target.TryGetComponent(out UnitAI enemy) || !enemy.isAlive) return; // ✅ skip dead
 
         FaceTarget(target.position);
 
         if (animator) animator.SetTrigger("AttackTrigger");
 
-        enemy.TakeDamage(attackDamage);
-        GainMana(10);
+        // Deal damage immediately (like old script)
+        if (target.TryGetComponent(out UnitAI enemy))
+        {
+            enemy.TakeDamage(attackDamage);
+            GainMana(10);
 
-        var ks = GetComponent<KillSwitchAbility>();
-        if (ks != null) ks.OnAttack(enemy);
+            // notify traits / listeners
+            OnAttackEvent?.Invoke(enemy);
+
+            var ks = GetComponent<KillSwitchAbility>();
+            if (ks != null) ks.OnAttack(enemy);
+        }
     }
 
 
+    public void PerformAttack()
+    {
+        if (currentTarget == null) return;
+
+        if (currentTarget.TryGetComponent<UnitAI>(out UnitAI enemy) && enemy.isAlive)
+        {
+            // Deal damage
+            enemy.TakeDamage(attackDamage);
+
+            // Notify traits
+            OnAttackEvent?.Invoke(enemy);
+
+            Debug.Log($"{unitName} attacked {enemy.unitName} for {attackDamage} dmg.");
+        }
+    }
+    private void SpawnProjectile(UnitAI target)
+    {
+        if (target == null || !target.isAlive) return;
+
+        // Pick spawn point
+        Vector3 spawnPos = firePoint != null ? firePoint.position : transform.position + Vector3.up * 1.5f;
+        GameObject proj = Instantiate(projectilePrefab, spawnPos, Quaternion.identity);
+
+        // Make it move toward target
+        StartCoroutine(MoveProjectile(proj, target));
+    }
+
+    private IEnumerator MoveProjectile(GameObject proj, UnitAI target)
+    {
+        while (proj != null && target != null && target.isAlive)
+        {
+            Vector3 dir = (target.transform.position + Vector3.up * 1.2f) - proj.transform.position;
+            proj.transform.position += dir.normalized * projectileSpeed * Time.deltaTime;
+
+            if (dir.magnitude < 0.2f) // impact
+            {
+                target.TakeDamage(attackDamage);
+
+                // Optional: spawn hit VFX
+                // GameObject impact = Instantiate(impactVFX, target.transform.position, Quaternion.identity);
+                // Destroy(impact, 1f);
+
+                Destroy(proj);
+                yield break;
+            }
+
+            yield return null;
+        }
+
+        if (proj != null) Destroy(proj);
+    }
+    public void AssignToTile(HexTile tile)
+    {
+        if (tile == null) return;
+
+        // clear previous
+        ClearTile();
+
+        currentTile = tile;
+        tile.occupyingUnit = this;
+
+        // snap to tile center (keep current Y)
+        Vector3 p = tile.transform.position;
+        p.y = transform.position.y;
+        transform.position = p;
+    }
 
     private void FaceTarget(Vector3 targetPos)
     {
@@ -188,10 +267,19 @@ public class UnitAI : MonoBehaviour
     {
         if (currentTarget != null && currentTarget.TryGetComponent(out UnitAI enemy))
         {
-            enemy.TakeDamage(attackDamage);
+            if (projectilePrefab != null)
+            {
+                SpawnProjectile(enemy);
+            }
+            else
+            {
+                enemy.TakeDamage(attackDamage); // melee units still hit instantly
+            }
             GainMana(10);
 
-            // 🔑 Check if this unit has KillSwitchAbility
+            // notify traits / listeners
+            OnAttackEvent?.Invoke(enemy);
+
             var ks = GetComponent<KillSwitchAbility>();
             if (ks != null) ks.OnAttack(enemy);
         }
@@ -266,6 +354,7 @@ public class UnitAI : MonoBehaviour
 
         isAlive = false;
         OnAnyUnitDeath?.Invoke(this);
+        GameManager.Instance.UnregisterUnit(this);
 
         // ✅ Snap to ground (align with tile or y = 0)
         Vector3 pos = transform.position;

@@ -48,11 +48,34 @@ public class HexGridLayout : MonoBehaviour
                 // 👇 Decide role
                 HexTile hexTile = tile.GetComponent<HexTile>();
                 hexTile.gridPosition = new Vector2Int(x, y);   // ✅ assign coords here
-                if (y == gridSize.y - 1) // last row = bench
+
+                // Bench or Board
+                if (y == gridSize.y - 1)
                     hexTile.tileType = TileType.Bench;
                 else
                     hexTile.tileType = TileType.Board;
+
+                // ✅ Assign ownership based on coordinates
+                if ((x >= 4 && x <= 7) && (y >= 0 && y <= 7))
+                {
+                    hexTile.owner = TileOwner.Enemy;
+                }
+                else
+                {
+                    hexTile.owner = TileOwner.Player;
+                }
+
                 BoardManager.Instance.RegisterTile(hexTile.gridPosition, hexTile);
+                // AFTER registering all tiles (inside the x/y loops is fine right after RegisterTile)
+                Collider[] hits = Physics.OverlapSphere(tile.transform.position, 0.2f);
+                foreach (var h in hits)
+                {
+                    if (h.TryGetComponent(out UnitAI unit) && unit.currentTile == null)
+                    {
+                        unit.AssignToTile(hexTile);
+                    }
+                }
+
             }
         }
     }
