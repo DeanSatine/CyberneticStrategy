@@ -385,7 +385,7 @@ Animation:
   m_Animations:
   - {fileID: -203655887218126122, guid: c7e994702a16b4641a1d71575b9d66a7, type: 3}
   - {fileID: -203655887218126122, guid: 084a337d0af3582468a8b305428a5c3d, type: 3}
-  - {fileID: -203655887218126122, guid: c7cc6bd1c149f574eadfdba9f17eb8e4, type: 3}
+  - {fileID: 7400000, guid: ae97e234beda8cb4b83646858f5fad0c, type: 2}
   - {fileID: -203655887218126122, guid: 662e16ecc52ae9f45ad95b8dc60828e1, type: 3}
   m_WrapMode: 0
   m_PlayAutomatically: 0
@@ -433,6 +433,9 @@ MonoBehaviour:
   canAttack: 1
   isAlive: 1
   isCastingAbility: 0
+  projectilePrefab: {fileID: 0}
+  firePoint: {fileID: 0}
+  projectileSpeed: 15
   unitUIPrefab: {fileID: 6939982145822855837, guid: 63931d92c48ef65418d45ec02069a522,
     type: 3}
   animator: {fileID: 0}

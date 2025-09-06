@@ -289,7 +289,7 @@ Animation:
   m_Animation: {fileID: 0}
   m_Animations:
   - {fileID: -203655887218126122, guid: 6e567a0e0a0559e4684e4bb11fba5757, type: 3}
-  - {fileID: -203655887218126122, guid: 71a405089f62bad43a847746d3bfc192, type: 3}
+  - {fileID: 7400000, guid: 6bb9c1799f3255e468b3212e9b5c2b0b, type: 2}
   - {fileID: -203655887218126122, guid: 366e0be309326b64186a6206fc7c9fe0, type: 3}
   - {fileID: -203655887218126122, guid: c7970482d08dcdf449cf26a367e0cd88, type: 3}
   m_WrapMode: 0

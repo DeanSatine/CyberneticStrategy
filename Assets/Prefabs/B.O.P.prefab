@@ -264,7 +264,7 @@ Animation:
   m_Animation: {fileID: 0}
   m_Animations:
   - {fileID: -203655887218126122, guid: 09048078b4d352148a4b8c794d6afc25, type: 3}
-  - {fileID: -203655887218126122, guid: c3d86d8cc32247542a0ff34f8be15319, type: 3}
+  - {fileID: 7400000, guid: 1d8eff8d445660a43b55aa19432cc2d8, type: 2}
   - {fileID: -203655887218126122, guid: 09fc3285c2d51ff4ead9d960815ef3ca, type: 3}
   - {fileID: -203655887218126122, guid: 0cab101d68803a545abb660619df6e91, type: 3}
   - {fileID: -203655887218126122, guid: 336d624864c35c646bac71b98980a1c8, type: 3}

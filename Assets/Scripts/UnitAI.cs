@@ -167,19 +167,6 @@ public class UnitAI : MonoBehaviour
         FaceTarget(target.position);
 
         if (animator) animator.SetTrigger("AttackTrigger");
-
-        // Deal damage immediately (like old script)
-        if (target.TryGetComponent(out UnitAI enemy))
-        {
-            enemy.TakeDamage(attackDamage);
-            GainMana(10);
-
-            // notify traits / listeners
-            OnAttackEvent?.Invoke(enemy);
-
-            var ks = GetComponent<KillSwitchAbility>();
-            if (ks != null) ks.OnAttack(enemy);
-        }
     }
 
 
@@ -273,9 +260,9 @@ public class UnitAI : MonoBehaviour
             }
             else
             {
-                enemy.TakeDamage(attackDamage); // melee units still hit instantly
+                enemy.TakeDamage(attackDamage); // melee units hit instantly
             }
-            GainMana(10);
+            GainMana(10); // Only gain mana once, here
 
             // notify traits / listeners
             OnAttackEvent?.Invoke(enemy);
