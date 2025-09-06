@@ -307,7 +307,7 @@ MonoBehaviour:
   attackDamage: 60
   attackSpeed: 1
   armor: 40
-  attackRange: 1
+  attackRange: 2
   mana: 0
   maxMana: 30
   currentMana: 0
@@ -325,6 +325,9 @@ MonoBehaviour:
   currentTarget: {fileID: 0}
   teamID: 0
   currentTile: {fileID: 0}
+  movementSpeed: 3
+  stoppingDistance: 1.4
+  obstacleAvoidance: 2
   moveOffsetRange: 0.2
   deathAnimLength: 1.2
 --- !u!114 &7161809393136151176

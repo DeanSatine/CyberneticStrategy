@@ -58,12 +58,18 @@ public class UnitAI : MonoBehaviour
     private UnitState _currentState = UnitState.Bench;
     [HideInInspector] public HexTile currentTile;
     [Header("Movement")]
+    [SerializeField] private float movementSpeed = 3f;
+    [SerializeField] private float stoppingDistance = 1.4f; // How close to get before attacking
+    [SerializeField] private float obstacleAvoidance = 2f; // Radius for avoiding other units
+
     [Tooltip("Random micro-offset so units don't perfectly stack on tile centers.")]
     [SerializeField] private float moveOffsetRange = 0.2f;
 
     [Header("Animation Settings")]
     [SerializeField] private float deathAnimLength = 1.2f; // match clip length
     private Vector3 moveOffset;
+    private Vector3 currentDestination;
+    private bool hasReachedDestination = true;
     public UnitState currentState
     {
         get => _currentState;
@@ -135,15 +141,7 @@ public class UnitAI : MonoBehaviour
         {
             float dist = Vector3.Distance(transform.position, currentTarget.position);
 
-            // ✅ If enemy is on an adjacent hex, force it "in range"
-            if (currentTile != null && currentTarget.TryGetComponent<UnitAI>(out UnitAI enemy))
-            {
-                if (BoardManager.Instance.AreNeighbors(currentTile, enemy.currentTile))
-                {
-                    dist = attackRange; // trick the system → allows attacking
-                }
-            }
-
+            // Use actual distance instead of hex-based logic
             if (dist <= attackRange)
             {
                 if (attackCooldown <= 0f)
@@ -152,6 +150,7 @@ public class UnitAI : MonoBehaviour
                     attackCooldown = 1f / attackSpeed;
                 }
                 if (animator) animator.SetBool("IsRunning", false);
+                hasReachedDestination = true; // Stop moving when in attack range
             }
             else if (canMove)
             {
@@ -477,70 +476,137 @@ public class UnitAI : MonoBehaviour
     {
         if (currentTile == null) return;
 
-        if (currentPath.Count == 0)
+        // Calculate ideal destination (near target, not necessarily on grid)
+        Vector3 idealDestination = CalculateIdealDestination(targetPos);
+
+        // Only recalculate path if destination changed significantly
+        if (Vector3.Distance(idealDestination, currentDestination) > 0.5f)
         {
-            HexTile goalTile = null;
-
-            if (currentTarget != null && currentTarget.TryGetComponent<UnitAI>(out UnitAI enemy) && enemy.currentTile != null)
-            {
-                // ✅ If melee, go for a free neighbor instead of the enemy's tile
-                if (attackRange <= 1.6f)
-                {
-                    goalTile = BoardManager.Instance.GetClosestFreeNeighbor(enemy.currentTile, currentTile);
-                }
-                else
-                {
-                    goalTile = enemy.currentTile; // ranged can target directly
-                }
-            }
-            else
-            {
-                goalTile = BoardManager.Instance.GetTileFromWorld(targetPos);
-            }
-
-            if (goalTile != null)
-            {
-                var path = BoardManager.Instance.FindPath(currentTile, goalTile);
-                if (path.Count > 1)
-                {
-                    currentPath = new Queue<HexTile>(path);
-                    currentPath.Dequeue(); // drop the starting tile
-                }
-            }
+            currentDestination = idealDestination;
+            hasReachedDestination = false;
         }
 
-        if (currentPath.Count > 0)
+        if (!hasReachedDestination)
         {
-            HexTile nextTile = currentPath.Peek();
-            Vector3 nextPos = nextTile.transform.position + moveOffset; // ✅ add offset
-            nextPos.y = transform.position.y; // stay flat
+            // Smooth movement toward destination with obstacle avoidance
+            Vector3 moveDirection = CalculateMovementDirection(currentDestination);
 
-            float moveSpeed = 3f;
-            transform.position = Vector3.MoveTowards(transform.position, nextPos, moveSpeed * Time.deltaTime);
-
-            // Face the movement direction
-            Vector3 dir = (nextPos - transform.position).normalized;
-            if (dir.sqrMagnitude > 0.001f)
+            if (moveDirection != Vector3.zero)
             {
-                Quaternion lookRot = Quaternion.LookRotation(dir, Vector3.up);
-                transform.rotation = Quaternion.Slerp(transform.rotation, lookRot, Time.deltaTime * 10f);
+                // Move smoothly in world space
+                Vector3 newPosition = transform.position + moveDirection * movementSpeed * Time.deltaTime;
+                transform.position = newPosition;
+
+                // Face movement direction
+                FaceDirection(moveDirection);
+
+                // Update which hex tile we're closest to (for game logic)
+                UpdateCurrentTile();
+
+                if (animator) animator.SetBool("IsRunning", true);
             }
 
-            if (Vector3.Distance(transform.position, nextPos) < 0.05f)
+            // Check if we've reached our destination
+            if (Vector3.Distance(transform.position, currentDestination) < 0.3f)
             {
-                if (currentTile != null && currentTile.occupyingUnit == this)
-                    currentTile.occupyingUnit = null;
-
-                currentTile = nextTile;
-                currentTile.occupyingUnit = this;
-                currentPath.Dequeue();
+                hasReachedDestination = true;
+                if (animator) animator.SetBool("IsRunning", false);
             }
-
-            if (animator) animator.SetBool("IsRunning", true);
         }
         else
         {
             if (animator) animator.SetBool("IsRunning", false);
+        }
+    }
+
+    private Vector3 CalculateIdealDestination(Vector3 targetPos)
+    {
+        if (currentTarget == null) return targetPos;
+
+        // For melee units: get close but maintain stopping distance
+        if (attackRange <= 1.6f)
+        {
+            Vector3 dirToTarget = (targetPos - transform.position).normalized;
+            return targetPos - dirToTarget * stoppingDistance;
+        }
+        else
+        {
+            // For ranged units: maintain attack range distance
+            Vector3 dirToTarget = (targetPos - transform.position).normalized;
+            return targetPos - dirToTarget * (attackRange * 0.8f);
+        }
+    }
+
+    private Vector3 CalculateMovementDirection(Vector3 destination)
+    {
+        Vector3 baseDirection = (destination - transform.position).normalized;
+        Vector3 avoidanceDirection = CalculateObstacleAvoidance();
+
+        // Combine base movement with obstacle avoidance
+        Vector3 finalDirection = (baseDirection + avoidanceDirection * 0.5f).normalized;
+
+        return finalDirection;
+    }
+
+    private Vector3 CalculateObstacleAvoidance()
+    {
+        Vector3 avoidanceVector = Vector3.zero;
+
+        // Find nearby units to avoid
+        Collider[] nearbyUnits = Physics.OverlapSphere(transform.position, obstacleAvoidance, LayerMask.GetMask("Default"));
+
+        foreach (var unit in nearbyUnits)
+        {
+            if (unit.transform == transform) continue; // Skip self
+
+            UnitAI otherUnit = unit.GetComponent<UnitAI>();
+            if (otherUnit == null || !otherUnit.isAlive) continue;
+
+            // Don't avoid our target (we want to get close to attack)
+            if (currentTarget != null && unit.transform == currentTarget) continue;
+
+            Vector3 directionAway = transform.position - unit.transform.position;
+            float distance = directionAway.magnitude;
+
+            if (distance < obstacleAvoidance && distance > 0.1f)
+            {
+                // Stronger avoidance for closer units
+                float avoidanceStrength = (obstacleAvoidance - distance) / obstacleAvoidance;
+                avoidanceVector += directionAway.normalized * avoidanceStrength;
+            }
+        }
+
+        return avoidanceVector.normalized;
+    }
+
+    private void UpdateCurrentTile()
+    {
+        // Find the closest hex tile for game logic purposes
+        HexTile closestTile = BoardManager.Instance.GetTileFromWorld(transform.position);
+
+        if (closestTile != null && closestTile != currentTile)
+        {
+            // Clear previous tile
+            if (currentTile != null && currentTile.occupyingUnit == this)
+                currentTile.occupyingUnit = null;
+
+            // Only claim the new tile if it's free or we're just passing through
+            if (closestTile.occupyingUnit == null)
+            {
+                currentTile = closestTile;
+                closestTile.occupyingUnit = this;
+            }
+            // If tile is occupied, we're just passing through - don't claim it
+        }
+    }
+
+    private void FaceDirection(Vector3 direction)
+    {
+        if (direction.sqrMagnitude > 0.001f)
+        {
+            direction.y = 0f; // Keep upright
+            Quaternion lookRotation = Quaternion.LookRotation(direction);
+            transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 10f);
         }
     }
 }
