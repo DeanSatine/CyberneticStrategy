@@ -93,7 +93,7 @@ public class EradicatorTrait : MonoBehaviour
     {
         if (pressPrefab != null && pressInstance == null)
         {
-            pressIdlePosition = new Vector3(0, 5f, -10); // board center or adjust
+            pressIdlePosition = new Vector3(0, 5f, -12); // board center or adjust
             pressInstance = Instantiate(pressPrefab, pressIdlePosition, Quaternion.identity);
         }
     }
