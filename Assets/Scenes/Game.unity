@@ -14193,7 +14193,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 67.1, y: 98.6}
+  m_AnchoredPosition: {x: 67.1001, y: 98.599976}
   m_SizeDelta: {x: 93.8324, y: 83.8734}
   m_Pivot: {x: 0, y: 0}
 --- !u!114 &1152062989
@@ -15184,7 +15184,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemyHexes: []
   minUnits: 1
-  maxUnits: 8
+  maxUnits: 3
   allUnits:
   - unitName: ManaDrive
     prefab: {fileID: 397472728585410053, guid: d5d81c0f1289d4640a7855d83e53a332, type: 3}

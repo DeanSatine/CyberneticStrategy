@@ -114,6 +114,7 @@ public class UnitAI : MonoBehaviour
             ui = uiObj.GetComponent<UnitUI>();
             ui.Init(transform, maxHealth, maxMana);
         }
+        SetupUnitCollision();
     }
 
 
@@ -196,6 +197,26 @@ public class UnitAI : MonoBehaviour
         StartCoroutine(MoveProjectile(proj, target));
     }
 
+    private void SetupUnitCollision()
+    {
+        Rigidbody rb = GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            // ✅ Allow physics but constrain movement to script control
+            rb.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionY;
+            rb.useGravity = false;
+            rb.drag = 10f; // High drag to prevent sliding
+            rb.mass = 1f;
+        }
+
+        // ✅ Set up collision detection
+        BoxCollider col = GetComponent<BoxCollider>();
+        if (col != null)
+        {
+            col.isTrigger = false; // Physical collision
+            col.size = new Vector3(0.8f, col.size.y, 0.8f); // Slightly smaller than hex
+        }
+    }
     private IEnumerator MoveProjectile(GameObject proj, UnitAI target)
     {
         while (proj != null && target != null && target.isAlive)

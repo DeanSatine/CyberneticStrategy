@@ -307,7 +307,7 @@ MonoBehaviour:
   attackDamage: 60
   attackSpeed: 1
   armor: 40
-  attackRange: 1
+  attackRange: 1.7
   mana: 0
   maxMana: 30
   currentMana: 0
@@ -325,6 +325,9 @@ MonoBehaviour:
   currentTarget: {fileID: 0}
   teamID: 0
   currentTile: {fileID: 0}
+  movementSpeed: 3
+  stoppingDistance: 1.4
+  obstacleAvoidance: 2
   moveOffsetRange: 0.2
   deathAnimLength: 1.2
 --- !u!114 &7161809393136151176
@@ -380,7 +383,7 @@ Rigidbody:
   m_GameObject: {fileID: 27990592220160999}
   serializedVersion: 4
   m_Mass: 1
-  m_Drag: 0
+  m_Drag: 10
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
@@ -396,7 +399,7 @@ Rigidbody:
   m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 126
+  m_Constraints: 36
   m_CollisionDetection: 0
 --- !u!114 &542645363885373531
 MonoBehaviour:
