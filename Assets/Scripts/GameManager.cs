@@ -38,7 +38,21 @@ public class GameManager : Singleton<GameManager>
         // ✅ apply trait abilities in planning phase
         TraitManager.Instance.ApplyTraits(playerUnits);
     }
+    public void ResetPlayerUnits()
+    {
+        foreach (var unit in playerUnits)
+        {
+            if (unit == null) continue;
+            if (!unit.isAlive) continue;
 
+            // return unit to its hex position, idle state
+            if (unit.currentTile != null)
+            {
+                unit.transform.position = unit.currentTile.transform.position + Vector3.up * 0.6f;
+            }
+            unit.SetState(UnitAI.UnitState.BoardIdle);
+        }
+    }
     public void UnregisterUnit(UnitAI unit)
     {
         playerUnits.Remove(unit);

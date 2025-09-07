@@ -10,18 +10,32 @@ public class CombatManager : MonoBehaviour
     {
         Instance = this;
     }
+    public Dictionary<UnitAI, HexTile> savedPlayerPositions = new Dictionary<UnitAI, HexTile>();
+
     public void StartCombat()
     {
         Debug.Log("⚔️ Combat started!");
 
+        savedPlayerPositions.Clear(); // reset from previous round
+
         foreach (var unit in FindObjectsOfType<UnitAI>())
         {
-            if (unit.isAlive && unit.currentState != UnitAI.UnitState.Bench)
+            if (unit.isAlive && unit.team == Team.Player && unit.currentState != UnitAI.UnitState.Bench)
             {
+                // save where they were before combat
+                if (unit.currentTile != null)
+                    savedPlayerPositions[unit] = unit.currentTile;
+
                 unit.SetState(UnitAI.UnitState.Combat);
             }
         }
     }
+
+    public Dictionary<UnitAI, HexTile> GetSavedPlayerPositions()
+    {
+        return savedPlayerPositions;
+    }
+
 
     private void OnEnable()
     {

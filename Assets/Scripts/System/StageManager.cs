@@ -2,6 +2,12 @@
 
 public class StageManager : MonoBehaviour
 {
+    public enum GamePhase
+    {
+        Prep,
+        Combat
+    }
+
     public static StageManager Instance;
 
     [Header("Stage settings")]
@@ -12,6 +18,8 @@ public class StageManager : MonoBehaviour
     [Header("Player lives")]
     public int maxLives = 3;
     private int currentLives;
+
+    public GamePhase currentPhase { get; private set; } = GamePhase.Prep;
 
     private void Awake()
     {
@@ -27,47 +35,70 @@ public class StageManager : MonoBehaviour
         {
             UIManager.Instance.UpdateLivesUI(currentLives);
             UIManager.Instance.UpdateStageUI(currentStage, roundInStage, roundsPerStage);
+            UIManager.Instance.ShowFightButton(true); // start in prep
         }
 
-        EnemyWaveManager.Instance.SpawnEnemyWave(currentStage);
+        EnterPrepPhase(); // start in prep
     }
 
-    /// <summary>
-    /// Called by CombatManager when a round ends.
-    /// playerWon == true  => player defeated the enemy wave
-    /// playerWon == false => player lost the round (lose a life)
-    /// </summary>
     public void OnCombatEnd(bool playerWon)
     {
         if (playerWon)
         {
             Debug.Log("✅ Player won the round!");
-            NextRound(); // advance round/stage as before
+            ReturnToPrepPhase();
             return;
         }
-
-        // player lost the round
-        Debug.Log("❌ Player lost the round!");
-        currentLives--;
-
-        if (UIManager.Instance != null)
-            UIManager.Instance.UpdateLivesUI(currentLives);
-
-        if (currentLives <= 0)
+        else
         {
-            Debug.Log("💀 Player has no lives left - Game Over.");
+            Debug.Log("❌ Player lost the round!");
+            currentLives--;
+
             if (UIManager.Instance != null)
-                UIManager.Instance.ShowGameOver();
-            return;
+                UIManager.Instance.UpdateLivesUI(currentLives);
+
+            if (currentLives <= 0)
+            {
+                Debug.Log("💀 Player has no lives left - Game Over.");
+                if (UIManager.Instance != null)
+                    UIManager.Instance.ShowGameOver();
+                return;
+            }
         }
 
-        // Player still has lives — advance the round/respawn new wave
+        NextRound();
+        EnterPrepPhase();
+    }
+
+    private void ReturnToPrepPhase()
+    {
+        Debug.Log("🔄 Returning to Prep Phase...");
+
+        // 1. Restore player units to their saved hexes
+        foreach (var kvp in CombatManager.Instance.GetSavedPlayerPositions())
+        {
+            UnitAI unit = kvp.Key;
+            HexTile tile = kvp.Value;
+
+            if (unit != null && unit.isAlive)
+            {
+                unit.SetState(UnitAI.UnitState.BoardIdle);
+                unit.AssignToTile(tile);
+                unit.animator.SetBool("IsRunning", false);
+            }
+        }
+
+        // 2. Spawn next enemy wave (but idle until fight button pressed)
+        EnemyWaveManager.Instance.SpawnEnemyWave(currentStage);
+
+        // 3. Show fight button again
+        if (UIManager.Instance != null)
+            UIManager.Instance.ShowFightButton(true);
+
+        // 4. Advance round counters
         NextRound();
     }
 
-    /// <summary>
-    /// Advance round/stage and spawn the next wave (keeps the original behavior).
-    /// </summary>
     public void NextRound()
     {
         roundInStage++;
@@ -85,10 +116,30 @@ public class StageManager : MonoBehaviour
 
         if (UIManager.Instance != null)
             UIManager.Instance.UpdateStageUI(currentStage, roundInStage, roundsPerStage);
+    }
 
+    private void EnterPrepPhase()
+    {
+        currentPhase = GamePhase.Prep;
+
+        // reset player units back to their tiles
+        GameManager.Instance.ResetPlayerUnits();
+
+        // spawn enemies for new round
         EnemyWaveManager.Instance.SpawnEnemyWave(currentStage);
 
-        if (GameManager.Instance != null)
-            GameManager.Instance.ResetCombatFlag();
+        // allow repositioning
+        if (UIManager.Instance != null)
+            UIManager.Instance.ShowFightButton(true);
+    }
+
+    public void EnterCombatPhase()
+    {
+        currentPhase = GamePhase.Combat;
+
+        if (UIManager.Instance != null)
+            UIManager.Instance.ShowFightButton(false);
+
+        CombatManager.Instance.StartCombat();
     }
 }

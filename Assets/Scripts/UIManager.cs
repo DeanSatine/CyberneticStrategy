@@ -7,13 +7,16 @@ public class UIManager : MonoBehaviour
     public static UIManager Instance;
 
     [Header("Lives UI")]
-    public TMP_Text livesText; // drag here in inspector
+    public TMP_Text livesText;
 
     [Header("Stage UI")]
-    public TMP_Text stageText; // drag another TMP text here for Stage/Round
+    public TMP_Text stageText;
 
     [Header("Game Over UI")]
-    public GameObject gameOverPanel; // panel with "Game Over" + Retry button
+    public GameObject gameOverPanel;
+
+    [Header("Fight Button UI")]
+    public GameObject fightButton; // 👈 drag your button object here
 
     private void Awake()
     {
@@ -36,6 +39,12 @@ public class UIManager : MonoBehaviour
             stageText.text = $"Stage {stage} - Round {round}/{roundsPerStage}";
     }
 
+    public void ShowFightButton(bool visible)
+    {
+        if (fightButton != null)
+            fightButton.SetActive(visible);
+    }
+
     public void ShowGameOver()
     {
         if (gameOverPanel != null)
@@ -45,5 +54,11 @@ public class UIManager : MonoBehaviour
     public void RetryGame()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    // 👇 Update this to call StageManager instead of CombatManager directly
+    public void OnFightButtonPressed()
+    {
+        StageManager.Instance.EnterCombatPhase();
     }
 }
