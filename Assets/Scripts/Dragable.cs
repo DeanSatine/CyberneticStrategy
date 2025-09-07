@@ -53,6 +53,37 @@ public class Draggable : MonoBehaviour
         }
     }
 
+    // ✅ Check if player can place units on this tile
+    private bool CanPlayerPlaceOnTile(HexTile tile)
+    {
+        // Allow placement on bench tiles
+        if (tile.tileType == TileType.Bench)
+            return true;
+
+        // For board tiles, check ownership and row restrictions
+        if (tile.tileType == TileType.Board)
+        {
+            // Only allow player units on player-owned tiles
+            if (tile.owner != TileOwner.Player)
+            {
+                Debug.Log($"❌ Cannot place unit on enemy territory at {tile.gridPosition}");
+                return false;
+            }
+
+            // ✅ RESTRICTION: Only allow placement on rows 0-4 (first 5 rows)
+            if (tile.gridPosition.y > 4)
+            {
+                Debug.Log($"❌ Cannot place unit beyond row 4. Tile {tile.gridPosition} is too far from player side.");
+                return false;
+            }
+
+            Debug.Log($"✅ Valid placement at {tile.gridPosition} (player territory, row 0-4)");
+            return true;
+        }
+
+        return false;
+    }
+
     private void SnapToClosestObject()
     {
         TraitManager.Instance.EvaluateTraits(GameManager.Instance.playerUnits);
@@ -72,6 +103,12 @@ public class Draggable : MonoBehaviour
             // 🔑 Always search upwards to see if this collider belongs to a HexTile
             HexTile tile = collider.GetComponentInParent<HexTile>();
             if (tile == null) continue;
+
+            // ✅ Check if player can place on this tile (ownership + row restriction)
+            if (unitAI.team == Team.Player && !CanPlayerPlaceOnTile(tile))
+            {
+                continue; // Skip invalid tiles for player units
+            }
 
             float distance = Vector3.Distance(transform.position, tile.transform.position);
             if (distance < closestDistance)
@@ -115,13 +152,14 @@ public class Draggable : MonoBehaviour
                 GameManager.Instance.UnregisterUnit(unitAI);
             }
 
+            Debug.Log($"✅ {unitAI.unitName} placed successfully at {targetTile.gridPosition}");
             return;
         }
 
-        // No tile found → snap back
+        // No valid tile found → snap back
+        Debug.Log($"❌ No valid placement found for {unitAI.unitName}. Returning to original position.");
         transform.position = oldPosition;
     }
-
 
     private Vector3 GetMouseWorldPos()
     {
