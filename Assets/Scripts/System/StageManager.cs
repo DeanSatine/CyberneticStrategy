@@ -23,11 +23,12 @@ public class StageManager : MonoBehaviour
     {
         currentLives = maxLives;
 
-        // update UI at start (requires UIManager.Instance)
         if (UIManager.Instance != null)
+        {
             UIManager.Instance.UpdateLivesUI(currentLives);
+            UIManager.Instance.UpdateStageUI(currentStage, roundInStage, roundsPerStage);
+        }
 
-        // spawn the initial wave (keeps your current behavior)
         EnemyWaveManager.Instance.SpawnEnemyWave(currentStage);
     }
 
@@ -82,10 +83,11 @@ public class StageManager : MonoBehaviour
             Debug.Log($"Round advanced! Stage {currentStage}, Round {roundInStage}");
         }
 
-        // spawn the wave for the new round (same as before)
+        if (UIManager.Instance != null)
+            UIManager.Instance.UpdateStageUI(currentStage, roundInStage, roundsPerStage);
+
         EnemyWaveManager.Instance.SpawnEnemyWave(currentStage);
 
-        // reset the combat flag in GameManager so player can start next combat manually
         if (GameManager.Instance != null)
             GameManager.Instance.ResetCombatFlag();
     }

@@ -1,6 +1,5 @@
 ﻿using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 public class UIManager : MonoBehaviour
@@ -8,7 +7,10 @@ public class UIManager : MonoBehaviour
     public static UIManager Instance;
 
     [Header("Lives UI")]
-    public TMP_Text livesText; // drag a Text or TMP_Text here
+    public TMP_Text livesText; // drag here in inspector
+
+    [Header("Stage UI")]
+    public TMP_Text stageText; // drag another TMP text here for Stage/Round
 
     [Header("Game Over UI")]
     public GameObject gameOverPanel; // panel with "Game Over" + Retry button
@@ -26,6 +28,12 @@ public class UIManager : MonoBehaviour
     {
         if (livesText != null)
             livesText.text = $"{lives}";
+    }
+
+    public void UpdateStageUI(int stage, int round, int roundsPerStage)
+    {
+        if (stageText != null)
+            stageText.text = $"Stage {stage} - Round {round}/{roundsPerStage}";
     }
 
     public void ShowGameOver()
