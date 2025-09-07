@@ -1,4 +1,4 @@
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -21,8 +21,7 @@ public struct Face
 
 [RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(MeshRenderer))]
-[RequireComponent (typeof(MeshCollider))]
-
+[RequireComponent(typeof(MeshCollider))]
 public class HexRenderer : MonoBehaviour
 {
     private Mesh m_mesh;
@@ -39,8 +38,8 @@ public class HexRenderer : MonoBehaviour
     public float outerSize;
     public float height;
     public bool isFlatTopped;
-    [SerializeField]
-    private bool isSelected = false;
+    [SerializeField] private bool isSelected = false;
+
     private int hexGridLayer;
 
     private void Awake()
@@ -49,61 +48,49 @@ public class HexRenderer : MonoBehaviour
         m_renderer = GetComponent<MeshRenderer>();
         m_collider = GetComponent<MeshCollider>();
 
-        m_mesh = new Mesh();
-        m_mesh.name = "Hex";
-
+        m_mesh = new Mesh { name = "Hex" };
         m_filter.mesh = m_mesh;
         m_renderer.material = idleMaterial;
 
         m_collider.sharedMesh = m_mesh;
         m_collider.convex = true;
+        m_collider.isTrigger = true; // ✅ make the hex collider trigger-only
 
         hexGridLayer = LayerMask.NameToLayer("HexGrid");
         gameObject.layer = hexGridLayer;
-
-
-
-
     }
 
     private void Update()
     {
         DrawMesh();
-        if (isSelected) { m_renderer.material = selectedMaterial; }
-        else { m_renderer.material = idleMaterial;}
+        m_renderer.material = isSelected ? selectedMaterial : idleMaterial;
     }
-
 
     public void DrawMesh()
     {
         DrawFaces();
         CombineFaces();
     }
-    
+
     private void DrawFaces()
     {
         m_faces = new List<Face>();
 
-        //Top faces
+        // Top faces
         for (int point = 0; point < 6; point++)
-        {
             m_faces.Add(CreateFace(innerSize, outerSize, height / 2f, height / 2f, point));
-        }
-        //Bottom Faces
+
+        // Bottom Faces
         for (int point = 0; point < 6; point++)
-        {
             m_faces.Add(CreateFace(innerSize, outerSize, -height / 2f, -height / 2f, point, true));
-        }
-        //outer faces
-        for (int point = 0;point < 6; point++)
-        {
+
+        // Outer faces
+        for (int point = 0; point < 6; point++)
             m_faces.Add(CreateFace(outerSize, outerSize, height / 2f, -height / 2f, point, true));
-        }
-        //Inner faces
-        for (int point = 0;point < 6; point++)
-        {
+
+        // Inner faces
+        for (int point = 0; point < 6; point++)
             m_faces.Add(CreateFace(innerSize, innerSize, height / 2f, -height / 2f, point, false));
-        }
     }
 
     private void CombineFaces()
@@ -114,23 +101,20 @@ public class HexRenderer : MonoBehaviour
 
         for (int i = 0; i < m_faces.Count; i++)
         {
-            //Add the vertices
             vertices.AddRange(m_faces[i].vertices);
             uvs.AddRange(m_faces[i].uvs);
 
-            //Offset the triangles
-            int offset = (4 * i);
+            int offset = 4 * i;
             foreach (int triangle in m_faces[i].triangles)
-            {
                 tris.Add(triangle + offset);
-            }
         }
 
+        m_mesh.Clear();
         m_mesh.vertices = vertices.ToArray();
         m_mesh.triangles = tris.ToArray();
         m_mesh.uv = uvs.ToArray();
         m_mesh.RecalculateNormals();
-    }  
+    }
 
     private Face CreateFace(float innerRad, float outerRad, float heightA, float heightB, int point, bool reverse = false)
     {
@@ -139,39 +123,39 @@ public class HexRenderer : MonoBehaviour
         Vector3 pointC = GetPoint(outerRad, heightA, (point < 5) ? point + 1 : 0);
         Vector3 pointD = GetPoint(outerRad, heightA, point);
 
-        List<Vector3> vertices = new List<Vector3>() { pointA, pointB, pointC, pointD };
-        List<int> triangles = new List<int>() { 0, 1, 2, 2, 3, 0 };
-        List<Vector2> uvs = new List<Vector2>() { new Vector2(0, 0), new Vector2(1, 0), new Vector2(1, 1), new Vector2(0, 1) };
-        if (reverse)
-        {
-            vertices.Reverse();
-        }
+        List<Vector3> vertices = new() { pointA, pointB, pointC, pointD };
+        List<int> triangles = new() { 0, 1, 2, 2, 3, 0 };
+        List<Vector2> uvs = new() { new Vector2(0, 0), new Vector2(1, 0), new Vector2(1, 1), new Vector2(0, 1) };
+
+        if (reverse) vertices.Reverse();
 
         return new Face(vertices, triangles, uvs);
     }
 
     protected Vector3 GetPoint(float size, float height, int index)
     {
-        float angle_deg = isFlatTopped ? 60 * index: 60*index-30;
+        float angle_deg = isFlatTopped ? 60 * index : 60 * index - 30;
         float angle_rad = Mathf.PI / 180f * angle_deg;
-        return new Vector3((size * Mathf.Cos(angle_rad)), height, size * Mathf.Sin(angle_rad));
+        return new Vector3(size * Mathf.Cos(angle_rad), height, size * Mathf.Sin(angle_rad));
     }
 
-
-    private void OnCollisionEnter(Collision collision)
+    // ✅ Trigger-based overlap detection
+    private void OnTriggerEnter(Collider other)
     {
-        if (collision.gameObject.CompareTag("Unit"))
+        if (other.CompareTag("Unit"))
         {
             isSelected = true;
-            Debug.Log("woah");
+            Debug.Log($"Unit entered hex {gameObject.name}");
         }
     }
 
-    private void OnCollisionExit(Collision collision)
+    private void OnTriggerExit(Collider other)
     {
-        if (collision.gameObject.CompareTag("Unit"))
+        if (other.CompareTag("Unit"))
         {
             isSelected = false;
+            Debug.Log($"Unit left hex {gameObject.name}");
         }
     }
 }
+

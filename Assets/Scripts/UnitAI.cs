@@ -215,21 +215,18 @@ public class UnitAI : MonoBehaviour
         Rigidbody rb = GetComponent<Rigidbody>();
         if (rb != null)
         {
-            // ✅ Allow physics but constrain movement to script control
-            rb.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionY;
+            rb.isKinematic = true;                 // ✅ don’t let physics move the unit
             rb.useGravity = false;
-            rb.drag = 10f; // High drag to prevent sliding
-            rb.mass = 1f;
+            rb.constraints = RigidbodyConstraints.FreezeAll; // fully under AI control
         }
 
-        // ✅ Set up collision detection
-        BoxCollider col = GetComponent<BoxCollider>();
+        Collider col = GetComponent<Collider>();
         if (col != null)
         {
-            col.isTrigger = false; // Physical collision
-            col.size = new Vector3(0.8f, col.size.y, 0.8f); // Slightly smaller than hex
+            col.isTrigger = true;  // ✅ no pushing, only detection
         }
     }
+
     private IEnumerator MoveProjectile(GameObject proj, UnitAI target)
     {
         while (proj != null && target != null && target.isAlive)
