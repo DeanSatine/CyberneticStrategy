@@ -290,6 +290,10 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f5b788c727c09de4480bdb92c860e59f,
         type: 3}
       insertIndex: -1
+      addedObject: {fileID: 8965447738997646369}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f5b788c727c09de4480bdb92c860e59f,
+        type: 3}
+      insertIndex: -1
       addedObject: {fileID: 4186335470939740577}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f5b788c727c09de4480bdb92c860e59f,
         type: 3}
@@ -299,10 +303,6 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 4583670255459424481}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f5b788c727c09de4480bdb92c860e59f,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 8965447738997646369}
   m_SourcePrefab: {fileID: 100100000, guid: f5b788c727c09de4480bdb92c860e59f, type: 3}
 --- !u!1 &397472728585410053 stripped
 GameObject:
@@ -358,8 +358,9 @@ MonoBehaviour:
   canAttack: 1
   isAlive: 1
   isCastingAbility: 0
-  projectilePrefab: {fileID: 0}
-  firePoint: {fileID: 0}
+  projectilePrefab: {fileID: 6448400655894711313, guid: 4fbb8e76f988d0a4a914d5196773c22f,
+    type: 3}
+  firePoint: {fileID: 6124733470185794249}
   projectileSpeed: 15
   unitUIPrefab: {fileID: 6939982145822855837, guid: 63931d92c48ef65418d45ec02069a522,
     type: 3}
@@ -392,9 +393,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damagePerStar:
-  - 40
-  - 60
-  - 80
+  - 200
+  - 250
+  - 350
   range: 4
   splashRadius: 3
   attackSpeedGain: 0.3
@@ -403,6 +404,38 @@ MonoBehaviour:
   impactVFX: {fileID: 689667626583958020, guid: 1336648bc1d8baf46a4515860950c9d4,
     type: 3}
   splashVFX: {fileID: 0}
+--- !u!114 &8965447738997646369
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 397472728585410053}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7771fb580d6217a4da3ee7324885b101, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  vfxConfig:
+    autoAttackProjectile: {fileID: 6448400655894711313, guid: 4fbb8e76f988d0a4a914d5196773c22f,
+      type: 3}
+    autoAttackMuzzleFlash: {fileID: 0}
+    autoAttackHitEffect: {fileID: 2944396702758532163, guid: e190bf97c041e58448af6b043116cba0,
+      type: 3}
+    abilityEffect: {fileID: 0}
+    abilityProjectile: {fileID: 6341886006476312110, guid: fe79c4833a7dc704393504b666003108,
+      type: 3}
+    abilityImpactEffect: {fileID: 1329845292236604, guid: 9bba9cf244c53c5439505dfc96fdd11c,
+      type: 3}
+    autoAttackSound: {fileID: 0}
+    abilitySound: {fileID: 0}
+    volume: 0.7
+  deathVFX: {fileID: 0}
+  levelUpVFX: {fileID: 0}
+  damageNumbersPrefab: {fileID: 0}
+  firePoint: {fileID: 6124733470185794249}
+  chestPoint: {fileID: 0}
+  weaponPoint: {fileID: 6124733470185794249}
 --- !u!114 &4186335470939740577
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -464,38 +497,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 36
   m_CollisionDetection: 0
---- !u!114 &8965447738997646369
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 397472728585410053}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7771fb580d6217a4da3ee7324885b101, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  vfxConfig:
-    autoAttackProjectile: {fileID: 6448400655894711313, guid: 4fbb8e76f988d0a4a914d5196773c22f,
-      type: 3}
-    autoAttackMuzzleFlash: {fileID: 0}
-    autoAttackHitEffect: {fileID: 2944396702758532163, guid: e190bf97c041e58448af6b043116cba0,
-      type: 3}
-    abilityEffect: {fileID: 689667626583958020, guid: 1336648bc1d8baf46a4515860950c9d4,
-      type: 3}
-    abilityProjectile: {fileID: 6341886006476312110, guid: fe79c4833a7dc704393504b666003108,
-      type: 3}
-    abilityImpactEffect: {fileID: 0}
-    autoAttackSound: {fileID: 0}
-    abilitySound: {fileID: 0}
-    volume: 0.7
-  deathVFX: {fileID: 0}
-  levelUpVFX: {fileID: 0}
-  damageNumbersPrefab: {fileID: 0}
-  firePoint: {fileID: 6124733470185794249}
-  chestPoint: {fileID: 0}
-  weaponPoint: {fileID: 6124733470185794249}
 --- !u!4 &1067295918317718719 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: f5b788c727c09de4480bdb92c860e59f,

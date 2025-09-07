@@ -34,74 +34,59 @@ public class ManaDriveAbility : MonoBehaviour, IUnitAbility
         // ✅ Find largest group of enemies for bomb targeting
         Vector3 targetPosition = FindLargestEnemyGroup();
 
-        // ✅ Call VFX system for massive bomb
-        if (vfxManager != null)
-            vfxManager.PlayManaDriveMassiveBomb(targetPosition);
+        // ✅ Play just the cast animation/effect (no duplicate projectile)
+        if (castVFX != null)
+        {
+            GameObject castEffect = Instantiate(castVFX, transform.position + Vector3.up * 1.5f, Quaternion.identity);
+            Destroy(castEffect, 2f);
+        }
 
-        // ✅ Fire bomb projectile
-        StartCoroutine(FireMassiveBomb(targetPosition, 1.0f)); // Full damage
+        // ✅ Fire bomb projectile (this handles both arc + damage + explosion VFX)
+        StartCoroutine(FireMassiveBomb(targetPosition, 1.0f));
     }
+
 
     private IEnumerator FireMassiveBomb(Vector3 targetPosition, float damageMultiplier)
     {
-        if (unitAI.projectilePrefab == null) yield break;
+        // ✅ Use VFX ability projectile instead of UnitAI.projectilePrefab
+        GameObject bombPrefab = vfxManager != null ? vfxManager.vfxConfig.abilityProjectile : null;
 
-        Vector3 spawnPos = unitAI.firePoint != null ?
-            unitAI.firePoint.position :
-            transform.position + Vector3.up * 1.5f;
+        if (bombPrefab == null)
+        {
+            Debug.LogError($"❌ No bomb prefab assigned for ManaDrive ({unitAI.unitName})!");
+            ExplodeBomb(targetPosition, damageMultiplier);
+            yield break;
+        }
 
-        GameObject bombPrefab = unitAI.projectilePrefab;
+        // ✅ Spawn bomb above ManaDrive
+        Vector3 spawnPos = transform.position + Vector3.up * 8f;
         GameObject bomb = Instantiate(bombPrefab, spawnPos, Quaternion.identity);
-
-        // ✅ Scale bomb to look bigger
         bomb.transform.localScale *= 2f;
 
-        // ✅ Arc trajectory parameters
-        float flightTime = 2f; // Total time for bomb to reach target
-        float maxHeight = 7f; // How high the arc goes
-        float elapsed = 0f;
+        float fallSpeed = 15f;
 
-        Vector3 startPos = spawnPos;
-        Vector3 endPos = targetPosition;
-
-        while (bomb != null && elapsed < flightTime)
+        // ✅ Drop bomb downwards toward target
+        while (bomb != null && bomb.transform.position.y > 0.6f)
         {
-            elapsed += Time.deltaTime;
-            float progress = elapsed / flightTime; // 0 to 1
+            Vector3 direction = (targetPosition - bomb.transform.position);
+            direction.y = -1f; // force downward
+            direction.Normalize();
 
-            // ✅ Calculate arc position
-            Vector3 currentPos = Vector3.Lerp(startPos, endPos, progress);
-
-            // ✅ Add parabolic height (goes up then down)
-            float height = maxHeight * 4f * progress * (1f - progress); // Parabolic curve
-            currentPos.y += height;
-
-            bomb.transform.position = currentPos;
-
-            // ✅ Rotate bomb to face movement direction
-            if (progress < 0.99f) // Don't rotate on the very last frame
-            {
-                Vector3 nextPos = Vector3.Lerp(startPos, endPos, (elapsed + Time.deltaTime) / flightTime);
-                nextPos.y += maxHeight * 4f * ((elapsed + Time.deltaTime) / flightTime) * (1f - ((elapsed + Time.deltaTime) / flightTime));
-
-                Vector3 direction = (nextPos - currentPos).normalized;
-                if (direction.magnitude > 0.1f)
-                {
-                    bomb.transform.rotation = Quaternion.LookRotation(direction);
-                }
-            }
+            bomb.transform.position += direction * fallSpeed * Time.deltaTime;
 
             yield return null;
         }
 
-        // ✅ Bomb reaches target and explodes
         if (bomb != null)
         {
-            bomb.transform.position = targetPosition; // Ensure exact landing
+            bomb.transform.position = targetPosition + Vector3.up * 0.5f;
             ExplodeBomb(targetPosition, damageMultiplier);
             Destroy(bomb);
         }
     }
+
+
+
 
 
     // ✅ Handle bomb explosion and damage
@@ -118,23 +103,33 @@ public class ManaDriveAbility : MonoBehaviour, IUnitAbility
             Destroy(explosion, 3f);
         }
 
-        // ✅ Damage all enemies in splash radius
-        Collider[] hits = Physics.OverlapSphere(explosionPos, splashRadius);
-        foreach (Collider hit in hits)
+        // ✅ Optional splash indicator VFX
+        if (splashVFX != null)
         {
-            UnitAI enemy = hit.GetComponent<UnitAI>();
-            if (enemy != null && enemy.teamID != unitAI.teamID && enemy.isAlive)
+            GameObject splash = Instantiate(splashVFX, explosionPos, Quaternion.identity);
+            splash.transform.localScale = Vector3.one * splashRadius * 2f; // scale to match radius
+            Destroy(splash, 2f);
+        }
+
+        // ✅ Damage all enemies in splash radius (distance check instead of relying on colliders)
+        UnitAI[] allUnits = FindObjectsOfType<UnitAI>();
+        foreach (UnitAI enemy in allUnits)
+        {
+            if (enemy != null && enemy.isAlive && enemy.team != unitAI.team)
             {
-                float healthBeforeHit = enemy.currentHealth;
-                enemy.TakeDamage(damage);
-
-                // ✅ Check if this killed the target
-                if (healthBeforeHit > 0 && enemy.currentHealth <= 0)
+                float distance = Vector3.Distance(enemy.transform.position, explosionPos);
+                if (distance <= splashRadius)
                 {
-                    killedTarget = true;
-                }
+                    float healthBeforeHit = enemy.currentHealth;
+                    enemy.TakeDamage(damage);
 
-                Debug.Log($"{unitAI.unitName} bomb hit {enemy.unitName} for {damage} damage!");
+                    if (healthBeforeHit > 0 && enemy.currentHealth <= 0)
+                    {
+                        killedTarget = true;
+                    }
+
+                    Debug.Log($"{unitAI.unitName} bomb hit {enemy.unitName} for {damage} damage at distance {distance:F1}!");
+                }
             }
         }
 
@@ -153,9 +148,10 @@ public class ManaDriveAbility : MonoBehaviour, IUnitAbility
             }
         }
 
-        // ✅ Reset mana
+        // ✅ Reset mana after cast
         unitAI.currentMana = 0;
     }
+
 
     // ✅ Find position with most enemies clustered together
     private Vector3 FindLargestEnemyGroup()
