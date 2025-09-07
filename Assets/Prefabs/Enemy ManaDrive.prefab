@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2349589256075078628
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1538876215593414790}
+  m_Layer: 9
+  m_Name: Chest
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1538876215593414790
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2349589256075078628}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.243, z: 0.019}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5113662417154957240}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &668066043330046804
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -235,6 +266,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: -3480699329000672020, guid: f5b788c727c09de4480bdb92c860e59f,
+        type: 3}
+      insertIndex: 0
+      addedObject: {fileID: 1538876215593414790}
     - targetCorrespondingSourceObject: {fileID: 1852576806548013000, guid: f5b788c727c09de4480bdb92c860e59f,
         type: 3}
       insertIndex: -1
@@ -326,6 +361,13 @@ MonoBehaviour:
     type: 3}
   animator: {fileID: 0}
   currentTarget: {fileID: 0}
+  unitRadius: 0.6
+  unitLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  pathRecalculateTime: 2
+  stuckThreshold: 0.1
+  maxPathfindingAttempts: 5
   teamID: 0
   currentTile: {fileID: 0}
   movementSpeed: 3
@@ -351,6 +393,8 @@ MonoBehaviour:
   - 80
   range: 4
   splashRadius: 2
+  attackSpeedGain: 0.3
+  recursiveDamageReduction: 0.25
   castVFX: {fileID: 0}
   impactVFX: {fileID: 0}
   splashVFX: {fileID: 0}
@@ -418,6 +462,12 @@ Rigidbody:
 --- !u!4 &1220719919538885788 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1852576806548013000, guid: f5b788c727c09de4480bdb92c860e59f,
+    type: 3}
+  m_PrefabInstance: {fileID: 668066043330046804}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &5113662417154957240 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -3480699329000672020, guid: f5b788c727c09de4480bdb92c860e59f,
     type: 3}
   m_PrefabInstance: {fileID: 668066043330046804}
   m_PrefabAsset: {fileID: 0}
@@ -513,6 +563,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: robowand
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: f94f2697780307c449adf22209d1a9c3,
+        type: 3}
+      propertyPath: m_Layer
+      value: 9
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

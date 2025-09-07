@@ -51,12 +51,27 @@ public class UnitAI : MonoBehaviour
     [HideInInspector] public Animator animator;
     public Transform currentTarget;
 
+    [Header("Collision Settings")]
+    [SerializeField] private float unitRadius = 0.6f; // Detection radius
+    [SerializeField] private LayerMask unitLayerMask = -1; // What layers to check for units
+
+    [Header("Pathfinding")]
+    [SerializeField] private float pathRecalculateTime = 2f; // How often to recalculate if stuck
+    [SerializeField] private float stuckThreshold = 0.1f; // How little movement means "stuck"
+    [SerializeField] private int maxPathfindingAttempts = 5; // Max alternative paths to try
+                                                             // Pathfinding state tracking
+    private Vector3 lastPosition;
+    private float timeAtLastPosition;
+    private float lastPathRecalculation;
+    private bool isUsingAlternativePath = false;
+
     [Header("Team Settings")]
     public int teamID = 0;   // 0 = Player team, 1 = Enemy team (expand later)
     public static event System.Action<UnitAI> OnAnyUnitDeath;
     public event System.Action<UnitState> OnStateChanged;
     private UnitState _currentState = UnitState.Bench;
     [HideInInspector] public HexTile currentTile;
+
     [Header("Movement")]
     [SerializeField] private float movementSpeed = 3f;
     [SerializeField] private float stoppingDistance = 1.4f; // How close to get before attacking
@@ -488,58 +503,6 @@ public class UnitAI : MonoBehaviour
         }
         return nearest;
     }
-    public UnitAI GetCurrentTarget()
-    {
-        return currentTarget != null ? currentTarget.GetComponent<UnitAI>() : null;
-    }
-
-    private void MoveTowards(Vector3 targetPos)
-    {
-        if (currentTile == null) return;
-
-        // Calculate ideal destination (near target, not necessarily on grid)
-        Vector3 idealDestination = CalculateIdealDestination(targetPos);
-
-        // Only recalculate path if destination changed significantly
-        if (Vector3.Distance(idealDestination, currentDestination) > 0.5f)
-        {
-            currentDestination = idealDestination;
-            hasReachedDestination = false;
-        }
-
-        if (!hasReachedDestination)
-        {
-            // Smooth movement toward destination with obstacle avoidance
-            Vector3 moveDirection = CalculateMovementDirection(currentDestination);
-
-            if (moveDirection != Vector3.zero)
-            {
-                // Move smoothly in world space
-                Vector3 newPosition = transform.position + moveDirection * movementSpeed * Time.deltaTime;
-                transform.position = newPosition;
-
-                // Face movement direction
-                FaceDirection(moveDirection);
-
-                // Update which hex tile we're closest to (for game logic)
-                UpdateCurrentTile();
-
-                if (animator) animator.SetBool("IsRunning", true);
-            }
-
-            // Check if we've reached our destination
-            if (Vector3.Distance(transform.position, currentDestination) < 0.3f)
-            {
-                hasReachedDestination = true;
-                if (animator) animator.SetBool("IsRunning", false);
-            }
-        }
-        else
-        {
-            if (animator) animator.SetBool("IsRunning", false);
-        }
-    }
-
     private Vector3 CalculateIdealDestination(Vector3 targetPos)
     {
         if (currentTarget == null) return targetPos;
@@ -556,6 +519,10 @@ public class UnitAI : MonoBehaviour
             Vector3 dirToTarget = (targetPos - transform.position).normalized;
             return targetPos - dirToTarget * (attackRange * 0.8f);
         }
+    }
+    public UnitAI GetCurrentTarget()
+    {
+        return currentTarget != null ? currentTarget.GetComponent<UnitAI>() : null;
     }
 
     private Vector3 CalculateMovementDirection(Vector3 destination)
@@ -574,7 +541,7 @@ public class UnitAI : MonoBehaviour
         Vector3 avoidanceVector = Vector3.zero;
 
         // Find nearby units to avoid
-        Collider[] nearbyUnits = Physics.OverlapSphere(transform.position, obstacleAvoidance, LayerMask.GetMask("Default"));
+        Collider[] nearbyUnits = Physics.OverlapSphere(transform.position, obstacleAvoidance, unitLayerMask);
 
         foreach (var unit in nearbyUnits)
         {
@@ -600,6 +567,16 @@ public class UnitAI : MonoBehaviour
         return avoidanceVector.normalized;
     }
 
+    private void FaceDirection(Vector3 direction)
+    {
+        if (direction.sqrMagnitude > 0.001f)
+        {
+            direction.y = 0f; // Keep upright
+            Quaternion lookRotation = Quaternion.LookRotation(direction);
+            transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 10f);
+        }
+    }
+
     private void UpdateCurrentTile()
     {
         // Find the closest hex tile for game logic purposes
@@ -621,13 +598,122 @@ public class UnitAI : MonoBehaviour
         }
     }
 
-    private void FaceDirection(Vector3 direction)
+
+    private void MoveTowards(Vector3 targetPos)
     {
-        if (direction.sqrMagnitude > 0.001f)
+        if (currentTile == null) return;
+
+        // Calculate ideal destination (near target, not necessarily on grid)
+        Vector3 idealDestination = CalculateIdealDestination(targetPos);
+
+        // Only recalculate path if destination changed significantly
+        if (Vector3.Distance(idealDestination, currentDestination) > 0.5f)
         {
-            direction.y = 0f; // Keep upright
-            Quaternion lookRotation = Quaternion.LookRotation(direction);
-            transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 10f);
+            currentDestination = idealDestination;
+            hasReachedDestination = false;
         }
+
+        if (!hasReachedDestination)
+        {
+            // Smooth movement toward destination with obstacle avoidance
+            Vector3 moveDirection = CalculateMovementDirection(currentDestination);
+
+            if (moveDirection != Vector3.zero)
+            {
+                // ✅ Check for collisions before moving
+                Vector3 newPosition = transform.position + moveDirection * movementSpeed * Time.deltaTime;
+
+                // ✅ Simple collision check - don't move if too close to other units
+                bool canMove = true;
+                Collider[] nearbyUnits = Physics.OverlapSphere(newPosition, unitRadius, unitLayerMask);
+
+                foreach (var col in nearbyUnits)
+                {
+                    UnitAI otherUnit = col.GetComponent<UnitAI>();
+                    if (otherUnit != null && otherUnit != this && otherUnit.isAlive)
+                    {
+                        // Don't move if it would put us too close to another unit
+                        if (currentTarget == null || col.transform != currentTarget)
+                        {
+                            canMove = false;
+                            break;
+                        }
+                    }
+                }
+
+                if (canMove)
+                {
+                    // Move smoothly in world space
+                    transform.position = newPosition;
+
+                    // Face movement direction
+                    FaceDirection(moveDirection);
+
+                    // Update which hex tile we're closest to (for game logic)
+                    UpdateCurrentTile();
+
+                    if (animator) animator.SetBool("IsRunning", true);
+                }
+                else
+                {
+                    // ✅ Can't move directly - try alternative direction
+                    Vector3 alternativeDir = FindAlternativeDirection(moveDirection);
+                    if (alternativeDir != Vector3.zero)
+                    {
+                        Vector3 altPosition = transform.position + alternativeDir * movementSpeed * Time.deltaTime;
+                        transform.position = altPosition;
+                        FaceDirection(alternativeDir);
+                        UpdateCurrentTile();
+                        if (animator) animator.SetBool("IsRunning", true);
+                    }
+                    else
+                    {
+                        if (animator) animator.SetBool("IsRunning", false);
+                    }
+                }
+            }
+
+            // Check if we've reached our destination
+            if (Vector3.Distance(transform.position, currentDestination) < 0.3f)
+            {
+                hasReachedDestination = true;
+                if (animator) animator.SetBool("IsRunning", false);
+            }
+        }
+        else
+        {
+            if (animator) animator.SetBool("IsRunning", false);
+        }
+    }
+
+    // ✅ Helper method for alternative movement
+    private Vector3 FindAlternativeDirection(Vector3 blockedDirection)
+    {
+        // Try perpendicular directions
+        Vector3[] alternatives = {
+        Vector3.Cross(blockedDirection, Vector3.up).normalized,
+        Vector3.Cross(Vector3.up, blockedDirection).normalized
+    };
+
+        foreach (var dir in alternatives)
+        {
+            Vector3 testPos = transform.position + dir * unitRadius;
+            Collider[] check = Physics.OverlapSphere(testPos, unitRadius * 0.8f, unitLayerMask);
+
+            bool isClear = true;
+            foreach (var col in check)
+            {
+                UnitAI otherUnit = col.GetComponent<UnitAI>();
+                if (otherUnit != null && otherUnit != this && otherUnit.isAlive)
+                {
+                    isClear = false;
+                    break;
+                }
+            }
+
+            if (isClear) return dir;
+        }
+
+        return Vector3.zero;
     }
 }

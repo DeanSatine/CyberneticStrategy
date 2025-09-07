@@ -260,6 +260,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 542645363885373531}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 503884b0a8b3f7548acbd486859d7efb,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 9145623929273288531}
   m_SourcePrefab: {fileID: 100100000, guid: 503884b0a8b3f7548acbd486859d7efb, type: 3}
 --- !u!1 &27990592220160999 stripped
 GameObject:
@@ -307,7 +311,7 @@ MonoBehaviour:
   attackDamage: 60
   attackSpeed: 1
   armor: 40
-  attackRange: 1.8
+  attackRange: 2
   mana: 0
   maxMana: 30
   currentMana: 0
@@ -323,6 +327,13 @@ MonoBehaviour:
     type: 3}
   animator: {fileID: 0}
   currentTarget: {fileID: 0}
+  unitRadius: 0.6
+  unitLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  pathRecalculateTime: 2
+  stuckThreshold: 0.1
+  maxPathfindingAttempts: 5
   teamID: 0
   currentTile: {fileID: 0}
   movementSpeed: 3
@@ -414,3 +425,32 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isDragging: 0
+--- !u!114 &9145623929273288531
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 27990592220160999}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7771fb580d6217a4da3ee7324885b101, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  vfxConfig:
+    autoAttackProjectile: {fileID: 0}
+    autoAttackMuzzleFlash: {fileID: 0}
+    autoAttackHitEffect: {fileID: 7226583673155636401, guid: a2ab56839e1c9504ea9d141e95d0b16b,
+      type: 3}
+    abilityEffect: {fileID: 0}
+    abilityProjectile: {fileID: 0}
+    abilityImpactEffect: {fileID: 0}
+    autoAttackSound: {fileID: 0}
+    abilitySound: {fileID: 0}
+    volume: 0.7
+  deathVFX: {fileID: 0}
+  levelUpVFX: {fileID: 0}
+  damageNumbersPrefab: {fileID: 0}
+  firePoint: {fileID: 0}
+  chestPoint: {fileID: 0}
+  weaponPoint: {fileID: 0}

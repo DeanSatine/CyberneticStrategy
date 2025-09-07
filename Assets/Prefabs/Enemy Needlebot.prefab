@@ -332,6 +332,13 @@ MonoBehaviour:
     type: 3}
   animator: {fileID: 0}
   currentTarget: {fileID: 0}
+  unitRadius: 0.6
+  unitLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  pathRecalculateTime: 2
+  stuckThreshold: 0.1
+  maxPathfindingAttempts: 5
   teamID: 0
   currentTile: {fileID: 0}
   movementSpeed: 3
