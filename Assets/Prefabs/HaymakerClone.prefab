@@ -454,6 +454,7 @@ MonoBehaviour:
   obstacleAvoidance: 2
   moveOffsetRange: 0.2
   deathAnimLength: 1.2
+  startingTile: {fileID: 0}
 --- !u!65 &1499806241345368472
 BoxCollider:
   m_ObjectHideFlags: 0
