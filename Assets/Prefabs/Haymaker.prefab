@@ -358,6 +358,10 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 4091e2ca91237fd4cb9e277c8685a4e6,
         type: 3}
       insertIndex: -1
+      addedObject: {fileID: 2716781428770711795}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 4091e2ca91237fd4cb9e277c8685a4e6,
+        type: 3}
+      insertIndex: -1
       addedObject: {fileID: 1499806241345368472}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 4091e2ca91237fd4cb9e277c8685a4e6,
         type: 3}
@@ -459,6 +463,7 @@ MonoBehaviour:
   obstacleAvoidance: 2
   moveOffsetRange: 0.2
   deathAnimLength: 1.2
+  startingTile: {fileID: 0}
 --- !u!114 &2341522245247770583
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -481,6 +486,37 @@ MonoBehaviour:
   - 400
   clonePrefab: {fileID: 3571069488247416756, guid: e500d4b71aabe274b88679a3f9566bed,
     type: 3}
+--- !u!114 &2716781428770711795
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3571069488247416756}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7771fb580d6217a4da3ee7324885b101, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  vfxConfig:
+    autoAttackProjectile: {fileID: 8548050680436672203, guid: 535ef7817c5bc78489aa45e25295e778,
+      type: 3}
+    autoAttackMuzzleFlash: {fileID: 0}
+    autoAttackHitEffect: {fileID: 2965222256817593503, guid: a164e676dbbd6e54587237e619372c98,
+      type: 3}
+    abilityEffect: {fileID: 1171201465392465800, guid: 4aa9f30a28a77224ba84b2a2c334c71b,
+      type: 3}
+    abilityProjectile: {fileID: 0}
+    abilityImpactEffect: {fileID: 0}
+    autoAttackSound: {fileID: 0}
+    abilitySound: {fileID: 0}
+    volume: 0.7
+  deathVFX: {fileID: 0}
+  levelUpVFX: {fileID: 0}
+  damageNumbersPrefab: {fileID: 0}
+  firePoint: {fileID: 0}
+  chestPoint: {fileID: 0}
+  weaponPoint: {fileID: 0}
 --- !u!65 &1499806241345368472
 BoxCollider:
   m_ObjectHideFlags: 0
