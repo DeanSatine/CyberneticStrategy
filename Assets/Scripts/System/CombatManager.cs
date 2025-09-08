@@ -20,16 +20,20 @@ public class CombatManager : MonoBehaviour
 
         foreach (var unit in FindObjectsOfType<UnitAI>())
         {
-            if (unit.isAlive && unit.team == Team.Player && unit.currentState != UnitAI.UnitState.Bench)
-            {
-                // save where they were before combat
-                if (unit.currentTile != null)
-                    savedPlayerPositions[unit] = unit.currentTile;
+            // Skip dead units or units on bench
+            if (!unit.isAlive || unit.currentState == UnitAI.UnitState.Bench)
+                continue;
 
-                unit.SetState(UnitAI.UnitState.Combat);
-            }
+            // Save player positions before combat
+            if (unit.team == Team.Player && unit.currentTile != null)
+                savedPlayerPositions[unit] = unit.currentTile;
+
+            // ✅ Set ALL alive units (both player and enemy) to combat state
+            unit.SetState(UnitAI.UnitState.Combat);
+            Debug.Log($"✅ Set {unit.team} unit {unit.unitName} to Combat state");
         }
     }
+
 
     public Dictionary<UnitAI, HexTile> GetSavedPlayerPositions()
     {

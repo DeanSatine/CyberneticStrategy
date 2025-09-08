@@ -79,8 +79,6 @@ public class Draggable : MonoBehaviour
 
     private void SnapToClosestObject()
     {
-        TraitManager.Instance.EvaluateTraits(GameManager.Instance.playerUnits);
-
         Collider[] colliders = Physics.OverlapCapsule(
             transform.position - Vector3.up * 0.5f,
             transform.position + Vector3.up * 0.5f,
@@ -93,11 +91,9 @@ public class Draggable : MonoBehaviour
         {
             if (collider.gameObject == gameObject) continue;
 
-            // 🔑 Always search upwards to see if this collider belongs to a HexTile
             HexTile tile = collider.GetComponentInParent<HexTile>();
             if (tile == null) continue;
 
-            // ✅ Check if player can place on this tile (ownership + row restriction)
             if (unitAI.team == Team.Player && !CanPlayerPlaceOnTile(tile))
             {
                 continue; // Skip invalid tiles for player units
@@ -113,7 +109,6 @@ public class Draggable : MonoBehaviour
 
         if (targetTile != null)
         {
-            // Ask the tile to claim itself atomically
             if (!targetTile.TryClaim(unitAI))
             {
                 Debug.Log($"Tile {targetTile.name} already occupied. Placement rejected.");
@@ -121,7 +116,6 @@ public class Draggable : MonoBehaviour
                 return;
             }
 
-            // ✅ Free old tile first (important: do AFTER successful claim, so we don't lose both)
             if (unitAI.currentTile != null && unitAI.currentTile != targetTile)
             {
                 unitAI.currentTile.Free(unitAI);
@@ -145,6 +139,10 @@ public class Draggable : MonoBehaviour
                 GameManager.Instance.UnregisterUnit(unitAI);
             }
 
+            // ✅ NOW evaluate traits AFTER unit is properly placed and registered
+            TraitManager.Instance.EvaluateTraits(GameManager.Instance.playerUnits);
+            TraitManager.Instance.ApplyTraits(GameManager.Instance.playerUnits);
+
             Debug.Log($"✅ {unitAI.unitName} placed successfully at {targetTile.gridPosition}");
             return;
         }
@@ -153,6 +151,7 @@ public class Draggable : MonoBehaviour
         Debug.Log($"❌ No valid placement found for {unitAI.unitName}. Returning to original position.");
         transform.position = oldPosition;
     }
+
 
     private Vector3 GetMouseWorldPos()
     {
