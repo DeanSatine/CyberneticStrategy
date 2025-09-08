@@ -617,6 +617,10 @@ public class UnitAI : MonoBehaviour
 
     public void ResetAfterCombat()
     {
+        // ✅ RESTORE HEALTH AND MANA FOR NEW ROUND
+        currentHealth = maxHealth;
+        currentMana = 0f;
+
         // Stop all combat-related activity
         SetState(UnitState.BoardIdle);
 
@@ -631,7 +635,17 @@ public class UnitAI : MonoBehaviour
             animator.ResetTrigger("AttackTrigger");
             animator.ResetTrigger("AbilityTrigger");
         }
+
+        // ✅ UPDATE UI BARS TO SHOW FULL HEALTH/ZERO MANA
+        if (ui != null)
+        {
+            ui.UpdateHealth(currentHealth);
+            ui.UpdateMana(currentMana);
+        }
+
+        Debug.Log($"✅ {unitName} reset for new round - HP: {currentHealth}/{maxHealth}, Mana: {currentMana}/{maxMana}");
     }
+
     private void UpdateCurrentTile()
     {
         // Find the closest hex tile for game logic purposes
