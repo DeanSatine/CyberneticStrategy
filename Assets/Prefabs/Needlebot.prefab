@@ -392,6 +392,7 @@ MonoBehaviour:
   obstacleAvoidance: 2
   moveOffsetRange: 0.2
   deathAnimLength: 1.2
+  startingTile: {fileID: 0}
 --- !u!114 &5542962458511737843
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -420,9 +421,9 @@ MonoBehaviour:
   baseNeedleCount: 4
   needlesPerCast: 0
   damagePerStar:
-  - 100
+  - 75
+  - 125
   - 150
-  - 175
   startDelay: 0.25
   throwInterval: 0.1
   abilityDuration: 1.5

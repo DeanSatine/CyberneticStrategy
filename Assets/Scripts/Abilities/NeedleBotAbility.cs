@@ -6,7 +6,7 @@ using static UnitAI;
 public class NeedleBotAbility : MonoBehaviour, IUnitAbility
 {
     private UnitAI unitAI;
-    private CyberneticVFX vfxManager; // ✅ Add VFX reference
+    private CyberneticVFX vfxManager;
 
     [Header("Ability Stats")]
     public int baseNeedleCount = 4;
@@ -23,7 +23,7 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
     private void Awake()
     {
         unitAI = GetComponent<UnitAI>();
-        vfxManager = GetComponent<CyberneticVFX>(); // ✅ Get VFX component
+        vfxManager = GetComponent<CyberneticVFX>();
         needlesPerCast = baseNeedleCount;
     }
 
@@ -37,7 +37,6 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
         if (unitAI.animator != null)
             unitAI.animator.SetTrigger("AbilityTrigger");
 
-        // ✅ Call VFX system for rapid throw
         if (vfxManager != null)
             vfxManager.PlayNeedlebotRapidThrow();
 
@@ -48,7 +47,8 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
     {
         yield return new WaitForSeconds(startDelay);
 
-        List<UnitAI> targets = FindNearestEnemies(2);
+        // ✅ NEW TARGETING: Current target + closest enemy to that target
+        List<UnitAI> targets = FindSmartTargets();
         if (targets.Count == 0)
         {
             Debug.Log($"{unitAI.unitName} tried to cast but found no enemies!");
@@ -59,6 +59,8 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
         int needlesPerTarget = Mathf.Max(1, needlesPerCast / targets.Count);
         float damage = damagePerStar[Mathf.Clamp(unitAI.starLevel - 1, 0, damagePerStar.Length - 1)];
 
+        Debug.Log($"🎯 {unitAI.unitName} targeting: {string.Join(", ", targets.ConvertAll(t => t.unitName))}");
+
         // ✅ Fire needles as actual projectiles
         for (int needleIndex = 0; needleIndex < needlesPerCast; needleIndex++)
         {
@@ -66,7 +68,6 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
 
             if (target != null && target.isAlive)
             {
-                // ✅ Fire needle projectile using your existing projectile system
                 if (unitAI.projectilePrefab != null)
                 {
                     Vector3 spawnPos = unitAI.firePoint != null ?
@@ -77,7 +78,6 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
                 }
                 else
                 {
-                    // ✅ Fallback: instant damage
                     target.TakeDamage(damage + unitAI.attackDamage);
                 }
 
@@ -94,6 +94,99 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
 
         yield return new WaitForSeconds(0.2f);
         EndCast();
+    }
+
+    // ✅ NEW: Smart targeting system
+    private List<UnitAI> FindSmartTargets()
+    {
+        List<UnitAI> targets = new List<UnitAI>();
+
+        // ✅ Priority 1: Current target (the enemy this unit is actively attacking)
+        UnitAI currentTarget = unitAI.GetCurrentTarget();
+        if (currentTarget != null && currentTarget.isAlive && currentTarget.team != unitAI.team)
+        {
+            targets.Add(currentTarget);
+            Debug.Log($"🎯 Primary target: {currentTarget.unitName}");
+        }
+
+        // ✅ Priority 2: Find closest enemy to the current target
+        if (currentTarget != null)
+        {
+            UnitAI secondaryTarget = FindClosestEnemyTo(currentTarget);
+            if (secondaryTarget != null && secondaryTarget != currentTarget)
+            {
+                targets.Add(secondaryTarget);
+                Debug.Log($"🎯 Secondary target: {secondaryTarget.unitName} (closest to {currentTarget.unitName})");
+            }
+        }
+
+        // ✅ Fallback: If no current target, find 2 nearest enemies to Needlebot
+        if (targets.Count == 0)
+        {
+            Debug.Log("⚠️ No current target found, falling back to nearest enemies");
+            targets = FindNearestEnemies(2);
+        }
+        // ✅ If only 1 target found, add the nearest enemy to Needlebot as backup
+        else if (targets.Count == 1)
+        {
+            UnitAI nearestToSelf = FindNearestEnemyToSelf(targets[0]);
+            if (nearestToSelf != null)
+            {
+                targets.Add(nearestToSelf);
+                Debug.Log($"🎯 Added backup target: {nearestToSelf.unitName}");
+            }
+        }
+
+        return targets;
+    }
+
+    // ✅ Find the closest enemy to a specific unit
+    private UnitAI FindClosestEnemyTo(UnitAI referenceUnit)
+    {
+        if (referenceUnit == null) return null;
+
+        UnitAI[] allUnits = FindObjectsOfType<UnitAI>();
+        UnitAI closest = null;
+        float closestDistance = float.MaxValue;
+
+        foreach (var unit in allUnits)
+        {
+            // Skip if it's the reference unit, dead, or on same team as Needlebot
+            if (unit == referenceUnit || !unit.isAlive || unit.team == unitAI.team)
+                continue;
+
+            float distance = Vector3.Distance(referenceUnit.transform.position, unit.transform.position);
+            if (distance < closestDistance)
+            {
+                closestDistance = distance;
+                closest = unit;
+            }
+        }
+
+        return closest;
+    }
+
+    // ✅ Find nearest enemy to Needlebot (excluding specified unit)
+    private UnitAI FindNearestEnemyToSelf(UnitAI excludeUnit)
+    {
+        UnitAI[] allUnits = FindObjectsOfType<UnitAI>();
+        UnitAI closest = null;
+        float closestDistance = float.MaxValue;
+
+        foreach (var unit in allUnits)
+        {
+            if (unit == unitAI || unit == excludeUnit || !unit.isAlive || unit.team == unitAI.team)
+                continue;
+
+            float distance = Vector3.Distance(unitAI.transform.position, unit.transform.position);
+            if (distance < closestDistance)
+            {
+                closestDistance = distance;
+                closest = unit;
+            }
+        }
+
+        return closest;
     }
 
     // ✅ Fire individual needle projectile
@@ -114,10 +207,8 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
 
             if (Vector3.Distance(needle.transform.position, targetPos) < 0.3f)
             {
-                // ✅ Hit target
                 target.TakeDamage(damage + unitAI.attackDamage);
 
-                // ✅ Play hit effect
                 if (vfxManager != null && vfxManager.vfxConfig.autoAttackHitEffect != null)
                 {
                     GameObject hitEffect = Instantiate(vfxManager.vfxConfig.autoAttackHitEffect, targetPos, Quaternion.identity);
@@ -145,6 +236,7 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
         unitAI.canMove = true;
     }
 
+    // ✅ Keep original method as fallback
     private List<UnitAI> FindNearestEnemies(int count)
     {
         UnitAI[] allUnits = FindObjectsOfType<UnitAI>();
