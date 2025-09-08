@@ -56,9 +56,9 @@ public class UIManager : MonoBehaviour
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
-    // 👇 Update this to call StageManager instead of CombatManager directly
     public void OnFightButtonPressed()
     {
         StageManager.Instance.EnterCombatPhase();
     }
+
 }

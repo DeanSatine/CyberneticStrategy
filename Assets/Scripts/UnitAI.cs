@@ -85,6 +85,8 @@ public class UnitAI : MonoBehaviour
     private Vector3 moveOffset;
     private Vector3 currentDestination;
     private bool hasReachedDestination = true;
+    [HideInInspector] public HexTile startingTile; // where the unit was before combat
+
     public UnitState currentState
     {
         get => _currentState;
@@ -265,6 +267,10 @@ public class UnitAI : MonoBehaviour
         Vector3 p = tile.transform.position;
         p.y = transform.position.y;
         transform.position = p;
+
+        // ✅ remember this as "starting tile" for reset between rounds
+        if (currentState != UnitState.Combat)
+            startingTile = tile;
     }
 
     private void FaceTarget(Vector3 targetPos)
@@ -571,7 +577,61 @@ public class UnitAI : MonoBehaviour
             transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 10f);
         }
     }
+    public void FullResetToPrep(HexTile tile)
+    {
+        // restore stats
+        currentHealth = maxHealth;
+        currentMana = 0;
+        isAlive = true;
+        isCastingAbility = false;
 
+        // snap back to tile
+        AssignToTile(tile);
+
+        // reset state/animation
+        SetState(UnitState.BoardIdle);
+        currentTarget = null;
+
+        if (animator != null)
+        {
+            animator.SetBool("IsRunning", false);
+            animator.ResetTrigger("AttackTrigger");
+            animator.ResetTrigger("AbilityTrigger");
+        }
+
+        // reset UI bars
+        if (ui != null)
+        {
+            ui.UpdateHealth(currentHealth);
+            ui.UpdateMana(currentMana);
+            ui.gameObject.SetActive(true);
+        }
+
+        // re-enable this script
+        this.enabled = true;
+
+        // re-enable collider
+        Collider col = GetComponent<Collider>();
+        if (col != null) col.enabled = true;
+    }
+
+    public void ResetAfterCombat()
+    {
+        // Stop all combat-related activity
+        SetState(UnitState.BoardIdle);
+
+        currentTarget = null;
+        attackCooldown = 0f;
+        isCastingAbility = false;
+
+        // Reset animator
+        if (animator != null)
+        {
+            animator.SetBool("IsRunning", false);
+            animator.ResetTrigger("AttackTrigger");
+            animator.ResetTrigger("AbilityTrigger");
+        }
+    }
     private void UpdateCurrentTile()
     {
         // Find the closest hex tile for game logic purposes

@@ -2,11 +2,7 @@
 
 public class StageManager : MonoBehaviour
 {
-    public enum GamePhase
-    {
-        Prep,
-        Combat
-    }
+    public enum GamePhase { Prep, Combat }
 
     public static StageManager Instance;
 
@@ -31,12 +27,8 @@ public class StageManager : MonoBehaviour
     {
         currentLives = maxLives;
 
-        if (UIManager.Instance != null)
-        {
-            UIManager.Instance.UpdateLivesUI(currentLives);
-            UIManager.Instance.UpdateStageUI(currentStage, roundInStage, roundsPerStage);
-            UIManager.Instance.ShowFightButton(true); // start in prep
-        }
+        UIManager.Instance.UpdateLivesUI(currentLives);
+        UIManager.Instance.UpdateStageUI(currentStage, roundInStage, roundsPerStage);
 
         EnterPrepPhase(); // start in prep
     }
@@ -46,35 +38,47 @@ public class StageManager : MonoBehaviour
         if (playerWon)
         {
             Debug.Log("✅ Player won the round!");
-            ReturnToPrepPhase();
-            return;
         }
         else
         {
             Debug.Log("❌ Player lost the round!");
             currentLives--;
-
-            if (UIManager.Instance != null)
-                UIManager.Instance.UpdateLivesUI(currentLives);
+            UIManager.Instance.UpdateLivesUI(currentLives);
 
             if (currentLives <= 0)
             {
-                Debug.Log("💀 Player has no lives left - Game Over.");
-                if (UIManager.Instance != null)
-                    UIManager.Instance.ShowGameOver();
+                Debug.Log("💀 Game Over!");
+                UIManager.Instance.ShowGameOver();
                 return;
             }
         }
 
+        ResetToPrepPhase();
         NextRound();
-        EnterPrepPhase();
     }
 
-    private void ReturnToPrepPhase()
+    public void EnterPrepPhase()
     {
-        Debug.Log("🔄 Returning to Prep Phase...");
+        Debug.Log("🔄 Entering Prep Phase");
+        currentPhase = GamePhase.Prep;
 
-        // 1. Restore player units to their saved hexes
+        GameManager.Instance.ResetPlayerUnits();  // snap players back
+        EnemyWaveManager.Instance.SpawnEnemyWave(currentStage); // preload enemies
+
+        UIManager.Instance.ShowFightButton(true); // allow pressing fight
+    }
+
+    public void EnterCombatPhase()
+    {
+        Debug.Log("⚔️ Entering Combat Phase");
+        currentPhase = GamePhase.Combat;
+
+        UIManager.Instance.ShowFightButton(false);
+        CombatManager.Instance.StartCombat();
+    }
+
+    private void ResetToPrepPhase()
+    {
         foreach (var kvp in CombatManager.Instance.GetSavedPlayerPositions())
         {
             UnitAI unit = kvp.Key;
@@ -82,64 +86,26 @@ public class StageManager : MonoBehaviour
 
             if (unit != null && unit.isAlive)
             {
-                unit.SetState(UnitAI.UnitState.BoardIdle);
+                unit.ResetAfterCombat();
                 unit.AssignToTile(tile);
-                unit.animator.SetBool("IsRunning", false);
             }
         }
 
-        // 2. Spawn next enemy wave (but idle until fight button pressed)
         EnemyWaveManager.Instance.SpawnEnemyWave(currentStage);
+        UIManager.Instance.ShowFightButton(true);
 
-        // 3. Show fight button again
-        if (UIManager.Instance != null)
-            UIManager.Instance.ShowFightButton(true);
-
-        // 4. Advance round counters
-        NextRound();
+        currentPhase = GamePhase.Prep;
     }
 
-    public void NextRound()
+    private void NextRound()
     {
         roundInStage++;
-
         if (roundInStage > roundsPerStage)
         {
             roundInStage = 1;
             currentStage++;
-            Debug.Log($"Stage advanced! Now at Stage {currentStage}");
-        }
-        else
-        {
-            Debug.Log($"Round advanced! Stage {currentStage}, Round {roundInStage}");
         }
 
-        if (UIManager.Instance != null)
-            UIManager.Instance.UpdateStageUI(currentStage, roundInStage, roundsPerStage);
-    }
-
-    private void EnterPrepPhase()
-    {
-        currentPhase = GamePhase.Prep;
-
-        // reset player units back to their tiles
-        GameManager.Instance.ResetPlayerUnits();
-
-        // spawn enemies for new round
-        EnemyWaveManager.Instance.SpawnEnemyWave(currentStage);
-
-        // allow repositioning
-        if (UIManager.Instance != null)
-            UIManager.Instance.ShowFightButton(true);
-    }
-
-    public void EnterCombatPhase()
-    {
-        currentPhase = GamePhase.Combat;
-
-        if (UIManager.Instance != null)
-            UIManager.Instance.ShowFightButton(false);
-
-        CombatManager.Instance.StartCombat();
+        UIManager.Instance.UpdateStageUI(currentStage, roundInStage, roundsPerStage);
     }
 }
