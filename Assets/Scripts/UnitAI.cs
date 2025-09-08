@@ -504,23 +504,6 @@ public class UnitAI : MonoBehaviour
         }
         return nearest;
     }
-    private Vector3 CalculateIdealDestination(Vector3 targetPos)
-    {
-        if (currentTarget == null) return targetPos;
-
-        // For melee units: get close but maintain stopping distance
-        if (attackRange <= 1.6f)
-        {
-            Vector3 dirToTarget = (targetPos - transform.position).normalized;
-            return targetPos - dirToTarget * stoppingDistance;
-        }
-        else
-        {
-            // For ranged units: maintain attack range distance
-            Vector3 dirToTarget = (targetPos - transform.position).normalized;
-            return targetPos - dirToTarget * (attackRange * 0.8f);
-        }
-    }
     public UnitAI GetCurrentTarget()
     {
         return currentTarget != null ? currentTarget.GetComponent<UnitAI>() : null;
@@ -533,6 +516,10 @@ public class UnitAI : MonoBehaviour
 
         // Combine base movement with obstacle avoidance
         Vector3 finalDirection = (baseDirection + avoidanceDirection * 0.5f).normalized;
+
+        // ✅ FIX: Constrain movement to horizontal plane only (no Y-axis movement)
+        finalDirection.y = 0;
+        finalDirection = finalDirection.normalized;
 
         return finalDirection;
     }
@@ -555,6 +542,10 @@ public class UnitAI : MonoBehaviour
             if (currentTarget != null && unit.transform == currentTarget) continue;
 
             Vector3 directionAway = transform.position - unit.transform.position;
+
+            // ✅ FIX: Constrain avoidance to horizontal plane only
+            directionAway.y = 0;
+
             float distance = directionAway.magnitude;
 
             if (distance < obstacleAvoidance && distance > 0.1f)
@@ -565,8 +556,43 @@ public class UnitAI : MonoBehaviour
             }
         }
 
+        // ✅ FIX: Ensure avoidance vector is horizontal only
+        avoidanceVector.y = 0;
         return avoidanceVector.normalized;
     }
+
+    private Vector3 CalculateIdealDestination(Vector3 targetPos)
+    {
+        if (currentTarget == null) return targetPos;
+
+        // For melee units: get close but maintain stopping distance
+        if (attackRange <= 1.6f)
+        {
+            Vector3 dirToTarget = (targetPos - transform.position).normalized;
+            // ✅ FIX: Constrain direction to horizontal plane
+            dirToTarget.y = 0;
+            dirToTarget = dirToTarget.normalized;
+
+            Vector3 destination = targetPos - dirToTarget * stoppingDistance;
+            // ✅ FIX: Keep same Y position as current unit
+            destination.y = transform.position.y;
+            return destination;
+        }
+        else
+        {
+            // For ranged units: maintain attack range distance
+            Vector3 dirToTarget = (targetPos - transform.position).normalized;
+            // ✅ FIX: Constrain direction to horizontal plane
+            dirToTarget.y = 0;
+            dirToTarget = dirToTarget.normalized;
+
+            Vector3 destination = targetPos - dirToTarget * (attackRange * 0.8f);
+            // ✅ FIX: Keep same Y position as current unit
+            destination.y = transform.position.y;
+            return destination;
+        }
+    }
+
 
     private void FaceDirection(Vector3 direction)
     {
