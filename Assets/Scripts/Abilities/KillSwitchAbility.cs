@@ -114,13 +114,15 @@ public class KillSwitchAbility : MonoBehaviour, IUnitAbility
             yield return null;
         }
 
-        // Snap to final landing location (prevents small penetrations)
+        // Snap to final landing location
         unitAI.transform.position = endPos;
+
+        // ✅ Make the jumped enemy the new official target
+        unitAI.currentTarget = target.transform;
 
         // update tile occupancy if we landed on a tile
         if (landingTile != null)
         {
-            // clear previous tile occupancy cleanly
             if (unitAI.currentTile != null && unitAI.currentTile.occupyingUnit == unitAI)
                 unitAI.currentTile.occupyingUnit = null;
 
@@ -129,7 +131,7 @@ public class KillSwitchAbility : MonoBehaviour, IUnitAbility
         }
         else
         {
-            // If we used fallback position, try to assign to nearest tile to keep board logic consistent
+            // fallback: nearest tile
             if (BoardManager.Instance != null)
             {
                 HexTile nearest = BoardManager.Instance.GetTileFromWorld(endPos);
@@ -140,6 +142,7 @@ public class KillSwitchAbility : MonoBehaviour, IUnitAbility
                 }
             }
         }
+
 
         // face the target horizontally
         Vector3 lookAt = target.transform.position;
@@ -152,15 +155,21 @@ public class KillSwitchAbility : MonoBehaviour, IUnitAbility
         // wait for slam timing (so animation can play)
         yield return new WaitForSeconds(slamDuration);
 
-        // Deal damage to the primary target
+        // Deal damage
         float damage = slamDamagePerStar[Mathf.Clamp(unitAI.starLevel - 1, 0, slamDamagePerStar.Length - 1)]
                        + unitAI.attackDamage;
+        target.TakeDamage(damage);
 
-        // If we landed one hex away, target is still hit by slam (keeps original behavior)
-        if (target != null && target.isAlive)
+        Debug.Log($"{unitAI.unitName} leapt and slammed {target.unitName} for {damage}!");
+
+        // 👇 If target is dead, clear it so UnitAI will find a new one
+        if (!target.isAlive)
         {
-            target.TakeDamage(damage);
-            Debug.Log($"{unitAI.unitName} leapt in front of and slammed {target.unitName} for {damage}!");
+            unitAI.currentTarget = null;
+        }
+        else
+        {
+            unitAI.currentTarget = target.transform; // keep locked if alive
         }
 
         // temporary buff
