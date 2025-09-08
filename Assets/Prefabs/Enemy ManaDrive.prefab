@@ -299,6 +299,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 4583670255459424481}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f5b788c727c09de4480bdb92c860e59f,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2693329466094142460}
   m_SourcePrefab: {fileID: 100100000, guid: f5b788c727c09de4480bdb92c860e59f, type: 3}
 --- !u!1 &397472728585410053 stripped
 GameObject:
@@ -375,6 +379,7 @@ MonoBehaviour:
   obstacleAvoidance: 2
   moveOffsetRange: 0.2
   deathAnimLength: 1.2
+  startingTile: {fileID: 0}
 --- !u!114 &1845309957721737311
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -396,7 +401,8 @@ MonoBehaviour:
   attackSpeedGain: 0.3
   recursiveDamageReduction: 0.25
   castVFX: {fileID: 0}
-  impactVFX: {fileID: 0}
+  impactVFX: {fileID: 2884259778889931343, guid: 7891a2be7089e084899e28c139bcc52d,
+    type: 3}
   splashVFX: {fileID: 0}
 --- !u!114 &4186335470939740577
 MonoBehaviour:
@@ -459,6 +465,36 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 36
   m_CollisionDetection: 0
+--- !u!114 &2693329466094142460
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 397472728585410053}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7771fb580d6217a4da3ee7324885b101, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  vfxConfig:
+    autoAttackProjectile: {fileID: 0}
+    autoAttackMuzzleFlash: {fileID: 0}
+    autoAttackHitEffect: {fileID: 0}
+    abilityEffect: {fileID: 0}
+    abilityProjectile: {fileID: 6341886006476312110, guid: 40a8fdb31d45b3043aaa6af3365e8615,
+      type: 3}
+    abilityImpactEffect: {fileID: 1329845292236604, guid: 88e6b468d16dd0146b46d32721338502,
+      type: 3}
+    autoAttackSound: {fileID: 0}
+    abilitySound: {fileID: 0}
+    volume: 0.7
+  deathVFX: {fileID: 0}
+  levelUpVFX: {fileID: 0}
+  damageNumbersPrefab: {fileID: 0}
+  firePoint: {fileID: 0}
+  chestPoint: {fileID: 0}
+  weaponPoint: {fileID: 0}
 --- !u!4 &1220719919538885788 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1852576806548013000, guid: f5b788c727c09de4480bdb92c860e59f,

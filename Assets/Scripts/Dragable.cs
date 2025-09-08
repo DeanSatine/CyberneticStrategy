@@ -16,6 +16,13 @@ public class Draggable : MonoBehaviour
 
     private void OnMouseDown()
     {
+        // ✅ BLOCK INTERACTION DURING COMBAT
+        if (!CanInteractWithUnit())
+        {
+            Debug.Log($"❌ Cannot interact with {unitAI.unitName} during combat!");
+            return;
+        }
+
         if (unitAI.currentTile != null && unitAI.currentTile.occupyingUnit != unitAI)
         {
             Debug.LogWarning("Tried to pick up a unit that shares a tile with another. Ignored.");
@@ -44,10 +51,60 @@ public class Draggable : MonoBehaviour
         }
     }
 
+    private bool CanInteractWithUnit()
+    {
+        // ✅ Allow interaction with benched units even during combat
+        if (unitAI != null && unitAI.currentState == UnitState.Bench)
+        {
+            Debug.Log($"✅ {unitAI.unitName} is benched and can be moved during combat");
+            return true;
+        }
+
+        // ✅ Check 1: No interaction during combat phase (except for benched units)
+        if (StageManager.Instance != null && StageManager.Instance.currentPhase == StageManager.GamePhase.Combat)
+        {
+            Debug.Log("🚫 Units on the board cannot be moved during combat phase!");
+            return false;
+        }
+
+        // ✅ Check 2: No interaction if unit is in combat state
+        if (unitAI != null && unitAI.currentState == UnitState.Combat)
+        {
+            Debug.Log($"🚫 {unitAI.unitName} is in combat and cannot be moved!");
+            return false;
+        }
+
+        // ✅ Check 3: No interaction if unit is dead
+        if (unitAI != null && !unitAI.isAlive)
+        {
+            Debug.Log($"🚫 {unitAI.unitName} is dead and cannot be moved!");
+            return false;
+        }
+
+        // ✅ Check 4: Only allow player units to be dragged (prevent enemy unit interaction)
+        if (unitAI != null && unitAI.team != Team.Player)
+        {
+            Debug.Log($"🚫 Cannot interact with enemy unit {unitAI.unitName}!");
+            return false;
+        }
+
+        return true;
+    }
+
+
     private void Update()
     {
         if (isDragging)
         {
+            // ✅ Additional safety check during dragging
+            if (!CanInteractWithUnit())
+            {
+                Debug.Log("❌ Combat started while dragging! Dropping unit.");
+                isDragging = false;
+                SnapToClosestObject();
+                return;
+            }
+
             Vector3 mousePos = GetMouseWorldPos();
             transform.position = new Vector3(mousePos.x, transform.position.y, mousePos.z);
         }
@@ -75,7 +132,6 @@ public class Draggable : MonoBehaviour
 
         return false;
     }
-
 
     private void SnapToClosestObject()
     {
@@ -151,7 +207,6 @@ public class Draggable : MonoBehaviour
         Debug.Log($"❌ No valid placement found for {unitAI.unitName}. Returning to original position.");
         transform.position = oldPosition;
     }
-
 
     private Vector3 GetMouseWorldPos()
     {
