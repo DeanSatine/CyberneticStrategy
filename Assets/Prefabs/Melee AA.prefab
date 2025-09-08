@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 7629484725202107705}
   - component: {fileID: 3230422166318069912}
   m_Layer: 0
-  m_Name: HayMaker AA
+  m_Name: Melee AA
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

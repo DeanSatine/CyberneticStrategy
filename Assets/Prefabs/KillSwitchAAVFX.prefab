@@ -14686,7 +14686,7 @@ GameObject:
   - component: {fileID: 4164592336981579065}
   - component: {fileID: 5567883141086394692}
   m_Layer: 0
-  m_Name: Hit_2_Red
+  m_Name: KillSwitchAAVFX
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

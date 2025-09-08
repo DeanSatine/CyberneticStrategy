@@ -325,6 +325,7 @@ MonoBehaviour:
   projectileSpeed: 15
   unitUIPrefab: {fileID: 6939982145822855837, guid: 63931d92c48ef65418d45ec02069a522,
     type: 3}
+  ui: {fileID: 0}
   animator: {fileID: 0}
   currentTarget: {fileID: 0}
   unitRadius: 0.6
@@ -341,6 +342,7 @@ MonoBehaviour:
   obstacleAvoidance: 2
   moveOffsetRange: 0.2
   deathAnimLength: 1.2
+  startingTile: {fileID: 0}
 --- !u!114 &7161809393136151176
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -438,9 +440,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   vfxConfig:
-    autoAttackProjectile: {fileID: 0}
+    autoAttackProjectile: {fileID: 8548050680436672203, guid: 535ef7817c5bc78489aa45e25295e778,
+      type: 3}
     autoAttackMuzzleFlash: {fileID: 0}
-    autoAttackHitEffect: {fileID: 7226583673155636401, guid: a2ab56839e1c9504ea9d141e95d0b16b,
+    autoAttackHitEffect: {fileID: 8293869836834216953, guid: 8293690d7899953419fb457436cdb93e,
       type: 3}
     abilityEffect: {fileID: 0}
     abilityProjectile: {fileID: 0}

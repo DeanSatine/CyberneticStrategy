@@ -44,7 +44,7 @@ public class UnitAI : MonoBehaviour
 
     [Header("UI")]
     public GameObject unitUIPrefab;
-    private UnitUI ui;
+    public UnitUI ui;
     private Queue<HexTile> currentPath = new Queue<HexTile>();
 
     private float attackCooldown = 0f;

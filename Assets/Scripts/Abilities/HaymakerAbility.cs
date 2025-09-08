@@ -106,14 +106,14 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         if (cloneInstance != null)
         {
             var cloneAI = cloneInstance.GetComponent<UnitAI>();
-
+            
             // ✅ Properly clean up tile assignment
             if (cloneAI != null)
             {
                 cloneAI.ClearTile();
                 GameManager.Instance.UnregisterUnit(cloneAI);
             }
-
+            
             Destroy(cloneInstance);
             cloneInstance = null;
             Debug.Log("[HaymakerAbility] Clone destroyed and tile cleared.");
