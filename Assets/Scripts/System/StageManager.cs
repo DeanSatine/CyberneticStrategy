@@ -79,6 +79,9 @@ public class StageManager : MonoBehaviour
 
     private void ResetToPrepPhase()
     {
+        // ✅ Reset Eradicator statics first
+        EradicatorTrait.ResetAllEradicators();
+
         foreach (var kvp in CombatManager.Instance.GetSavedPlayerPositions())
         {
             UnitAI unit = kvp.Key;
@@ -90,6 +93,10 @@ public class StageManager : MonoBehaviour
                 unit.AssignToTile(tile);
             }
         }
+
+        // ✅ Reapply traits after all units are reset
+        TraitManager.Instance.EvaluateTraits(GameManager.Instance.playerUnits);
+        TraitManager.Instance.ApplyTraits(GameManager.Instance.playerUnits);
 
         EnemyWaveManager.Instance.SpawnEnemyWave(currentStage);
         UIManager.Instance.ShowFightButton(true);

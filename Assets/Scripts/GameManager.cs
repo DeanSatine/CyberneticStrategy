@@ -51,5 +51,9 @@ public class GameManager : MonoBehaviour
                     unit.AssignToTile(unit.startingTile);
             }
         }
+
+        // ✅ Reapply traits after reset
+        TraitManager.Instance.EvaluateTraits(playerUnits);
+        TraitManager.Instance.ApplyTraits(playerUnits);
     }
 }

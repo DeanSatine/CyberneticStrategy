@@ -646,6 +646,7 @@ public class UnitAI : MonoBehaviour
         Debug.Log($"✅ {unitName} reset for new round - HP: {currentHealth}/{maxHealth}, Mana: {currentMana}/{maxMana}");
     }
 
+
     private void UpdateCurrentTile()
     {
         // Find the closest hex tile for game logic purposes

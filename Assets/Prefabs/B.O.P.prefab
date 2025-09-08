@@ -26,7 +26,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 00dc4eb0c1328b64fadc0173b59146b0,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.699
+      value: 0.694
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 00dc4eb0c1328b64fadc0173b59146b0,
         type: 3}
@@ -347,6 +347,7 @@ MonoBehaviour:
   obstacleAvoidance: 2
   moveOffsetRange: 0.2
   deathAnimLength: 0.5
+  startingTile: {fileID: 0}
 --- !u!114 &6517958316986358636
 MonoBehaviour:
   m_ObjectHideFlags: 0
