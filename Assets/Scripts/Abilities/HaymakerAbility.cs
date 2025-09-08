@@ -191,28 +191,138 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         UnitAI target = unitAI.GetCurrentTarget();
         if (target == null) yield break;
 
+        // --- STAB ---
         if (unitAI.animator) unitAI.animator.SetTrigger("StabTrigger");
-        yield return new WaitForSeconds(0.3f);
+
+        // Lunge forward + back while stab animation is playing
+        Vector3 stabStart = transform.position;
+        Vector3 stabForward = stabStart + transform.forward * 0.5f; // small lunge
+        float stabDuration = 0.4f; // should match animation length
+        float halfDuration = stabDuration * 0.5f;
+
+        // forward
+        float elapsed = 0f;
+        while (elapsed < halfDuration)
+        {
+            elapsed += Time.deltaTime;
+            transform.position = Vector3.Lerp(stabStart, stabForward, elapsed / halfDuration);
+            yield return null;
+        }
+
+        // backward
+        elapsed = 0f;
+        while (elapsed < halfDuration)
+        {
+            elapsed += Time.deltaTime;
+            transform.position = Vector3.Lerp(stabForward, stabStart, elapsed / halfDuration);
+            yield return null;
+        }
+
+        // Apply stab damage
         float dmg = stabDamage[Mathf.Clamp(unitAI.starLevel - 1, 0, stabDamage.Length - 1)];
         target.TakeDamage(dmg + unitAI.attackDamage);
 
+        yield return new WaitForSeconds(0.1f); // small delay before leap
+
+        // --- JUMP / SLAM ---
         if (unitAI.animator) unitAI.animator.SetTrigger("JumpTrigger");
-        yield return new WaitForSeconds(0.5f);
 
-        List<UnitAI> enemies = FindEnemiesInRadius(5f);
-        if (enemies.Count == 0) yield break;
+        // Find clump of enemies to leap toward
+        Vector3 leapTarget = FindBestClumpPosition(5f); // 5 hex search radius
+        if (leapTarget == Vector3.zero) leapTarget = transform.position; // fallback
 
-        UnitAI center = enemies[0];
-        List<UnitAI> aoeTargets = FindEnemiesInRadius(2f, center.transform.position);
+        Vector3 jumpStart = transform.position;
+        Vector3 jumpEnd = leapTarget;
+        float jumpHeight = 2.5f;
+        float jumpDuration = 0.6f; // match animation
 
-        float slamDmg = slamDamage[Mathf.Clamp(unitAI.starLevel - 1, 0, slamDamage.Length - 1)];
+        elapsed = 0f;
+        while (elapsed < jumpDuration)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / jumpDuration;
+
+            // arc
+            Vector3 pos = Vector3.Lerp(jumpStart, jumpEnd, t);
+            pos.y += Mathf.Sin(t * Mathf.PI) * jumpHeight;
+            transform.position = pos;
+
+            yield return null;
+        }
+
+        // Slam on landing
+        // Slam on landing
         if (unitAI.animator) unitAI.animator.SetTrigger("SlamTrigger");
 
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(0.2f); // delay before damage lands
+
+        float slamDmg = slamDamage[Mathf.Clamp(unitAI.starLevel - 1, 0, slamDamage.Length - 1)];
+        List<UnitAI> aoeTargets = FindEnemiesInRadius(2.5f, jumpEnd);
 
         foreach (var e in aoeTargets)
             e.TakeDamage(slamDmg + unitAI.attackDamage);
+
+        // ✅ Retarget after leap/slam
+        UnitAI newTarget = null;
+        float minDist = Mathf.Infinity;
+        foreach (var enemy in aoeTargets)
+        {
+            if (!enemy.isAlive) continue;
+            float dist = Vector3.Distance(unitAI.transform.position, enemy.transform.position);
+            if (dist < minDist)
+            {
+                minDist = dist;
+                newTarget = enemy;
+            }
+        }
+
+        // Set new target if found
+        if (newTarget != null)
+        {
+            unitAI.currentTarget = newTarget.transform;
+            unitAI.SetState(UnitAI.UnitState.Combat); // make sure AI resumes properly
+        }
+
     }
+
+    private Vector3 FindBestClumpPosition(float searchRadius)
+    {
+        UnitAI[] allUnits = FindObjectsOfType<UnitAI>();
+        List<UnitAI> enemies = new List<UnitAI>();
+
+        foreach (var u in allUnits)
+        {
+            if (u == unitAI || !u.isAlive || u.team == unitAI.team) continue;
+            if (Vector3.Distance(transform.position, u.transform.position) <= searchRadius)
+                enemies.Add(u);
+        }
+
+        if (enemies.Count == 0) return Vector3.zero;
+
+        // Find enemy that has the most neighbors within 2 units (clump center)
+        UnitAI bestCenter = enemies[0];
+        int bestCount = 0;
+
+        foreach (var e in enemies)
+        {
+            int nearby = 0;
+            foreach (var other in enemies)
+            {
+                if (other == e) continue;
+                if (Vector3.Distance(e.transform.position, other.transform.position) <= 2f)
+                    nearby++;
+            }
+
+            if (nearby > bestCount)
+            {
+                bestCount = nearby;
+                bestCenter = e;
+            }
+        }
+
+        return bestCenter.transform.position;
+    }
+
 
     private List<UnitAI> FindEnemiesInRadius(float radius, Vector3? center = null)
     {
