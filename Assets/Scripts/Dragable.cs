@@ -112,24 +112,34 @@ public class Draggable : MonoBehaviour
 
     private bool CanPlayerPlaceOnTile(HexTile tile)
     {
-        // Allow placement on bench tiles
-        if (tile.tileType == TileType.Bench)
-            return true;
-
-        // For board tiles, check only row restrictions
+        // ✅ CRITICAL: Block ALL board placement during combat
         if (tile.tileType == TileType.Board)
         {
-            // Change from Y restriction to X restriction
+            if (StageManager.Instance != null && StageManager.Instance.currentPhase == StageManager.GamePhase.Combat)
+            {
+                Debug.Log($"🚫 COMBAT ACTIVE: Cannot place any units on the board during combat!");
+                return false;
+            }
+
+            // Normal row restrictions during prep phase
             if (tile.gridPosition.x > 3)
             {
                 Debug.Log($"❌ Cannot place unit beyond row 3. Tile {tile.gridPosition} is too far forward.");
                 return false;
             }
 
-            Debug.Log($"✅ Valid placement at {tile.gridPosition} (bottom half, rows 0-3)");
+            Debug.Log($"✅ Valid board placement at {tile.gridPosition} (prep phase, rows 0-3)");
             return true;
         }
 
+        // ✅ Always allow bench placement
+        if (tile.tileType == TileType.Bench)
+        {
+            Debug.Log($"✅ Valid bench placement at {tile.gridPosition}");
+            return true;
+        }
+
+        Debug.Log($"❌ Invalid tile type for placement: {tile.tileType}");
         return false;
     }
 
