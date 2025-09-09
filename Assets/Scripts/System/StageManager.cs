@@ -38,6 +38,10 @@ public class StageManager : MonoBehaviour
         if (playerWon)
         {
             Debug.Log("✅ Player won the round!");
+
+            // ✅ Give player 3 gold for winning
+            EconomyManager.Instance.AddGold(3);
+            Debug.Log("💰 Player earned 3 gold for winning!");
         }
         else
         {
@@ -51,6 +55,10 @@ public class StageManager : MonoBehaviour
                 UIManager.Instance.ShowGameOver();
                 return;
             }
+
+            // ✅ Give player 1 gold even for losing (optional)
+            EconomyManager.Instance.AddGold(1);
+            Debug.Log("💰 Player earned 1 gold for participation!");
         }
 
         ResetToPrepPhase();
@@ -97,6 +105,10 @@ public class StageManager : MonoBehaviour
         // ✅ Reapply traits after all units are reset
         TraitManager.Instance.EvaluateTraits(GameManager.Instance.playerUnits);
         TraitManager.Instance.ApplyTraits(GameManager.Instance.playerUnits);
+
+        // ✅ Reset shop for new round
+        ShopManager.Instance.GenerateShop();
+        Debug.Log("🛒 Shop reset for new round!");
 
         EnemyWaveManager.Instance.SpawnEnemyWave(currentStage);
         UIManager.Instance.ShowFightButton(true);
