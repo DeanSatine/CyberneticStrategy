@@ -1,36 +1,233 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
+using System.Linq;
+
+[System.Serializable]
+public class ShopCardReference
+{
+    public string unitName;
+    public GameObject cardGameObject;  // Reference to existing card in hierarchy
+    public int tier;                   // 1-5, affects spawn rates
+}
 
 public class ShopManager : MonoBehaviour
 {
     public static ShopManager Instance;
 
+    [Header("Existing Unit Cards")]
+    public ShopCardReference[] availableCards;
+
+    [Header("Shop Slots")]
+    public Transform[] shopSlotParents;  // The 5 slot parent transforms
+
     [Header("Bench Settings")]
     public Transform[] benchSlots; // assign your 9 bench slot transforms in inspector
+
+    [Header("Shop Settings")]
+    [SerializeField] private int rerollCost = 2;
+    [SerializeField] private int unitsPerShop = 5;
 
     private void Awake()
     {
         Instance = this;
+
+        // Auto-populate cards if not set up
+        if (availableCards == null || availableCards.Length == 0)
+        {
+            SetupCardsFromHierarchy();
+        }
     }
 
-    public void FillShop(ShopSlotUI[] slots)
+    private void Start()
+    {
+        GenerateShop();
+    }
+
+    private void SetupCardsFromHierarchy()
+    {
+        // Find all ShopSlotUI components in the scene
+        ShopSlotUI[] allShopSlots = FindObjectsOfType<ShopSlotUI>();
+        List<ShopCardReference> foundCards = new List<ShopCardReference>();
+
+        foreach (var slot in allShopSlots)
+        {
+            string cardName = slot.gameObject.name;
+            int tier = DetermineTierFromName(cardName);
+
+            foundCards.Add(new ShopCardReference
+            {
+                unitName = cardName,
+                cardGameObject = slot.gameObject,
+                tier = tier
+            });
+        }
+
+        availableCards = foundCards.ToArray();
+        Debug.Log($"🔍 Auto-discovered {availableCards.Length} shop cards");
+    }
+
+    private int DetermineTierFromName(string cardName)
+    {
+        // Determine tier based on card name
+        string name = cardName.ToLower();
+        if (name.Contains("bop")) return 1;
+        if (name.Contains("needle")) return 2;
+        if (name.Contains("mana")) return 3;
+        if (name.Contains("kill")) return 4;
+        if (name.Contains("hay")) return 5;
+
+        return 1; // Default tier
+    }
+
+    public void GenerateShop()
+    {
+        Debug.Log("🛒 Generating new shop...");
+
+        // First, deactivate all cards
+        foreach (var card in availableCards)
+        {
+            if (card.cardGameObject != null)
+                card.cardGameObject.SetActive(false);
+        }
+
+        // Get cards available for current stage
+        List<ShopCardReference> availableForStage = GetCardsForStage();
+
+        // Randomly select cards to show
+        List<ShopCardReference> selectedCards = SelectRandomCards(availableForStage, unitsPerShop);
+
+        // Activate selected cards and position them in slots
+        for (int i = 0; i < selectedCards.Count && i < shopSlotParents.Length; i++)
+        {
+            ActivateCardInSlot(selectedCards[i], i);
+        }
+
+        Debug.Log($"✅ Shop generated with {selectedCards.Count} units!");
+    }
+
+    private List<ShopCardReference> GetCardsForStage()
     {
         int stage = StageManager.Instance.currentStage;
+        List<ShopCardReference> availableForStage = new List<ShopCardReference>();
 
-        for (int i = 0; i < slots.Length; i++)
+        foreach (var card in availableCards)
         {
-            ShopSlotUI slot = slots[i];
-            if (RollAllowsThisUnit(slot.cost, stage))
-                slot.gameObject.SetActive(true);
-            else
-                slot.gameObject.SetActive(false);
+            if (IsCardAvailableForStage(card.tier, stage))
+            {
+                // Add multiple entries for weighted selection
+                int weight = GetCardWeight(card.tier, stage);
+                for (int w = 0; w < weight; w++)
+                {
+                    availableForStage.Add(card);
+                }
+            }
         }
+
+        return availableForStage;
+    }
+
+    private bool IsCardAvailableForStage(int tier, int stage)
+    {
+        switch (stage)
+        {
+            case 1:
+                return tier <= 2; // Only tier 1-2 units
+            case 2:
+                return tier <= 4; // Tier 1-4 units
+            case 3:
+            default:
+                return true; // All tiers available
+        }
+    }
+
+    private int GetCardWeight(int tier, int stage)
+    {
+        // Higher weight = more likely to appear
+        switch (stage)
+        {
+            case 1:
+                switch (tier)
+                {
+                    case 1: return 7; // 70% weight
+                    case 2: return 3; // 30% weight
+                    default: return 0;
+                }
+            case 2:
+                switch (tier)
+                {
+                    case 1: return 3; // 30% weight
+                    case 2: return 4; // 40% weight  
+                    case 3: return 2; // 20% weight
+                    case 4: return 1; // 10% weight
+                    default: return 0;
+                }
+            case 3:
+            default:
+                switch (tier)
+                {
+                    case 1: return 1; // 10% weight
+                    case 2: return 2; // 20% weight
+                    case 3: return 3; // 30% weight
+                    case 4: return 2; // 20% weight
+                    case 5: return 2; // 20% weight
+                    default: return 1;
+                }
+        }
+    }
+
+    private List<ShopCardReference> SelectRandomCards(List<ShopCardReference> available, int count)
+    {
+        List<ShopCardReference> selected = new List<ShopCardReference>();
+        List<ShopCardReference> pool = new List<ShopCardReference>(available);
+
+        for (int i = 0; i < count && pool.Count > 0; i++)
+        {
+            int randomIndex = Random.Range(0, pool.Count);
+            ShopCardReference selectedCard = pool[randomIndex];
+            selected.Add(selectedCard);
+
+            // Remove all instances of this card from pool to avoid duplicates
+            pool.RemoveAll(card => card.cardGameObject == selectedCard.cardGameObject);
+        }
+
+        return selected;
+    }
+
+    private void ActivateCardInSlot(ShopCardReference card, int slotIndex)
+    {
+        if (card.cardGameObject == null || slotIndex >= shopSlotParents.Length)
+            return;
+
+        // Move card to the correct slot parent
+        card.cardGameObject.transform.SetParent(shopSlotParents[slotIndex]);
+
+        // Reset position and scale
+        card.cardGameObject.transform.localPosition = Vector3.zero;
+        card.cardGameObject.transform.localScale = Vector3.one;
+
+        // Activate the card
+        card.cardGameObject.SetActive(true);
+
+        Debug.Log($"🃏 Activated {card.unitName} in slot {slotIndex}");
+    }
+
+    public void RerollShop()
+    {
+        if (!EconomyManager.Instance.SpendGold(rerollCost))
+        {
+            Debug.Log("💸 Not enough gold to reroll shop!");
+            return;
+        }
+
+        Debug.Log($"🎲 Rerolling shop for {rerollCost} gold...");
+        GenerateShop();
     }
 
     public void TryBuyUnit(ShopSlotUI slot)
     {
         if (!EconomyManager.Instance.SpendGold(slot.cost))
         {
-            Debug.Log("Not enough gold!");
+            Debug.Log("💸 Not enough gold!");
             return;
         }
 
@@ -47,48 +244,37 @@ public class ShopManager : MonoBehaviour
 
         if (freeSlot == null)
         {
-            Debug.Log("Bench is full!");
+            Debug.Log("🪑 Bench is full!");
+            // Refund the gold
+            EconomyManager.Instance.AddGold(slot.cost);
             return;
         }
 
         // Spawn unit on free bench slot
-        // Spawn unit on free bench slot
         GameObject unit = Instantiate(slot.unitPrefab, freeSlot.position, Quaternion.identity);
+        unit.transform.rotation = Quaternion.Euler(0f, -90f, 0f);
+        unit.transform.SetParent(freeSlot);
 
-        // ✅ Force facing forward
-        unit.transform.rotation = Quaternion.Euler(0f, -90f, 0f); 
+        Debug.Log($"✅ Bought {slot.unitPrefab.name} for {slot.cost} gold, placed on bench!");
 
-        unit.transform.SetParent(freeSlot); // parent it so it "sticks" to slot
-        Debug.Log($"Bought {slot.unitPrefab.name} for {slot.cost} gold, placed on bench!");
-        unit.transform.SetParent(freeSlot); // parent it so it "sticks" to slot
-        Debug.Log($"Bought {slot.unitPrefab.name} for {slot.cost} gold, placed on bench!");
+        // Hide the bought card from shop
+        slot.gameObject.SetActive(false);
     }
 
-    private bool RollAllowsThisUnit(int cost, int stage)
+    // Public methods for UI
+    public void OnRerollButtonClicked()
     {
-        int roll = Random.Range(0, 100);
+        RerollShop();
+    }
 
-        if (stage == 1)
-        {
-            if (cost == 1) return roll < 70;
-            if (cost == 2) return roll >= 70;
-        }
-        else if (stage == 2)
-        {
-            if (cost == 1) return roll < 30;
-            if (cost == 2) return roll >= 30 && roll < 70;
-            if (cost == 3) return roll >= 70 && roll < 90;
-            if (cost == 4) return roll >= 90;
-        }
-        else if (stage >= 3)
-        {
-            if (cost == 1) return roll < 10;
-            if (cost == 2) return roll >= 10 && roll < 30;
-            if (cost == 3) return roll >= 30 && roll < 60;
-            if (cost == 4) return roll >= 60 && roll < 85;
-            if (cost == 5) return roll >= 85;
-        }
+    public void RefreshShop()
+    {
+        GenerateShop();
+    }
 
-        return false;
+    // Legacy compatibility
+    public void FillShop(ShopSlotUI[] slots)
+    {
+        GenerateShop();
     }
 }

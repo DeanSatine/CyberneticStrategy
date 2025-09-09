@@ -9431,7 +9431,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &548275731
 RectTransform:
   m_ObjectHideFlags: 0
@@ -15984,12 +15984,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b813d7d2ac3b274291db8eddf359fb9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  shopSlots:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  rerollButton: {fileID: 1152062989}
+  rerollCostText: {fileID: 957473998}
 --- !u!1 &952664372
 GameObject:
   m_ObjectHideFlags: 0
@@ -24063,7 +24059,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1474986656
 RectTransform:
   m_ObjectHideFlags: 0
@@ -30040,7 +30036,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1907624681
 RectTransform:
   m_ObjectHideFlags: 0
@@ -31631,7 +31627,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2038669323
 RectTransform:
   m_ObjectHideFlags: 0
@@ -32065,6 +32061,88 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aefc1f0a494deb74797a595b93001539, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  availableCards:
+  - unitName: HayMaker
+    cardGameObject: {fileID: 1748140687}
+    tier: 5
+  - unitName: BOP
+    cardGameObject: {fileID: 1748140687}
+    tier: 2
+  - unitName: KillSwitch
+    cardGameObject: {fileID: 1906178258}
+    tier: 4
+  - unitName: ManaDrive
+    cardGameObject: {fileID: 1495879679}
+    tier: 3
+  - unitName: NeedleBot
+    cardGameObject: {fileID: 1303329878}
+    tier: 1
+  - unitName: Haymaker
+    cardGameObject: {fileID: 511206200}
+    tier: 5
+  - unitName: BOP
+    cardGameObject: {fileID: 380678316}
+    tier: 2
+  - unitName: NeedleBot
+    cardGameObject: {fileID: 1862543580}
+    tier: 1
+  - unitName: ManaDrive
+    cardGameObject: {fileID: 548275730}
+    tier: 3
+  - unitName: HayMaker
+    cardGameObject: {fileID: 159670006}
+    tier: 5
+  - unitName: NeedleBot
+    cardGameObject: {fileID: 1783982420}
+    tier: 1
+  - unitName: KillSwitch
+    cardGameObject: {fileID: 1868294722}
+    tier: 4
+  - unitName: Manadrive
+    cardGameObject: {fileID: 73584958}
+    tier: 3
+  - unitName: BOP
+    cardGameObject: {fileID: 1474986655}
+    tier: 2
+  - unitName: HayMaker
+    cardGameObject: {fileID: 794683506}
+    tier: 5
+  - unitName: KillSwitch
+    cardGameObject: {fileID: 878346651}
+    tier: 4
+  - unitName: ManaDrive
+    cardGameObject: {fileID: 195479046}
+    tier: 3
+  - unitName: BOP
+    cardGameObject: {fileID: 390185301}
+    tier: 2
+  - unitName: NeedleBot
+    cardGameObject: {fileID: 1907624680}
+    tier: 1
+  - unitName: KillSwitch
+    cardGameObject: {fileID: 1262689411}
+    tier: 5
+  - unitName: ManaDrive
+    cardGameObject: {fileID: 2050911492}
+    tier: 3
+  - unitName: BOP
+    cardGameObject: {fileID: 989601940}
+    tier: 2
+  - unitName: NeedleBot
+    cardGameObject: {fileID: 606818812}
+    tier: 1
+  - unitName: HayMaker
+    cardGameObject: {fileID: 2038669322}
+    tier: 5
+  - unitName: KillSwitch
+    cardGameObject: {fileID: 1076824555}
+    tier: 4
+  shopSlotParents:
+  - {fileID: 1704590731}
+  - {fileID: 704649754}
+  - {fileID: 943347646}
+  - {fileID: 1802958895}
+  - {fileID: 504690613}
   benchSlots:
   - {fileID: 2000388091}
   - {fileID: 29781453}
@@ -32075,6 +32153,8 @@ MonoBehaviour:
   - {fileID: 1460421026}
   - {fileID: 1144176909}
   - {fileID: 1899137417}
+  rerollCost: 2
+  unitsPerShop: 5
 --- !u!1 &2054099518
 GameObject:
   m_ObjectHideFlags: 0
