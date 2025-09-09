@@ -362,9 +362,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damageAmpPerStar:
-  - 30
-  - 40
-  - 50
+  - 35
+  - 45
+  - 55
   chestBuffPercent:
   - 0.05
   - 0.05
@@ -427,7 +427,8 @@ MonoBehaviour:
     autoAttackProjectile: {fileID: 8548050680436672203, guid: 535ef7817c5bc78489aa45e25295e778,
       type: 3}
     autoAttackMuzzleFlash: {fileID: 0}
-    autoAttackHitEffect: {fileID: 0}
+    autoAttackHitEffect: {fileID: 2046140665488341963, guid: 9d292543345e17f47a88af867d7eabbd,
+      type: 3}
     abilityEffect: {fileID: 0}
     abilityProjectile: {fileID: 0}
     abilityImpactEffect: {fileID: 0}
