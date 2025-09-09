@@ -198,18 +198,29 @@ public class ShopManager : MonoBehaviour
         if (card.cardGameObject == null || slotIndex >= shopSlotParents.Length)
             return;
 
-        // Move card to the correct slot parent
-        card.cardGameObject.transform.SetParent(shopSlotParents[slotIndex]);
+        // Remember original world scale before moving
+        Vector3 worldScale = card.cardGameObject.transform.lossyScale;
 
-        // Reset position and scale
+        // Parent the card to the slot, but don't keep world position
+        card.cardGameObject.transform.SetParent(shopSlotParents[slotIndex], false);
+
+        // Snap to slot center
         card.cardGameObject.transform.localPosition = Vector3.zero;
-        card.cardGameObject.transform.localScale = Vector3.one;
 
-        // Activate the card
+        // Restore world scale so the card looks the same size as before
+        Vector3 parentScale = shopSlotParents[slotIndex].lossyScale;
+        card.cardGameObject.transform.localScale = new Vector3(
+            worldScale.x / parentScale.x,
+            worldScale.y / parentScale.y,
+            worldScale.z / parentScale.z
+        );
+
+        // Show the card
         card.cardGameObject.SetActive(true);
 
-        Debug.Log($"🃏 Activated {card.unitName} in slot {slotIndex}");
+        Debug.Log($"🃏 Activated {card.unitName} in slot {slotIndex}, preserved world scale {worldScale}");
     }
+
 
     public void RerollShop()
     {

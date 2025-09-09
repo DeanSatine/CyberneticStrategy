@@ -7,7 +7,6 @@ public class ShopUIManager : MonoBehaviour
 
     [Header("Shop Controls")]
     public Button rerollButton;
-    public TMPro.TMP_Text rerollCostText;
 
     private void Awake()
     {
@@ -22,23 +21,13 @@ public class ShopUIManager : MonoBehaviour
             rerollButton.onClick.AddListener(OnRerollClicked);
         }
 
-        // Update reroll cost display
-        UpdateRerollCostDisplay();
     }
 
     private void OnRerollClicked()
     {
         ShopManager.Instance.RerollShop();
-        UpdateRerollCostDisplay();
     }
 
-    private void UpdateRerollCostDisplay()
-    {
-        if (rerollCostText != null)
-        {
-            rerollCostText.text = $"Reroll (2g)";
-        }
-    }
 
     public void RefreshShopUI()
     {
