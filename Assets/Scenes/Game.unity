@@ -9534,7 +9534,7 @@ MonoBehaviour:
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
   m_Interactable: 1
-  m_TargetGraphic: {fileID: 0}
+  m_TargetGraphic: {fileID: 1152062990}
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
@@ -18784,7 +18784,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b813d7d2ac3b274291db8eddf359fb9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rerollButton: {fileID: 0}
+  rerollButton: {fileID: 458182523}
 --- !u!1 &952664372
 GameObject:
   m_ObjectHideFlags: 0
@@ -22456,10 +22456,10 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 458182522}
   - {fileID: 317237786}
   - {fileID: 957473997}
   - {fileID: 864950405}
-  - {fileID: 458182522}
   m_Father: {fileID: 949686860}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

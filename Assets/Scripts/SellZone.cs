@@ -143,8 +143,8 @@ public class SellZone : MonoBehaviour
         if (unitName.Contains("haymaker")) return 5;
         if (unitName.Contains("killswitch")) return 4;
         if (unitName.Contains("manadrive")) return 3;
-        if (unitName.Contains("needlebot")) return 2;
-        if (unitName.Contains("bop")) return 1;
+        if (unitName.Contains("needlebot")) return 1;
+        if (unitName.Contains("b.o.p")) return 2;
 
         // Default based on star level
         return unit.starLevel;
