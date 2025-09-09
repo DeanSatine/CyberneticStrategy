@@ -1,41 +1,37 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using System.Linq;
+using UnityEngine.UI;
 
 [System.Serializable]
-public class ShopCardReference
+public class ShopCard
 {
-    public string unitName;
-    public GameObject cardGameObject;  // Reference to existing card in hierarchy
-    public int tier;                   // 1-5, affects spawn rates
+    public GameObject cardPrefab;  // Drag your card prefabs here
+    public int cost;              // Set the cost for each card
+    public int tier;              // Determines when it appears (1-5)
 }
 
 public class ShopManager : MonoBehaviour
 {
     public static ShopManager Instance;
 
-    [Header("Existing Unit Cards")]
-    public ShopCardReference[] availableCards;
+    [Header("Card Setup - Drag your card prefabs here")]
+    public ShopCard[] availableCards;
 
     [Header("Shop Slots")]
     public Transform[] shopSlotParents;  // The 5 slot parent transforms
 
     [Header("Bench Settings")]
-    public Transform[] benchSlots; // assign your 9 bench slot transforms in inspector
+    public Transform[] benchSlots;
 
     [Header("Shop Settings")]
     [SerializeField] private int rerollCost = 2;
-    [SerializeField] private int unitsPerShop = 5;
+
+    // Track current shop instances
+    private List<GameObject> currentShopInstances = new List<GameObject>();
 
     private void Awake()
     {
         Instance = this;
-
-        // Auto-populate cards if not set up
-        if (availableCards == null || availableCards.Length == 0)
-        {
-            SetupCardsFromHierarchy();
-        }
     }
 
     private void Start()
@@ -43,72 +39,46 @@ public class ShopManager : MonoBehaviour
         GenerateShop();
     }
 
-    private void SetupCardsFromHierarchy()
-    {
-        // Find all ShopSlotUI components in the scene
-        ShopSlotUI[] allShopSlots = FindObjectsOfType<ShopSlotUI>();
-        List<ShopCardReference> foundCards = new List<ShopCardReference>();
-
-        foreach (var slot in allShopSlots)
-        {
-            string cardName = slot.gameObject.name;
-            int tier = DetermineTierFromName(cardName);
-
-            foundCards.Add(new ShopCardReference
-            {
-                unitName = cardName,
-                cardGameObject = slot.gameObject,
-                tier = tier
-            });
-        }
-
-        availableCards = foundCards.ToArray();
-        Debug.Log($"🔍 Auto-discovered {availableCards.Length} shop cards");
-    }
-
-    private int DetermineTierFromName(string cardName)
-    {
-        // Determine tier based on card name
-        string name = cardName.ToLower();
-        if (name.Contains("bop")) return 1;
-        if (name.Contains("needle")) return 2;
-        if (name.Contains("mana")) return 3;
-        if (name.Contains("kill")) return 4;
-        if (name.Contains("hay")) return 5;
-
-        return 1; // Default tier
-    }
-
     public void GenerateShop()
     {
         Debug.Log("🛒 Generating new shop...");
 
-        // First, deactivate all cards
-        foreach (var card in availableCards)
-        {
-            if (card.cardGameObject != null)
-                card.cardGameObject.SetActive(false);
-        }
+        // ✅ CLEAR existing shop first
+        ClearShop();
 
         // Get cards available for current stage
-        List<ShopCardReference> availableForStage = GetCardsForStage();
+        List<ShopCard> availableForStage = GetCardsForStage();
 
-        // Randomly select cards to show
-        List<ShopCardReference> selectedCards = SelectRandomCards(availableForStage, unitsPerShop);
+        // Randomly select 5 cards
+        List<ShopCard> selectedCards = SelectRandomCards(availableForStage, 5);
 
-        // Activate selected cards and position them in slots
+        // Instantiate selected cards in slots
         for (int i = 0; i < selectedCards.Count && i < shopSlotParents.Length; i++)
         {
-            ActivateCardInSlot(selectedCards[i], i);
+            InstantiateCardInSlot(selectedCards[i], i);
         }
 
         Debug.Log($"✅ Shop generated with {selectedCards.Count} units!");
     }
 
-    private List<ShopCardReference> GetCardsForStage()
+    // ✅ CRITICAL: This method clears the shop properly
+    private void ClearShop()
+    {
+        // Destroy all current shop card instances
+        foreach (GameObject cardInstance in currentShopInstances)
+        {
+            if (cardInstance != null)
+                Destroy(cardInstance);
+        }
+        currentShopInstances.Clear();
+
+        Debug.Log("🧹 Cleared existing shop cards");
+    }
+
+    private List<ShopCard> GetCardsForStage()
     {
         int stage = StageManager.Instance.currentStage;
-        List<ShopCardReference> availableForStage = new List<ShopCardReference>();
+        List<ShopCard> availableForStage = new List<ShopCard>();
 
         foreach (var card in availableCards)
         {
@@ -175,55 +145,73 @@ public class ShopManager : MonoBehaviour
         }
     }
 
-    private List<ShopCardReference> SelectRandomCards(List<ShopCardReference> available, int count)
+    private List<ShopCard> SelectRandomCards(List<ShopCard> available, int count)
     {
-        List<ShopCardReference> selected = new List<ShopCardReference>();
-        List<ShopCardReference> pool = new List<ShopCardReference>(available);
+        List<ShopCard> selected = new List<ShopCard>();
+        List<ShopCard> pool = new List<ShopCard>(available);
 
         for (int i = 0; i < count && pool.Count > 0; i++)
         {
             int randomIndex = Random.Range(0, pool.Count);
-            ShopCardReference selectedCard = pool[randomIndex];
+            ShopCard selectedCard = pool[randomIndex];
             selected.Add(selectedCard);
 
-            // Remove all instances of this card from pool to avoid duplicates
-            pool.RemoveAll(card => card.cardGameObject == selectedCard.cardGameObject);
+            // Remove all instances of this card type from pool to avoid duplicates
+            pool.RemoveAll(card => card.cardPrefab == selectedCard.cardPrefab);
         }
 
         return selected;
     }
 
-    private void ActivateCardInSlot(ShopCardReference card, int slotIndex)
+    private void InstantiateCardInSlot(ShopCard shopCard, int slotIndex)
     {
-        if (card.cardGameObject == null || slotIndex >= shopSlotParents.Length)
+        if (shopCard.cardPrefab == null || slotIndex >= shopSlotParents.Length)
             return;
 
-        // Remember original world scale before moving
-        Vector3 worldScale = card.cardGameObject.transform.lossyScale;
+        // Instantiate the card
+        GameObject cardInstance = Instantiate(shopCard.cardPrefab, shopSlotParents[slotIndex]);
+        cardInstance.transform.localRotation = Quaternion.identity;
 
-        // Parent the card to the slot, but don't keep world position
-        card.cardGameObject.transform.SetParent(shopSlotParents[slotIndex], false);
+        // Set the cost on the ShopSlotUI component
+        ShopSlotUI shopSlotUI = cardInstance.GetComponent<ShopSlotUI>();
+        if (shopSlotUI != null)
+        {
+            shopSlotUI.cost = shopCard.cost;
 
-        // Snap to slot center
-        card.cardGameObject.transform.localPosition = Vector3.zero;
+            // Ensure button is connected
+            if (shopSlotUI.buyButton == null)
+            {
+                Button cardButton = cardInstance.GetComponent<Button>();
+                if (cardButton == null)
+                    cardButton = cardInstance.GetComponentInChildren<Button>();
 
-        // Restore world scale so the card looks the same size as before
-        Vector3 parentScale = shopSlotParents[slotIndex].lossyScale;
-        card.cardGameObject.transform.localScale = new Vector3(
-            worldScale.x / parentScale.x,
-            worldScale.y / parentScale.y,
-            worldScale.z / parentScale.z
-        );
+                if (cardButton != null)
+                {
+                    shopSlotUI.buyButton = cardButton;
+                    cardButton.onClick.RemoveAllListeners();
+                    cardButton.onClick.AddListener(() => shopSlotUI.OnBuyClicked());
+                }
+                else
+                {
+                    cardButton = cardInstance.AddComponent<Button>();
+                    shopSlotUI.buyButton = cardButton;
+                    cardButton.onClick.AddListener(() => shopSlotUI.OnBuyClicked());
+                }
+            }
+        }
 
-        // Show the card
-        card.cardGameObject.SetActive(true);
+        // Activate and track the card
+        cardInstance.SetActive(true);
+        currentShopInstances.Add(cardInstance);
 
-        Debug.Log($"🃏 Activated {card.unitName} in slot {slotIndex}, preserved world scale {worldScale}");
+        Debug.Log($"🃏 Instantiated {shopCard.cardPrefab.name} in slot {slotIndex} (Cost: {shopCard.cost})");
     }
 
-
+    // ✅ REROLL: This now properly clears and regenerates
     public void RerollShop()
     {
+        Debug.Log("🎲 RerollShop method called!");
+
         if (!EconomyManager.Instance.SpendGold(rerollCost))
         {
             Debug.Log("💸 Not enough gold to reroll shop!");
@@ -231,7 +219,7 @@ public class ShopManager : MonoBehaviour
         }
 
         Debug.Log($"🎲 Rerolling shop for {rerollCost} gold...");
-        GenerateShop();
+        GenerateShop(); // This now clears first, then generates new
     }
 
     public void TryBuyUnit(ShopSlotUI slot)
@@ -256,7 +244,6 @@ public class ShopManager : MonoBehaviour
         if (freeSlot == null)
         {
             Debug.Log("🪑 Bench is full!");
-            // Refund the gold
             EconomyManager.Instance.AddGold(slot.cost);
             return;
         }
@@ -268,24 +255,11 @@ public class ShopManager : MonoBehaviour
 
         Debug.Log($"✅ Bought {slot.unitPrefab.name} for {slot.cost} gold, placed on bench!");
 
-        // Hide the bought card from shop
-        slot.gameObject.SetActive(false);
-    }
-
-    // Public methods for UI
-    public void OnRerollButtonClicked()
-    {
-        RerollShop();
-    }
-
-    public void RefreshShop()
-    {
-        GenerateShop();
-    }
-
-    // Legacy compatibility
-    public void FillShop(ShopSlotUI[] slots)
-    {
-        GenerateShop();
+        // Remove the bought card from shop by destroying it
+        if (currentShopInstances.Contains(slot.gameObject))
+        {
+            currentShopInstances.Remove(slot.gameObject);
+        }
+        Destroy(slot.gameObject);
     }
 }

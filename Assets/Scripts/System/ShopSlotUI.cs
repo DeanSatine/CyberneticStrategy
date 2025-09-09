@@ -16,7 +16,7 @@ public class ShopSlotUI : MonoBehaviour
             buyButton.onClick.AddListener(OnBuyClicked);
     }
 
-    private void OnBuyClicked()
+    public void OnBuyClicked()
     {
         ShopManager.Instance.TryBuyUnit(this);
     }

@@ -3326,19 +3326,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 159670010}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 2052790677}
-        m_TargetAssemblyTypeName: ShopManager, Assembly-CSharp
-        m_MethodName: BuyUnit
-        m_Mode: 3
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 5
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &159670010
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6223,7 +6211,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0.82699966, y: -22.0091}
+  m_AnchoredPosition: {x: 0.8270035, y: -22.0091}
   m_SizeDelta: {x: 101.6538, y: 148.403}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &317237787
@@ -6240,7 +6228,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 0, g: 0, b: 0, a: 0.6313726}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -10063,19 +10051,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 511206204}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 2052790677}
-        m_TargetAssemblyTypeName: ShopManager, Assembly-CSharp
-        m_MethodName: BuyUnit
-        m_Mode: 3
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 5
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &511206204
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15764,19 +15740,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 794683510}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 2052790677}
-        m_TargetAssemblyTypeName: ShopManager, Assembly-CSharp
-        m_MethodName: BuyUnit
-        m_Mode: 3
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 5
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &794683510
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -22448,7 +22412,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 2052790677}
         m_TargetAssemblyTypeName: ShopManager, Assembly-CSharp
-        m_MethodName: RefreshShop
+        m_MethodName: RerollShop
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -23899,19 +23863,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1235995897}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 2052790677}
-        m_TargetAssemblyTypeName: ShopManager, Assembly-CSharp
-        m_MethodName: BuyUnit
-        m_Mode: 3
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 5
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &1235995897
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -28096,19 +28048,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1514638931}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 2052790677}
-        m_TargetAssemblyTypeName: ShopManager, Assembly-CSharp
-        m_MethodName: BuyUnit
-        m_Mode: 3
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 5
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &1514638931
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -36003,19 +35943,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2038669325}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 2052790677}
-        m_TargetAssemblyTypeName: ShopManager, Assembly-CSharp
-        m_MethodName: BuyUnit
-        m_Mode: 3
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 5
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &2038669325
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -36363,87 +36291,87 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2052790673}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: aefc1f0a494deb74797a595b93001539, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   availableCards:
-  - unitName: HayMaker
-    cardGameObject: {fileID: 1748140687}
+  - cardPrefab: {fileID: 1235995893}
+    cost: 5
     tier: 5
-  - unitName: BOP
-    cardGameObject: {fileID: 1748140687}
-    tier: 2
-  - unitName: KillSwitch
-    cardGameObject: {fileID: 1906178258}
+  - cardPrefab: {fileID: 1906178258}
+    cost: 4
     tier: 4
-  - unitName: ManaDrive
-    cardGameObject: {fileID: 1495879679}
+  - cardPrefab: {fileID: 1495879679}
+    cost: 3
     tier: 3
-  - unitName: NeedleBot
-    cardGameObject: {fileID: 1303329878}
-    tier: 1
-  - unitName: Haymaker
-    cardGameObject: {fileID: 511206200}
-    tier: 5
-  - unitName: BOP
-    cardGameObject: {fileID: 380678316}
+  - cardPrefab: {fileID: 1748140687}
+    cost: 2
     tier: 2
-  - unitName: NeedleBot
-    cardGameObject: {fileID: 1862543580}
+  - cardPrefab: {fileID: 1303329878}
+    cost: 1
     tier: 1
-  - unitName: ManaDrive
-    cardGameObject: {fileID: 548275730}
-    tier: 3
-  - unitName: HayMaker
-    cardGameObject: {fileID: 159670006}
+  - cardPrefab: {fileID: 511206200}
+    cost: 5
     tier: 5
-  - unitName: NeedleBot
-    cardGameObject: {fileID: 1783982420}
-    tier: 1
-  - unitName: KillSwitch
-    cardGameObject: {fileID: 1868294722}
+  - cardPrefab: {fileID: 1076824555}
+    cost: 4
     tier: 4
-  - unitName: Manadrive
-    cardGameObject: {fileID: 73584958}
+  - cardPrefab: {fileID: 548275730}
+    cost: 3
     tier: 3
-  - unitName: BOP
-    cardGameObject: {fileID: 1474986655}
+  - cardPrefab: {fileID: 380678316}
+    cost: 2
     tier: 2
-  - unitName: HayMaker
-    cardGameObject: {fileID: 794683506}
-    tier: 5
-  - unitName: KillSwitch
-    cardGameObject: {fileID: 878346651}
-    tier: 4
-  - unitName: ManaDrive
-    cardGameObject: {fileID: 195479046}
-    tier: 3
-  - unitName: BOP
-    cardGameObject: {fileID: 390185301}
-    tier: 2
-  - unitName: NeedleBot
-    cardGameObject: {fileID: 1907624680}
+  - cardPrefab: {fileID: 1862543580}
+    cost: 1
     tier: 1
-  - unitName: KillSwitch
-    cardGameObject: {fileID: 1262689411}
+  - cardPrefab: {fileID: 159670006}
+    cost: 5
     tier: 5
-  - unitName: ManaDrive
-    cardGameObject: {fileID: 2050911492}
-    tier: 3
-  - unitName: BOP
-    cardGameObject: {fileID: 989601940}
-    tier: 2
-  - unitName: NeedleBot
-    cardGameObject: {fileID: 606818812}
-    tier: 1
-  - unitName: HayMaker
-    cardGameObject: {fileID: 2038669322}
-    tier: 5
-  - unitName: KillSwitch
-    cardGameObject: {fileID: 1076824555}
+  - cardPrefab: {fileID: 1868294722}
+    cost: 4
     tier: 4
+  - cardPrefab: {fileID: 73584958}
+    cost: 3
+    tier: 3
+  - cardPrefab: {fileID: 1474986655}
+    cost: 2
+    tier: 2
+  - cardPrefab: {fileID: 1783982420}
+    cost: 1
+    tier: 1
+  - cardPrefab: {fileID: 794683506}
+    cost: 5
+    tier: 5
+  - cardPrefab: {fileID: 878346651}
+    cost: 4
+    tier: 4
+  - cardPrefab: {fileID: 195479046}
+    cost: 3
+    tier: 3
+  - cardPrefab: {fileID: 390185301}
+    cost: 2
+    tier: 2
+  - cardPrefab: {fileID: 1907624680}
+    cost: 1
+    tier: 1
+  - cardPrefab: {fileID: 2038669322}
+    cost: 5
+    tier: 5
+  - cardPrefab: {fileID: 1262689411}
+    cost: 4
+    tier: 4
+  - cardPrefab: {fileID: 2050911492}
+    cost: 3
+    tier: 3
+  - cardPrefab: {fileID: 989601940}
+    cost: 2
+    tier: 2
+  - cardPrefab: {fileID: 606818812}
+    cost: 1
+    tier: 1
   shopSlotParents:
   - {fileID: 1704590731}
   - {fileID: 704649754}
@@ -36461,7 +36389,6 @@ MonoBehaviour:
   - {fileID: 1144176909}
   - {fileID: 1899137417}
   rerollCost: 2
-  unitsPerShop: 5
 --- !u!1 &2054099518
 GameObject:
   m_ObjectHideFlags: 0
@@ -36693,7 +36620,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &2072945873
 RectTransform:
   m_ObjectHideFlags: 0
