@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 1559216468072176890}
   - component: {fileID: 665439209610736958}
   m_Layer: 0
-  m_Name: Sparks explode yellow
+  m_Name: StarUpVFX
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

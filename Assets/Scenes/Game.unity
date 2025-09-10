@@ -12198,7 +12198,7 @@ GameObject:
   - component: {fileID: 606818815}
   - component: {fileID: 606818814}
   m_Layer: 5
-  m_Name: NeedleBotCard  (1)
+  m_Name: Needlebot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -18519,7 +18519,7 @@ GameObject:
   - component: {fileID: 945965101}
   - component: {fileID: 945965100}
   m_Layer: 5
-  m_Name: NeedleBotCard  (2)
+  m_Name: Needlebot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -24794,7 +24794,7 @@ GameObject:
   - component: {fileID: 1303329881}
   - component: {fileID: 1303329880}
   m_Layer: 5
-  m_Name: NeedleBotCard  (1)
+  m_Name: Needlebot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -31360,7 +31360,7 @@ GameObject:
   - component: {fileID: 1783982423}
   - component: {fileID: 1783982422}
   m_Layer: 5
-  m_Name: NeedleBotCard  (3)
+  m_Name: Needlebot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -32643,7 +32643,7 @@ GameObject:
   - component: {fileID: 1862543583}
   - component: {fileID: 1862543582}
   m_Layer: 5
-  m_Name: NeedleBotCard  (2)
+  m_Name: Needlebot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -34050,7 +34050,7 @@ GameObject:
   - component: {fileID: 1907624682}
   - component: {fileID: 1907624685}
   m_Layer: 5
-  m_Name: 'NeedleBotCard '
+  m_Name: Needlebot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -37937,6 +37937,12 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 835031862}
     m_Modifications:
+    - target: {fileID: 733270962967138839, guid: 0b88a13b667b65a49b6fe796211de552,
+        type: 3}
+      propertyPath: starUpVFXPrefab
+      value: 
+      objectReference: {fileID: 496913248247719083, guid: c483142edbf33dc4d9014c13724a0175,
+        type: 3}
     - target: {fileID: 733270962967138839, guid: 0b88a13b667b65a49b6fe796211de552,
         type: 3}
       propertyPath: playerUnits.Array.size

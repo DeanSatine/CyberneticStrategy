@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -7,6 +8,9 @@ public class GameManager : MonoBehaviour
 
     public List<UnitAI> playerUnits = new List<UnitAI>();
     private List<UnitAI> enemyUnits = new List<UnitAI>();
+
+    [Header("Merge VFX")]
+    public GameObject starUpVFXPrefab;
 
     private void Awake()
     {
@@ -33,6 +37,35 @@ public class GameManager : MonoBehaviour
     {
         playerUnits.Remove(unit);
         enemyUnits.Remove(unit);
+    }
+
+    // --- Try merging when a new unit is bought ---
+    public void TryMergeUnits(UnitAI newUnit)
+    {
+        Debug.Log($"🔎 Checking for merge on {newUnit.unitName} (star {newUnit.starLevel})");
+
+        foreach (var u in playerUnits)
+        {
+            Debug.Log($"   -> {u.unitName}, star {u.starLevel}");
+        }
+
+        var sameUnits = playerUnits
+            .Where(u => u.unitName == newUnit.unitName && u.starLevel == newUnit.starLevel)
+            .ToList();
+
+        if (sameUnits.Count >= 3)
+        {
+            UnitAI upgradedUnit = sameUnits[0];
+            upgradedUnit.UpgradeStarLevel();
+
+            // Remove the other two
+            for (int i = 1; i < 3; i++)
+            {
+                UnitAI unitToRemove = sameUnits[i];
+                playerUnits.Remove(unitToRemove);
+                Destroy(unitToRemove.gameObject);
+            }
+        }
     }
 
     // --- Access ---

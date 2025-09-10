@@ -253,7 +253,12 @@ public class ShopManager : MonoBehaviour
         unit.transform.rotation = Quaternion.Euler(0f, -90f, 0f);
         unit.transform.SetParent(freeSlot);
 
+        UnitAI newUnit = unit.GetComponent<UnitAI>();
+
         Debug.Log($"✅ Bought {slot.unitPrefab.name} for {slot.cost} gold, placed on bench!");
+
+        // 🔹 Check for merging
+        GameManager.Instance.TryMergeUnits(newUnit);
 
         // Remove the bought card from shop by destroying it
         if (currentShopInstances.Contains(slot.gameObject))

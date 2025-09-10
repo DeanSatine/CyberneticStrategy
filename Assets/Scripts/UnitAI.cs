@@ -87,6 +87,24 @@ public class UnitAI : MonoBehaviour
     private bool hasReachedDestination = true;
     [HideInInspector] public HexTile startingTile; // where the unit was before combat
 
+    [Header("Star Upgrade")]
+    [Tooltip("Multiplier applied to stats on 2-star (e.g. 1.8)")]
+
+    public float twoStarMultiplier = 1.8f;
+
+    [Tooltip("Multiplier applied to stats on 3-star (e.g. 2.5)")]
+
+    public float threeStarMultiplier = 2.5f;
+
+    [Tooltip("Scale at 2-star (relative to base)")]
+
+    public float twoStarScale = 1.10f;
+
+    [Tooltip("Scale at 3-star (relative to base)")]
+
+    public float threeStarScale = 1.25f;
+
+    private Vector3 baseScale;
     public UnitState currentState
     {
         get => _currentState;
@@ -115,7 +133,10 @@ public class UnitAI : MonoBehaviour
     private void Awake()
     {
         animator = GetComponent<Animator>();
+
+        baseScale = transform.localScale;
     }
+
 
     private void Start()
     {
@@ -781,6 +802,41 @@ public class UnitAI : MonoBehaviour
             if (animator) animator.SetBool("IsRunning", false);
         }
     }
+    // ⭐ Upgrade Star Level (called from GameManager when merging)
+    public void UpgradeStarLevel()
+    {
+        if (starLevel >= 3)
+        {
+            Debug.Log($"[Upgrade] {unitName} already at max star ({starLevel})");
+            return;
+        }
+
+        int oldStar = starLevel;
+        starLevel++;
+
+        float multiplier = (starLevel == 2) ? twoStarMultiplier : threeStarMultiplier;
+        maxHealth = Mathf.Round(maxHealth * multiplier);
+        attackDamage = Mathf.Round(attackDamage * multiplier);
+        currentHealth = maxHealth;
+
+        // Apply fixed scale relative to base
+        if (starLevel == 2) transform.localScale = baseScale * twoStarScale;
+        else if (starLevel == 3) transform.localScale = baseScale * threeStarScale;
+
+        // Spawn VFX if prefab assigned in GameManager
+        if (GameManager.Instance != null && GameManager.Instance.starUpVFXPrefab != null)
+        {
+            var vfx = Instantiate(GameManager.Instance.starUpVFXPrefab, transform.position + Vector3.up * 1.2f, Quaternion.identity);
+            Destroy(vfx, 3f);
+        }
+
+        // Update UI
+        if (ui != null)
+            ui.UpdateHealth(currentHealth);
+
+        Debug.Log($"[Upgrade] {unitName} {oldStar}★ -> {starLevel}★. HP: {maxHealth}, AD: {attackDamage}");
+    }
+
 
     // ✅ Helper method for alternative movement
     private Vector3 FindAlternativeDirection(Vector3 blockedDirection)
