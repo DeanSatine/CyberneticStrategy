@@ -36309,7 +36309,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c514caf8a440976428b53a6bedec7b9d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startingGold: 20
+  startingGold: 3
   currentGold: 0
   goldText: {fileID: 957988388}
   gainColor: {r: 0, g: 1, b: 0, a: 1}
