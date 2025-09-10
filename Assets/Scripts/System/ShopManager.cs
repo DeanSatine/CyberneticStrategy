@@ -255,9 +255,12 @@ public class ShopManager : MonoBehaviour
 
         UnitAI newUnit = unit.GetComponent<UnitAI>();
 
+        // ✅ Register new unit with GameManager so it's tracked
+        GameManager.Instance.RegisterUnit(newUnit, true);
+
         Debug.Log($"✅ Bought {slot.unitPrefab.name} for {slot.cost} gold, placed on bench!");
 
-        // 🔹 Check for merging
+        // ✅ Now merging will work
         GameManager.Instance.TryMergeUnits(newUnit);
 
         // Remove the bought card from shop by destroying it

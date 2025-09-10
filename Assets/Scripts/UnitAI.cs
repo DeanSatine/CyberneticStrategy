@@ -134,8 +134,10 @@ public class UnitAI : MonoBehaviour
     {
         animator = GetComponent<Animator>();
 
-        baseScale = transform.localScale;
+        // Ensure uniform scaling baseline
+        baseScale = Vector3.one;
     }
+
 
 
     private void Start()
@@ -818,10 +820,12 @@ public class UnitAI : MonoBehaviour
         maxHealth = Mathf.Round(maxHealth * multiplier);
         attackDamage = Mathf.Round(attackDamage * multiplier);
         currentHealth = maxHealth;
+    
+        if (starLevel == 2)
+            transform.localScale = new Vector3(1, 70, 1); // 2-star size
+        else if (starLevel == 3)
+            transform.localScale = new Vector3(125, 125, 125); // 3-star size
 
-        // Apply fixed scale relative to base
-        if (starLevel == 2) transform.localScale = baseScale * twoStarScale;
-        else if (starLevel == 3) transform.localScale = baseScale * threeStarScale;
 
         // Spawn VFX if prefab assigned in GameManager
         if (GameManager.Instance != null && GameManager.Instance.starUpVFXPrefab != null)
