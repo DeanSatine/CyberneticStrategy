@@ -139,7 +139,6 @@ public class UnitAI : MonoBehaviour
     }
 
 
-
     private void Start()
     {
         float offsetRange = 0.2f; // tweak this for spacing
@@ -805,6 +804,8 @@ public class UnitAI : MonoBehaviour
         }
     }
     // ⭐ Upgrade Star Level (called from GameManager when merging)
+    // ⭐ Upgrade Star Level (called from GameManager when merging)
+    // ⭐ Upgrade Star Level (called from GameManager when merging)
     public void UpgradeStarLevel()
     {
         if (starLevel >= 3)
@@ -820,14 +821,58 @@ public class UnitAI : MonoBehaviour
         maxHealth = Mathf.Round(maxHealth * multiplier);
         attackDamage = Mathf.Round(attackDamage * multiplier);
         currentHealth = maxHealth;
-    
+
+        // 📏 Force scaling rules by unit name
         if (starLevel == 2)
-            transform.localScale = new Vector3(1, 70, 1); // 2-star size
+        {
+            switch (unitName)
+            {
+                case "Needlebot":
+                    transform.localScale = new Vector3(1, 70, 1);
+                    break;
+                case "Bop":
+                    transform.localScale = new Vector3(1.1f, 1.1f, 1.1f);
+                    break;
+                case "ManaDrive":
+                    transform.localScale = new Vector3(115, 115, 115);
+                    break;
+                case "KillSwitch":
+                    transform.localScale = new Vector3(1.15f, 1.15f, 1.15f);
+                    break;
+                case "Haymaker":
+                    transform.localScale = new Vector3(1.1f, 120, 1.1f);
+                    break;
+                default:
+                    transform.localScale = baseScale * 1.1f; // fallback for other units
+                    break;
+            }
+        }
         else if (starLevel == 3)
-            transform.localScale = new Vector3(125, 125, 125); // 3-star size
+        {
+            switch (unitName)
+            {
+                case "Needlebot":
+                    transform.localScale = new Vector3(125, 125, 125);
+                    break;
+                case "Bop":
+                    transform.localScale = new Vector3(1.25f, 1.25f, 1.25f);
+                    break;
+                case "ManaDrive":
+                    transform.localScale = new Vector3(130, 130, 130);
+                    break;
+                case "KillSwitch":
+                    transform.localScale = new Vector3(1.3f, 1.3f, 1.3f);
+                    break;
+                case "Haymaker":
+                    transform.localScale = new Vector3(140, 140, 140);
+                    break;
+                default:
+                    transform.localScale = baseScale * 1.25f; // fallback for other units
+                    break;
+            }
+        }
 
-
-        // Spawn VFX if prefab assigned in GameManager
+        // Spawn VFX if prefab assigned
         if (GameManager.Instance != null && GameManager.Instance.starUpVFXPrefab != null)
         {
             var vfx = Instantiate(GameManager.Instance.starUpVFXPrefab, transform.position + Vector3.up * 1.2f, Quaternion.identity);
@@ -840,6 +885,8 @@ public class UnitAI : MonoBehaviour
 
         Debug.Log($"[Upgrade] {unitName} {oldStar}★ -> {starLevel}★. HP: {maxHealth}, AD: {attackDamage}");
     }
+
+
 
 
     // ✅ Helper method for alternative movement
