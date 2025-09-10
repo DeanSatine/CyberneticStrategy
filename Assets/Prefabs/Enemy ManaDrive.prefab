@@ -349,7 +349,7 @@ MonoBehaviour:
   attackDamage: 30
   attackSpeed: 0.8
   armor: 20
-  attackRange: 4
+  attackRange: 6
   mana: 0
   maxMana: 40
   currentMana: 0
@@ -363,6 +363,7 @@ MonoBehaviour:
   projectileSpeed: 15
   unitUIPrefab: {fileID: 6939982145822855837, guid: 63931d92c48ef65418d45ec02069a522,
     type: 3}
+  ui: {fileID: 0}
   animator: {fileID: 0}
   currentTarget: {fileID: 0}
   unitRadius: 0.6
@@ -380,6 +381,10 @@ MonoBehaviour:
   moveOffsetRange: 0.2
   deathAnimLength: 1.2
   startingTile: {fileID: 0}
+  twoStarMultiplier: 1.8
+  threeStarMultiplier: 2.5
+  twoStarScale: 1.1
+  threeStarScale: 1.25
 --- !u!114 &1845309957721737311
 MonoBehaviour:
   m_ObjectHideFlags: 0
