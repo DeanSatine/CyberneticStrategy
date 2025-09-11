@@ -828,19 +828,19 @@ public class UnitAI : MonoBehaviour
             switch (unitName)
             {
                 case "Needlebot":
-                    transform.localScale = new Vector3(1, 70, 1);
+                    transform.localScale = new Vector3(0.8f,65, 0.8f);
                     break;
-                case "Bop":
-                    transform.localScale = new Vector3(1.1f, 1.1f, 1.1f);
+                case "BOP":
+                    transform.localScale = new Vector3(1.3f, 105f, 1.3f);
                     break;
                 case "ManaDrive":
-                    transform.localScale = new Vector3(115, 115, 115);
+                    transform.localScale = new Vector3(0.75f, 60, 0.75f);
                     break;
                 case "KillSwitch":
-                    transform.localScale = new Vector3(1.15f, 1.15f, 1.15f);
+                    transform.localScale = new Vector3(1.3f, 90, 1.3f);
                     break;
                 case "Haymaker":
-                    transform.localScale = new Vector3(1.1f, 120, 1.1f);
+                    transform.localScale = new Vector3(1.3f, 105, 1.3f);
                     break;
                 default:
                     transform.localScale = baseScale * 1.1f; // fallback for other units
@@ -876,7 +876,7 @@ public class UnitAI : MonoBehaviour
         if (GameManager.Instance != null && GameManager.Instance.starUpVFXPrefab != null)
         {
             var vfx = Instantiate(GameManager.Instance.starUpVFXPrefab, transform.position + Vector3.up * 1.2f, Quaternion.identity);
-            Destroy(vfx, 3f);
+            Destroy(vfx, 1f);
         }
 
         // Update UI
