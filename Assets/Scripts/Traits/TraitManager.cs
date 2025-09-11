@@ -72,8 +72,19 @@ public class TraitManager : MonoBehaviour
     {
         Dictionary<Trait, int> counts = new Dictionary<Trait, int>();
 
+        // Track which unit types have already contributed
+        HashSet<string> contributedUnits = new HashSet<string>();
+
         foreach (var unit in units)
         {
+            if (unit == null) continue;
+
+            // Skip if we've already counted this unit type (by name)
+            if (contributedUnits.Contains(unit.unitName))
+                continue;
+
+            contributedUnits.Add(unit.unitName);
+
             foreach (var trait in unit.traits)
             {
                 if (!counts.ContainsKey(trait))
@@ -85,6 +96,7 @@ public class TraitManager : MonoBehaviour
 
         return counts;
     }
+
     public bool IsTraitActive(Trait trait, int count)
     {
         switch (trait)
@@ -156,10 +168,18 @@ public class TraitManager : MonoBehaviour
     public void EvaluateTraits(List<UnitAI> playerUnits)
     {
         Dictionary<Trait, int> traitCounts = new Dictionary<Trait, int>();
+        HashSet<string> contributedUnits = new HashSet<string>();
 
         foreach (var unit in playerUnits)
         {
             if (unit == null) continue;
+
+            // Skip if we've already counted this unit type (by name)
+            if (contributedUnits.Contains(unit.unitName))
+                continue;
+
+            contributedUnits.Add(unit.unitName);
+
             foreach (var trait in unit.traits)
             {
                 if (!traitCounts.ContainsKey(trait))
