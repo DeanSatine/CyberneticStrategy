@@ -172,7 +172,17 @@ public class UnitAI : MonoBehaviour
         if (currentTarget == null || !currentTarget.GetComponent<UnitAI>().isAlive)
         {
             currentTarget = FindNearestEnemy();
-            currentPath.Clear(); // ✅ recalc path on new target
+            currentPath.Clear();
+        }
+        else
+        {
+            // ✅ If target is alive but too far, recheck periodically
+            float dist = Vector3.Distance(transform.position, currentTarget.position);
+            if (dist > attackRange * 2f) // tweak multiplier if needed
+            {
+                currentTarget = FindNearestEnemy();
+                currentPath.Clear();
+            }
         }
 
         if (currentTarget != null && canAttack)
@@ -273,7 +283,10 @@ public class UnitAI : MonoBehaviour
             yield return null;
         }
 
-        if (proj != null) Destroy(proj);
+        if (proj != null)
+        {
+            Destroy(proj);
+        }
     }
     public void AssignToTile(HexTile tile)
     {
@@ -497,6 +510,7 @@ public class UnitAI : MonoBehaviour
     {
         yield return new WaitForSeconds(delay);
         isCastingAbility = false;
+        StopAllCoroutines(); 
     }
 
 
@@ -645,6 +659,10 @@ public class UnitAI : MonoBehaviour
             animator.SetBool("IsRunning", false);
             animator.ResetTrigger("AttackTrigger");
             animator.ResetTrigger("AbilityTrigger");
+
+            // ✅ Hard reset animator to prevent frozen states
+            animator.Rebind();
+            animator.Update(0f);
         }
 
         // reset UI bars
