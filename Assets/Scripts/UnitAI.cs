@@ -268,17 +268,19 @@ public class UnitAI : MonoBehaviour
     {
         while (proj != null && target != null && target.isAlive)
         {
+            // ✅ Stop if target is benched
+            if (target.currentState == UnitState.Bench)
+            {
+                Destroy(proj);
+                yield break;
+            }
+
             Vector3 dir = (target.transform.position + Vector3.up * 1.2f) - proj.transform.position;
             proj.transform.position += dir.normalized * projectileSpeed * Time.deltaTime;
 
             if (dir.magnitude < 0.2f) // impact
             {
                 target.TakeDamage(attackDamage);
-
-                // Optional: spawn hit VFX
-                // GameObject impact = Instantiate(impactVFX, target.transform.position, Quaternion.identity);
-                // Destroy(impact, 1f);
-
                 Destroy(proj);
                 yield break;
             }
@@ -286,11 +288,9 @@ public class UnitAI : MonoBehaviour
             yield return null;
         }
 
-        if (proj != null)
-        {
-            Destroy(proj);
-        }
+        if (proj != null) Destroy(proj);
     }
+
     public void AssignToTile(HexTile tile)
     {
         if (tile == null) return;
@@ -350,11 +350,19 @@ public class UnitAI : MonoBehaviour
 
     public void TakeDamage(float damage)
     {
+        // ✅ Benched units cannot take damage
+        if (currentState == UnitState.Bench)
+        {
+            Debug.Log($"🚫 {unitName} is benched and ignored damage.");
+            return;
+        }
+
         float reducedDamage = damage * (1f - (armor * 0.005f));
         currentHealth -= reducedDamage;
         GainMana(1);
 
         Debug.Log($"{unitName} took {reducedDamage} damage. HP: {currentHealth}/{maxHealth}");
+
         if (ui != null)
             ui.UpdateHealth(currentHealth);   // ✅ refresh bar
 
@@ -528,24 +536,37 @@ public class UnitAI : MonoBehaviour
     private Transform FindNearestEnemy()
     {
         UnitAI[] allUnits = FindObjectsOfType<UnitAI>();
-        Transform nearest = null;
-        float minDist = Mathf.Infinity;
+        Transform bestTarget = null;
+        float bestScore = Mathf.Infinity;
 
         foreach (var unit in allUnits)
         {
             if (unit == this || !unit.isAlive) continue;
-            if (unit.team == this.team) continue; // don’t target allies
-            if (unit.currentState == UnitState.Bench) continue; // ✅ skip benched units
+            if (unit.team == this.team) continue;
+            if (unit.currentState != UnitState.Combat) continue; // ✅ skip benched
 
             float dist = Vector3.Distance(transform.position, unit.transform.position);
-            if (dist < minDist)
+
+            // ✅ Add targeting bias
+            float bias = 0f;
+
+            // Prefer melee units
+            if (unit.unitName == "Bop" || unit.unitName == "KillSwitch" || unit.unitName == "Haymaker")
+                bias -= 3f; // lower score = more likely to be picked
+
+            float score = dist + bias;
+
+            if (score < bestScore)
             {
-                minDist = dist;
-                nearest = unit.transform;
+                bestScore = score;
+                bestTarget = unit.transform;
             }
         }
-        return nearest;
+
+        return bestTarget;
     }
+
+
     public UnitAI GetCurrentTarget()
     {
         return currentTarget != null ? currentTarget.GetComponent<UnitAI>() : null;
