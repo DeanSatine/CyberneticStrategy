@@ -169,11 +169,14 @@ public class UnitAI : MonoBehaviour
 
         attackCooldown -= Time.deltaTime;
 
-        if (currentTarget == null || !currentTarget.GetComponent<UnitAI>().isAlive)
+        if (currentTarget == null
+            || !currentTarget.GetComponent<UnitAI>().isAlive
+            || currentTarget.GetComponent<UnitAI>().currentState == UnitState.Bench) // ✅ skip benched
         {
             currentTarget = FindNearestEnemy();
-            currentPath.Clear();
+            currentPath.Clear(); // ✅ recalc path on new target
         }
+
         else
         {
             // ✅ If target is alive but too far, recheck periodically
@@ -325,6 +328,8 @@ public class UnitAI : MonoBehaviour
     {
         if (currentTarget != null && currentTarget.TryGetComponent(out UnitAI enemy))
         {
+            if (enemy.currentState == UnitState.Bench) return; // ✅ ignore benched units
+
             if (projectilePrefab != null)
             {
                 SpawnProjectile(enemy);
@@ -529,7 +534,8 @@ public class UnitAI : MonoBehaviour
         foreach (var unit in allUnits)
         {
             if (unit == this || !unit.isAlive) continue;
-            if (unit.team == this.team) continue; // ✅ don’t target allies
+            if (unit.team == this.team) continue; // don’t target allies
+            if (unit.currentState == UnitState.Bench) continue; // ✅ skip benched units
 
             float dist = Vector3.Distance(transform.position, unit.transform.position);
             if (dist < minDist)
