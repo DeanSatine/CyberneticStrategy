@@ -37,14 +37,26 @@ public class TraitManager : MonoBehaviour
     [Header("Strikebyte")]
     public int strikebyteThreshold2 = 2;
     public int strikebyteThreshold3 = 3;
+    public int strikebyteThreshold4 = 4;
+
+    // --- Damage Ramping ---
     public float strikebyteRampDamageAmp2 = 1f;
     public float strikebyteRampDamageAmp3 = 2f;
+    public float strikebyteRampDamageAmp4 = 3f;
+
     public float strikebyteMaxDamageAmp2 = 15f;
     public float strikebyteMaxDamageAmp3 = 25f;
+    public float strikebyteMaxDamageAmp4 = 30f;
+
+    // --- Attack Speed Ramping ---
     public float strikebyteRampAS2 = 0.05f;
     public float strikebyteRampAS3 = 0.10f;
+    public float strikebyteRampAS4 = 0.15f;
+
     public float strikebyteMaxAS2 = 0.30f;
-    public float strikebyteMaxAS3 = 0.50f;
+    public float strikebyteMaxAS3 = 0.40f;
+    public float strikebyteMaxAS4 = 0.50f;
+
 
     // ==============================
     // MAIN ENTRY
@@ -87,7 +99,7 @@ public class TraitManager : MonoBehaviour
                 return (count >= clobbertronThreshold);
 
             case Trait.Strikebyte:
-                return (count >= strikebyteThreshold2 || count >= strikebyteThreshold3);
+                return (count >= strikebyteThreshold2 || count >= strikebyteThreshold3 || count >= strikebyteThreshold4);
         }
         return false;
     }
@@ -109,6 +121,7 @@ public class TraitManager : MonoBehaviour
                 break;
 
             case Trait.Strikebyte:
+                if (count >= strikebyteThreshold4) return 4;
                 if (count >= strikebyteThreshold3) return 3;
                 if (count >= strikebyteThreshold2) return 2;
                 break;
@@ -133,7 +146,8 @@ public class TraitManager : MonoBehaviour
                 return (0, clobbertronThreshold);
 
             case Trait.Strikebyte:
-                if (count >= strikebyteThreshold3) return (strikebyteThreshold3, 0);
+                if (count >= strikebyteThreshold4) return (strikebyteThreshold4, 0);
+                if (count >= strikebyteThreshold3) return (strikebyteThreshold3, strikebyteThreshold4);
                 if (count >= strikebyteThreshold2) return (strikebyteThreshold2, strikebyteThreshold3);
                 return (0, strikebyteThreshold2);
         }
@@ -252,14 +266,21 @@ public class TraitManager : MonoBehaviour
                                 var ability = unit.GetComponent<StrikebyteTrait>();
                                 if (ability == null) ability = unit.gameObject.AddComponent<StrikebyteTrait>();
 
-                                if (count >= strikebyteThreshold3)
+                                if (count >= strikebyteThreshold4)
+                                {
+                                    ability.rampDamageAmp = strikebyteRampDamageAmp4;
+                                    ability.maxDamageAmp = strikebyteMaxDamageAmp4;
+                                    ability.rampAS = strikebyteRampAS4;
+                                    ability.maxAS = strikebyteMaxAS4;
+                                }
+                                else if (count >= strikebyteThreshold3)
                                 {
                                     ability.rampDamageAmp = strikebyteRampDamageAmp3;
                                     ability.maxDamageAmp = strikebyteMaxDamageAmp3;
                                     ability.rampAS = strikebyteRampAS3;
                                     ability.maxAS = strikebyteMaxAS3;
                                 }
-                                else
+                                else // Tier 2
                                 {
                                     ability.rampDamageAmp = strikebyteRampDamageAmp2;
                                     ability.maxDamageAmp = strikebyteMaxDamageAmp2;
