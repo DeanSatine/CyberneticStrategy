@@ -333,6 +333,8 @@ public class UnitAI : MonoBehaviour
     // 🔹 Call this from the auto attack animation (Animation Event)
     public void DealAutoAttackDamage()
     {
+        Debug.Log($"[ATTACK EVENT] {unitName} (star {starLevel}) firing DealAutoAttackDamage with {attackDamage} damage");
+
         if (currentTarget != null && currentTarget.TryGetComponent(out UnitAI enemy))
         {
             if (enemy.currentState == UnitState.Bench) return;
@@ -341,20 +343,23 @@ public class UnitAI : MonoBehaviour
 
             if (projectilePrefab != null && vfx == null)
             {
-                // Only use UnitAI projectiles if no VFX component
+                Debug.Log($"[{unitName}] Using UnitAI projectile system");
                 SpawnProjectile(enemy);
             }
             else
             {
-                // ✅ Always deal damage for melee or when VFX handles visuals
+                Debug.Log($"[{unitName}] Dealing immediate damage: {attackDamage} to {enemy.unitName}");
                 enemy.TakeDamage(attackDamage);
             }
 
             GainMana(10);
-            OnAttackEvent?.Invoke(enemy); // Trigger VFX
+            OnAttackEvent?.Invoke(enemy);
+        }
+        else
+        {
+            Debug.Log($"[ATTACK EVENT] {unitName} has no target!");
         }
     }
-
 
     public void TakeDamage(float damage)
     {
@@ -884,54 +889,88 @@ public class UnitAI : MonoBehaviour
         currentHealth = maxHealth;
 
         // 📏 Force scaling rules by unit name
+        // 📏 Force scaling rules by unit name
         if (starLevel == 2)
         {
+            Vector3 desiredWorldScale;
             switch (unitName)
             {
                 case "Needlebot":
-                    transform.localScale = new Vector3(0.8f,65, 0.8f);
+                    desiredWorldScale = new Vector3(0.8f, 0.65f, 0.8f);
                     break;
                 case "BOP":
-                    transform.localScale = new Vector3(1.3f, 105f, 1.3f);
+                    desiredWorldScale = new Vector3(1.3f, 1.05f, 1.3f);
                     break;
                 case "ManaDrive":
-                    transform.localScale = new Vector3(0.75f, 60, 0.75f);
+                    desiredWorldScale = new Vector3(0.75f, 0.60f, 0.75f);
                     break;
                 case "KillSwitch":
-                    transform.localScale = new Vector3(1.3f, 90, 1.3f);
+                    desiredWorldScale = new Vector3(1.3f, 0.90f, 1.3f);
                     break;
                 case "Haymaker":
-                    transform.localScale = new Vector3(1.3f, 105, 1.3f);
+                    desiredWorldScale = new Vector3(1.3f, 1.05f, 1.3f);
                     break;
                 default:
-                    transform.localScale = baseScale * 1.1f; // fallback for other units
+                    desiredWorldScale = baseScale * 1.1f; // fallback for other units
                     break;
+            }
+
+            // ✅ Account for parent scaling (CharacterTile has very small Y scale)
+            if (transform.parent != null)
+            {
+                Vector3 parentScale = transform.parent.lossyScale;
+                transform.localScale = new Vector3(
+                    desiredWorldScale.x / parentScale.x,
+                    desiredWorldScale.y / parentScale.y,
+                    desiredWorldScale.z / parentScale.z
+                );
+            }
+            else
+            {
+                transform.localScale = desiredWorldScale;
             }
         }
         else if (starLevel == 3)
         {
+            Vector3 desiredWorldScale;
             switch (unitName)
             {
                 case "Needlebot":
-                    transform.localScale = new Vector3(125, 125, 125);
+                    desiredWorldScale = new Vector3(1.25f, 1.25f, 1.25f);
                     break;
                 case "Bop":
-                    transform.localScale = new Vector3(1.25f, 1.25f, 1.25f);
+                    desiredWorldScale = new Vector3(1.25f, 1.25f, 1.25f);
                     break;
                 case "ManaDrive":
-                    transform.localScale = new Vector3(130, 130, 130);
+                    desiredWorldScale = new Vector3(1.30f, 1.30f, 1.30f);
                     break;
                 case "KillSwitch":
-                    transform.localScale = new Vector3(1.3f, 1.3f, 1.3f);
+                    desiredWorldScale = new Vector3(1.3f, 1.3f, 1.3f);
                     break;
                 case "Haymaker":
-                    transform.localScale = new Vector3(140, 140, 140);
+                    desiredWorldScale = new Vector3(1.40f, 1.40f, 1.40f);
                     break;
                 default:
-                    transform.localScale = baseScale * 1.25f; // fallback for other units
+                    desiredWorldScale = baseScale * 1.25f; // fallback for other units
                     break;
             }
+
+            // ✅ Account for parent scaling (CharacterTile has very small Y scale)
+            if (transform.parent != null)
+            {
+                Vector3 parentScale = transform.parent.lossyScale;
+                transform.localScale = new Vector3(
+                    desiredWorldScale.x / parentScale.x,
+                    desiredWorldScale.y / parentScale.y,
+                    desiredWorldScale.z / parentScale.z
+                );
+            }
+            else
+            {
+                transform.localScale = desiredWorldScale;
+            }
         }
+
 
         // Spawn VFX if prefab assigned
         if (GameManager.Instance != null && GameManager.Instance.starUpVFXPrefab != null)

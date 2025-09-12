@@ -39,9 +39,12 @@ public class StageManager : MonoBehaviour
         {
             Debug.Log("✅ Player won the round!");
 
-            // ✅ Give player 3 gold for winning
-            EconomyManager.Instance.AddGold(3);
-            Debug.Log("💰 Player earned 3 gold for winning!");
+            // ✅ Calculate gold based on current round (base 3 + round number)
+            int totalRoundNumber = ((currentStage - 1) * roundsPerStage) + roundInStage;
+            int goldReward = 3 + totalRoundNumber;
+
+            EconomyManager.Instance.AddGold(goldReward);
+            Debug.Log($"💰 Player earned {goldReward} gold for winning round {totalRoundNumber}!");
         }
         else
         {
