@@ -129,8 +129,16 @@ public class UnitAI : MonoBehaviour
         {
             currentState = newState;
             OnStateChanged?.Invoke(newState);
+
+            if (newState == UnitState.Combat)
+            {
+                // 🔹 Force fresh target at combat start
+                currentTarget = FindNearestEnemy();
+                attackCooldown = 0f;
+            }
         }
     }
+
     private void Awake()
     {
         animator = GetComponent<Animator>();
@@ -172,10 +180,13 @@ public class UnitAI : MonoBehaviour
 
         if (currentTarget == null
             || !currentTarget.GetComponent<UnitAI>().isAlive
-            || currentTarget.GetComponent<UnitAI>().currentState == UnitState.Bench) // ✅ skip benched
+            || currentTarget.GetComponent<UnitAI>().currentState == UnitState.Bench)
         {
             currentTarget = FindNearestEnemy();
-            currentPath.Clear(); // ✅ recalc path on new target
+            currentPath.Clear();
+
+            if (currentTarget != null)
+                attackCooldown = 0f; // 🔹 reset cooldown so we attack immediately
         }
 
         else
@@ -419,7 +430,7 @@ public class UnitAI : MonoBehaviour
     {
         // ✅ Guard: prevent multiple death calls
         if (!isAlive) return;
-
+        CleanupProjectiles();
         isAlive = false;
         OnAnyUnitDeath?.Invoke(this);
         GameManager.Instance.UnregisterUnit(this);
@@ -463,15 +474,19 @@ public class UnitAI : MonoBehaviour
 
     private IEnumerator DeathSequence(float animLength)
     {
-        // ✅ wait for death animation
         yield return new WaitForSeconds(animLength);
 
-        // Then fade and destroy
-        StartCoroutine(FadeAndDestroy(2.5f));
+        if (team == Team.Player)
+        {
+            // 🔹 Player units are only KO’d, not destroyed
+            gameObject.SetActive(false); // hide until prep reset
+        }
+        else
+        {
+            // 🔹 Enemies can be fully removed
+            StartCoroutine(FadeAndDestroy(2.5f));
+        }
     }
-
-
-
 
     private void GainMana(float amount)
     {
@@ -708,18 +723,16 @@ public class UnitAI : MonoBehaviour
 
     public void ResetAfterCombat()
     {
-        // ✅ RESTORE HEALTH AND MANA FOR NEW ROUND
+        gameObject.SetActive(true);   // 🔹 revive unit if it was hidden
+        isAlive = true;
         currentHealth = maxHealth;
         currentMana = 0f;
 
-        // Stop all combat-related activity
         SetState(UnitState.BoardIdle);
-
         currentTarget = null;
         attackCooldown = 0f;
         isCastingAbility = false;
 
-        // Reset animator
         if (animator != null)
         {
             animator.SetBool("IsRunning", false);
@@ -727,13 +740,18 @@ public class UnitAI : MonoBehaviour
             animator.ResetTrigger("AbilityTrigger");
         }
 
-        // ✅ UPDATE UI BARS TO SHOW FULL HEALTH/ZERO MANA
         if (ui != null)
         {
             ui.UpdateHealth(currentHealth);
             ui.UpdateMana(currentMana);
+            ui.gameObject.SetActive(true);
         }
-        CleanupProjectiles();
+
+        Collider col = GetComponent<Collider>();
+        if (col != null) col.enabled = true;
+
+        this.enabled = true;
+
         Debug.Log($"✅ {unitName} reset for new round - HP: {currentHealth}/{maxHealth}, Mana: {currentMana}/{maxMana}");
     }
 

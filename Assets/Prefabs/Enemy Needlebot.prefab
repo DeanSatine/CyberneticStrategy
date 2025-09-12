@@ -313,7 +313,7 @@ MonoBehaviour:
   team: 1
   maxHealth: 400
   currentHealth: 400
-  attackDamage: 55
+  attackDamage: 45
   attackSpeed: 0.9
   armor: 15
   attackRange: 6
@@ -381,9 +381,9 @@ MonoBehaviour:
   baseNeedleCount: 4
   needlesPerCast: 0
   damagePerStar:
-  - 100
-  - 150
-  - 175
+  - 45
+  - 65
+  - 95
   startDelay: 0.25
   throwInterval: 0.1
   abilityDuration: 1.5
