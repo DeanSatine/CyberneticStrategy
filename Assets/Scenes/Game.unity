@@ -34211,12 +34211,12 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 828676111}
-  - {fileID: 2072945873}
   - {fileID: 1704590731}
   - {fileID: 704649754}
   - {fileID: 943347646}
   - {fileID: 1802958895}
   - {fileID: 504690613}
+  - {fileID: 2072945873}
   m_Father: {fileID: 949686860}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -48965,7 +48965,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c514caf8a440976428b53a6bedec7b9d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startingGold: 3
+  startingGold: 50
   currentGold: 0
   goldText: {fileID: 957988388}
   gainColor: {r: 0, g: 1, b: 0, a: 1}
@@ -49596,7 +49596,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &2072945873
 RectTransform:
   m_ObjectHideFlags: 0

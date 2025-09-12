@@ -333,23 +333,33 @@ public class UnitAI : MonoBehaviour
     // 🔹 Call this from the auto attack animation (Animation Event)
     public void DealAutoAttackDamage()
     {
-        Debug.Log($"[ATTACK EVENT] {unitName} (star {starLevel}) firing DealAutoAttackDamage with {attackDamage} damage");
+        Debug.Log($"🎯 [ATTACK EVENT] {unitName} (⭐{starLevel}) FIRING auto attack event! Current target: {(currentTarget != null ? currentTarget.name : "NULL")}");
 
         if (currentTarget != null && currentTarget.TryGetComponent(out UnitAI enemy))
         {
-            if (enemy.currentState == UnitState.Bench) return;
+            if (enemy.currentState == UnitState.Bench)
+            {
+                Debug.Log($"❌ [ATTACK EVENT] {unitName}: Target {enemy.unitName} is benched, ignoring.");
+                return;
+            }
+
+            Debug.Log($"🎯 [ATTACK EVENT] {unitName} (⭐{starLevel}) attacking {enemy.unitName} (⭐{enemy.starLevel}) with {attackDamage} damage");
 
             CyberneticVFX vfx = GetComponent<CyberneticVFX>();
 
             if (projectilePrefab != null && vfx == null)
             {
-                Debug.Log($"[{unitName}] Using UnitAI projectile system");
+                Debug.Log($"🚀 [{unitName}] Using UnitAI projectile system");
                 SpawnProjectile(enemy);
             }
             else
             {
-                Debug.Log($"[{unitName}] Dealing immediate damage: {attackDamage} to {enemy.unitName}");
+                Debug.Log($"⚡ [{unitName}] Dealing IMMEDIATE damage: {attackDamage} to {enemy.unitName} (⭐{enemy.starLevel})");
+                Debug.Log($"💥 [BEFORE] {enemy.unitName} health: {enemy.currentHealth}/{enemy.maxHealth}");
+
                 enemy.TakeDamage(attackDamage);
+
+                Debug.Log($"💗 [AFTER] {enemy.unitName} health: {enemy.currentHealth}/{enemy.maxHealth}");
             }
 
             GainMana(10);
@@ -357,12 +367,15 @@ public class UnitAI : MonoBehaviour
         }
         else
         {
-            Debug.Log($"[ATTACK EVENT] {unitName} has no target!");
+            Debug.Log($"❌ [ATTACK EVENT] {unitName} (⭐{starLevel}) has NO VALID TARGET! currentTarget={currentTarget}");
         }
     }
 
+
     public void TakeDamage(float damage)
     {
+        Debug.Log($"💥 [TAKE DAMAGE] {unitName} (⭐{starLevel}) receiving {damage} damage (current state: {currentState})");
+
         // ✅ Benched units cannot take damage
         if (currentState == UnitState.Bench)
         {
@@ -374,10 +387,10 @@ public class UnitAI : MonoBehaviour
         currentHealth -= reducedDamage;
         GainMana(1);
 
-        Debug.Log($"{unitName} took {reducedDamage} damage. HP: {currentHealth}/{maxHealth}");
+        Debug.Log($"💗 {unitName} took {reducedDamage} damage. HP: {currentHealth}/{maxHealth}");
 
         if (ui != null)
-            ui.UpdateHealth(currentHealth);   // ✅ refresh bar
+            ui.UpdateHealth(currentHealth);
 
         if (currentHealth <= 0)
         {
