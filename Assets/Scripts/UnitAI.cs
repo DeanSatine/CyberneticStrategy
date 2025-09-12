@@ -219,22 +219,6 @@ public class UnitAI : MonoBehaviour
         if (animator) animator.SetTrigger("AttackTrigger");
     }
 
-
-    public void PerformAttack()
-    {
-        if (currentTarget == null) return;
-
-        if (currentTarget.TryGetComponent<UnitAI>(out UnitAI enemy) && enemy.isAlive)
-        {
-            // Deal damage
-            enemy.TakeDamage(attackDamage);
-
-            // Notify traits
-            OnAttackEvent?.Invoke(enemy);
-
-            Debug.Log($"{unitName} attacked {enemy.unitName} for {attackDamage} dmg.");
-        }
-    }
     private void SpawnProjectile(UnitAI target)
     {
         if (target == null || !target.isAlive) return;

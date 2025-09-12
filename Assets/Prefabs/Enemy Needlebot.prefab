@@ -325,7 +325,8 @@ MonoBehaviour:
   canAttack: 1
   isAlive: 1
   isCastingAbility: 0
-  projectilePrefab: {fileID: 0}
+  projectilePrefab: {fileID: 8548050680436672203, guid: 651b92cc1a58a8942bec9aaa5fd2ce6a,
+    type: 3}
   firePoint: {fileID: 0}
   projectileSpeed: 15
   unitUIPrefab: {fileID: 6939982145822855837, guid: 63931d92c48ef65418d45ec02069a522,

@@ -24952,14 +24952,19 @@ MonoBehaviour:
   clobbertronCrashDamage: 200
   strikebyteThreshold2: 2
   strikebyteThreshold3: 3
+  strikebyteThreshold4: 4
   strikebyteRampDamageAmp2: 1
   strikebyteRampDamageAmp3: 2
+  strikebyteRampDamageAmp4: 3
   strikebyteMaxDamageAmp2: 15
   strikebyteMaxDamageAmp3: 25
+  strikebyteMaxDamageAmp4: 30
   strikebyteRampAS2: 0.05
   strikebyteRampAS3: 0.1
+  strikebyteRampAS4: 0.15
   strikebyteMaxAS2: 0.3
   strikebyteMaxAS3: 0.5
+  strikebyteMaxAS4: 0.5
 --- !u!4 &923416039
 Transform:
   m_ObjectHideFlags: 0
@@ -31329,8 +31334,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enemyHexes: []
-  minUnits: 10
-  maxUnits: 10
+  minUnits: 1
+  maxUnits: 3
   allUnits:
   - unitName: ManaDrive
     prefab: {fileID: 397472728585410053, guid: d5d81c0f1289d4640a7855d83e53a332, type: 3}

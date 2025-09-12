@@ -82,7 +82,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 592e6e20f85d9d44086827001f3e2adb, type: 2}
+      objectReference: {fileID: 2100000, guid: 9daf21ebf1e039a42989b41993276df9, type: 2}
     - target: {fileID: 919132149155446097, guid: 6cdaeae6ca843c54481d33ea8adf3df8,
         type: 3}
       propertyPath: m_Name
@@ -196,7 +196,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 592e6e20f85d9d44086827001f3e2adb, type: 2}
+      objectReference: {fileID: 2100000, guid: 9daf21ebf1e039a42989b41993276df9, type: 2}
     - target: {fileID: -5195048882033904264, guid: 4091e2ca91237fd4cb9e277c8685a4e6,
         type: 3}
       propertyPath: m_Layer
@@ -269,7 +269,7 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 4091e2ca91237fd4cb9e277c8685a4e6,
         type: 3}
       propertyPath: m_Name
-      value: EnemyHayMaker
+      value: Enemy HaymakerClone
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 4091e2ca91237fd4cb9e277c8685a4e6,
         type: 3}
@@ -320,7 +320,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 592e6e20f85d9d44086827001f3e2adb, type: 2}
+      objectReference: {fileID: 2100000, guid: 9daf21ebf1e039a42989b41993276df9, type: 2}
     - target: {fileID: 5866666021909216657, guid: 4091e2ca91237fd4cb9e277c8685a4e6,
         type: 3}
       propertyPath: m_Controller
@@ -354,15 +354,15 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 4091e2ca91237fd4cb9e277c8685a4e6,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: 2341522245247770583}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 4091e2ca91237fd4cb9e277c8685a4e6,
-        type: 3}
-      insertIndex: -1
       addedObject: {fileID: 1499806241345368472}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 4091e2ca91237fd4cb9e277c8685a4e6,
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 7820883320823222560}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 4091e2ca91237fd4cb9e277c8685a4e6,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -5444784109813616411}
   m_SourcePrefab: {fileID: 100100000, guid: 4091e2ca91237fd4cb9e277c8685a4e6, type: 3}
 --- !u!4 &2664505750195266861 stripped
 Transform:
@@ -387,11 +387,10 @@ Animation:
   serializedVersion: 3
   m_Animation: {fileID: 0}
   m_Animations:
-  - {fileID: -203655887218126122, guid: 662e16ecc52ae9f45ad95b8dc60828e1, type: 3}
-  - {fileID: -203655887218126122, guid: c7cc6bd1c149f574eadfdba9f17eb8e4, type: 3}
-  - {fileID: -203655887218126122, guid: 084a337d0af3582468a8b305428a5c3d, type: 3}
   - {fileID: -203655887218126122, guid: c7e994702a16b4641a1d71575b9d66a7, type: 3}
-  - {fileID: -203655887218126122, guid: 0459e7c5d4121cf4aa006cd5b4da6b67, type: 3}
+  - {fileID: -203655887218126122, guid: 084a337d0af3582468a8b305428a5c3d, type: 3}
+  - {fileID: 7400000, guid: ae97e234beda8cb4b83646858f5fad0c, type: 2}
+  - {fileID: -203655887218126122, guid: 662e16ecc52ae9f45ad95b8dc60828e1, type: 3}
   m_WrapMode: 0
   m_PlayAutomatically: 0
   m_AnimatePhysics: 0
@@ -423,13 +422,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   unitName: HayMaker
   starLevel: 1
-  team: 1
-  maxHealth: 1100
-  currentHealth: 1100
-  attackDamage: 65
+  team: 0
+  maxHealth: 275
+  currentHealth: 275
+  attackDamage: 16
   attackSpeed: 0.8
   armor: 45
-  attackRange: 1.7
+  attackRange: 1.8
   mana: 0
   maxMana: 50
   currentMana: 0
@@ -438,8 +437,7 @@ MonoBehaviour:
   canAttack: 1
   isAlive: 1
   isCastingAbility: 0
-  projectilePrefab: {fileID: 8548050680436672203, guid: 535ef7817c5bc78489aa45e25295e778,
-    type: 3}
+  projectilePrefab: {fileID: 0}
   firePoint: {fileID: 0}
   projectileSpeed: 15
   unitUIPrefab: {fileID: 6939982145822855837, guid: 63931d92c48ef65418d45ec02069a522,
@@ -466,28 +464,6 @@ MonoBehaviour:
   threeStarMultiplier: 2.5
   twoStarScale: 1.1
   threeStarScale: 1.25
---- !u!114 &2341522245247770583
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3571069488247416756}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cb9efea354552134eb730edcdf5b25cd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  stabDamage:
-  - 125
-  - 250
-  - 999
-  slamDamage:
-  - 200
-  - 250
-  - 400
-  clonePrefab: {fileID: 3571069488247416756, guid: e950db6fcdd9f7244a32ce829f9c01e6,
-    type: 3}
 --- !u!65 &1499806241345368472
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -536,3 +512,32 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 36
   m_CollisionDetection: 0
+--- !u!114 &-5444784109813616411
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3571069488247416756}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7771fb580d6217a4da3ee7324885b101, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  vfxConfig:
+    autoAttackProjectile: {fileID: 2965222256817593503, guid: a164e676dbbd6e54587237e619372c98,
+      type: 3}
+    autoAttackMuzzleFlash: {fileID: 0}
+    autoAttackHitEffect: {fileID: 0}
+    abilityEffect: {fileID: 0}
+    abilityProjectile: {fileID: 0}
+    abilityImpactEffect: {fileID: 0}
+    autoAttackSound: {fileID: 0}
+    abilitySound: {fileID: 0}
+    volume: 0.7
+  deathVFX: {fileID: 0}
+  levelUpVFX: {fileID: 0}
+  damageNumbersPrefab: {fileID: 0}
+  firePoint: {fileID: 0}
+  chestPoint: {fileID: 0}
+  weaponPoint: {fileID: 0}
