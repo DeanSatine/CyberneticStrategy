@@ -103,6 +103,7 @@ public class UnitAI : MonoBehaviour
     [Tooltip("Scale at 3-star (relative to base)")]
 
     public float threeStarScale = 1.25f;
+    private List<GameObject> activeProjectiles = new List<GameObject>();
 
     private Vector3 baseScale;
     public UnitState currentState
@@ -223,11 +224,10 @@ public class UnitAI : MonoBehaviour
     {
         if (target == null || !target.isAlive) return;
 
-        // Pick spawn point
         Vector3 spawnPos = firePoint != null ? firePoint.position : transform.position + Vector3.up * 1.5f;
         GameObject proj = Instantiate(projectilePrefab, spawnPos, Quaternion.identity);
 
-        // Make it move toward target
+        activeProjectiles.Add(proj); // ✅ track projectile
         StartCoroutine(MoveProjectile(proj, target));
     }
 
@@ -252,9 +252,9 @@ public class UnitAI : MonoBehaviour
     {
         while (proj != null && target != null && target.isAlive)
         {
-            // ✅ Stop if target is benched
-            if (target.currentState == UnitState.Bench)
+            if (target.currentState == UnitAI.UnitState.Bench)
             {
+                activeProjectiles.Remove(proj);
                 Destroy(proj);
                 yield break;
             }
@@ -262,9 +262,10 @@ public class UnitAI : MonoBehaviour
             Vector3 dir = (target.transform.position + Vector3.up * 1.2f) - proj.transform.position;
             proj.transform.position += dir.normalized * projectileSpeed * Time.deltaTime;
 
-            if (dir.magnitude < 0.2f) // impact
+            if (dir.magnitude < 0.2f)
             {
                 target.TakeDamage(attackDamage);
+                activeProjectiles.Remove(proj);
                 Destroy(proj);
                 yield break;
             }
@@ -272,9 +273,20 @@ public class UnitAI : MonoBehaviour
             yield return null;
         }
 
-        if (proj != null) Destroy(proj);
+        if (proj != null)
+        {
+            activeProjectiles.Remove(proj);
+            Destroy(proj);
+        }
     }
-
+    private void CleanupProjectiles()
+    {
+        foreach (var proj in activeProjectiles)
+        {
+            if (proj != null) Destroy(proj);
+        }
+        activeProjectiles.Clear();
+    }
     public void AssignToTile(HexTile tile)
     {
         if (tile == null) return;
@@ -312,25 +324,26 @@ public class UnitAI : MonoBehaviour
     {
         if (currentTarget != null && currentTarget.TryGetComponent(out UnitAI enemy))
         {
-            if (enemy.currentState == UnitState.Bench) return; // ✅ ignore benched units
+            if (enemy.currentState == UnitState.Bench) return;
 
-            if (projectilePrefab != null)
+            CyberneticVFX vfx = GetComponent<CyberneticVFX>();
+
+            if (projectilePrefab != null && vfx == null)
             {
+                // Only use UnitAI projectiles if no VFX component
                 SpawnProjectile(enemy);
             }
             else
             {
-                enemy.TakeDamage(attackDamage); // melee units hit instantly
+                // ✅ Always deal damage for melee or when VFX handles visuals
+                enemy.TakeDamage(attackDamage);
             }
-            GainMana(10); // Only gain mana once, here
 
-            // notify traits / listeners
-            OnAttackEvent?.Invoke(enemy);
-
-            var ks = GetComponent<KillSwitchAbility>();
-            if (ks != null) ks.OnAttack(enemy);
+            GainMana(10);
+            OnAttackEvent?.Invoke(enemy); // Trigger VFX
         }
     }
+
 
     public void TakeDamage(float damage)
     {
@@ -690,6 +703,7 @@ public class UnitAI : MonoBehaviour
         // re-enable collider
         Collider col = GetComponent<Collider>();
         if (col != null) col.enabled = true;
+        CleanupProjectiles();
     }
 
     public void ResetAfterCombat()
@@ -719,7 +733,7 @@ public class UnitAI : MonoBehaviour
             ui.UpdateHealth(currentHealth);
             ui.UpdateMana(currentMana);
         }
-
+        CleanupProjectiles();
         Debug.Log($"✅ {unitName} reset for new round - HP: {currentHealth}/{maxHealth}, Mana: {currentMana}/{maxMana}");
     }
 

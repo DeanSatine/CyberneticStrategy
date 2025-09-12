@@ -1,5 +1,6 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Unity.VisualScripting;
+using UnityEngine;
 
 public class EnemyWaveManager : MonoBehaviour
 {
@@ -20,11 +21,15 @@ public class EnemyWaveManager : MonoBehaviour
         Instance = this;
     }
 
-    public void SpawnEnemyWave(int stage)
+    public void SpawnEnemyWave(int stage, int round)
     {
         ClearEnemies();
 
-        int enemyCount = Random.Range(minUnits, maxUnits + 1);
+        // ✅ Base enemy count starts at 2
+        int enemyCount = 2 + ((stage - 1) * 3) + (round - 1);
+
+        // ✅ Cap at 9 enemies
+        enemyCount = Mathf.Min(enemyCount, 9);
 
         for (int i = 0; i < enemyCount; i++)
         {
@@ -62,8 +67,9 @@ public class EnemyWaveManager : MonoBehaviour
             GameManager.Instance.RegisterUnit(enemyAI, false);
         }
 
-        Debug.Log($"Spawned {activeEnemies.Count} enemies for Stage {stage}");
+        Debug.Log($"Spawned {activeEnemies.Count} enemies for Stage {stage} Round {round}");
     }
+
 
     public void ClearEnemies()
     {

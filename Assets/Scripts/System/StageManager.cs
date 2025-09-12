@@ -71,7 +71,7 @@ public class StageManager : MonoBehaviour
         currentPhase = GamePhase.Prep;
 
         GameManager.Instance.ResetPlayerUnits();  // snap players back
-        EnemyWaveManager.Instance.SpawnEnemyWave(currentStage); // preload enemies
+        EnemyWaveManager.Instance.SpawnEnemyWave(currentStage, roundInStage);
 
         UIManager.Instance.ShowFightButton(true); // allow pressing fight
     }
@@ -110,7 +110,7 @@ public class StageManager : MonoBehaviour
         ShopManager.Instance.GenerateShop();
         Debug.Log("🛒 Shop reset for new round!");
 
-        EnemyWaveManager.Instance.SpawnEnemyWave(currentStage);
+        EnemyWaveManager.Instance.SpawnEnemyWave(currentStage, roundInStage);
         UIManager.Instance.ShowFightButton(true);
 
         currentPhase = GamePhase.Prep;

@@ -31334,26 +31334,26 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enemyHexes: []
-  minUnits: 1
-  maxUnits: 3
+  minUnits: 2
+  maxUnits: 9
   allUnits:
-  - unitName: ManaDrive
-    prefab: {fileID: 397472728585410053, guid: d5d81c0f1289d4640a7855d83e53a332, type: 3}
-    cost: 3
-    icon: {fileID: 0}
   - unitName: Needlebot
     prefab: {fileID: 8772506818969043707, guid: 6a388368b433d664ea6a6e2ba76adbad,
       type: 3}
-    cost: 0
-    icon: {fileID: 0}
-  - unitName: KillSwitch
-    prefab: {fileID: 27990592220160999, guid: aa78c32e8abf8924a83cfd6b532978d2, type: 3}
-    cost: 4
+    cost: 1
     icon: {fileID: 0}
   - unitName: B.O.P
     prefab: {fileID: 3915463247227310737, guid: 7442cc27438675149861c97c8d4f043c,
       type: 3}
     cost: 2
+    icon: {fileID: 0}
+  - unitName: ManaDrive
+    prefab: {fileID: 397472728585410053, guid: d5d81c0f1289d4640a7855d83e53a332, type: 3}
+    cost: 3
+    icon: {fileID: 0}
+  - unitName: KillSwitch
+    prefab: {fileID: 27990592220160999, guid: aa78c32e8abf8924a83cfd6b532978d2, type: 3}
+    cost: 4
     icon: {fileID: 0}
   - unitName: HayMaker
     prefab: {fileID: 3571069488247416756, guid: 41202446e30667148857f2028683a5a7,
