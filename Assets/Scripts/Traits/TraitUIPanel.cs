@@ -1,8 +1,9 @@
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class TraitUIPanel : MonoBehaviour
+public class TraitUIPanel : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     [Header("UI References")]
     public TextMeshProUGUI currentCountText;
@@ -11,12 +12,17 @@ public class TraitUIPanel : MonoBehaviour
 
     private CanvasGroup canvasGroup;
 
+    [Header("Tooltip Settings")]
+    public GameObject tooltipPrefab;   // Assign the tooltip object already in your scene (disabled by default)
+
     private void Awake()
     {
-        // Add a CanvasGroup if missing
         canvasGroup = GetComponent<CanvasGroup>();
         if (canvasGroup == null)
             canvasGroup = gameObject.AddComponent<CanvasGroup>();
+
+        if (tooltipPrefab != null)
+            tooltipPrefab.SetActive(false); // ensure it's hidden at start
     }
 
     public void UpdateTexts(int count, int activeThreshold, int nextThreshold, bool isActive)
@@ -27,5 +33,17 @@ public class TraitUIPanel : MonoBehaviour
 
         // fade if not active
         canvasGroup.alpha = isActive ? 1f : 0.5f;
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        if (tooltipPrefab != null)
+            tooltipPrefab.SetActive(true);
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        if (tooltipPrefab != null)
+            tooltipPrefab.SetActive(false);
     }
 }
