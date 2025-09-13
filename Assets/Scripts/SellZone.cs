@@ -103,19 +103,26 @@ public class SellZone : MonoBehaviour
 
     private int CalculateSellPrice(UnitAI unit)
     {
-        // Try to find the unit's original cost from shop data
-        int originalCost = GetUnitOriginalCost(unit);
-
-        if (originalCost <= 0)
+        // Find the base cost
+        int baseCost = GetUnitOriginalCost(unit);
+        if (baseCost <= 0)
         {
-            // Fallback: base price on star level if no shop cost found
-            originalCost = unit.starLevel;
+            baseCost = unit.starLevel; // fallback
         }
 
-        // Calculate sell price (percentage of original cost)
-        int sellPrice = Mathf.RoundToInt(originalCost * sellPercentage);
-        return Mathf.Max(1, sellPrice); // Minimum 1 gold
+        // Factor in star level (2★ = 3x cost, 3★ = 9x cost)
+        int effectiveCost = baseCost;
+        if (unit.starLevel == 2)
+            effectiveCost = baseCost * 3;
+        else if (unit.starLevel == 3)
+            effectiveCost = baseCost * 9;
+
+        // Apply sell percentage
+        int sellPrice = Mathf.RoundToInt(effectiveCost * sellPercentage);
+
+        return Mathf.Max(1, sellPrice);
     }
+
 
     private int GetUnitOriginalCost(UnitAI unit)
     {
@@ -199,33 +206,44 @@ public class SellZone : MonoBehaviour
 
     private void Update()
     {
-        // Visual feedback when holding a unit over the sell zone
         Draggable[] allDraggables = FindObjectsOfType<Draggable>();
-        bool holdingUnit = false;
+        Draggable heldUnit = null;
 
         foreach (var draggable in allDraggables)
         {
             if (draggable.isDragging)
             {
-                holdingUnit = true;
+                heldUnit = draggable;
                 break;
             }
         }
 
-        // Change appearance when player is holding a unit
-        if (holdingUnit && backgroundImage != null)
+        if (heldUnit != null)
         {
-            backgroundImage.color = Color.Lerp(backgroundImage.color, highlightColor, Time.deltaTime * 5f);
-            if (sellText != null && sellText.text == "Sell Zone")
-                sellText.text = "Click to Sell";
+            UnitAI unit = heldUnit.GetComponent<UnitAI>();
+            if (unit != null && unit.team == Team.Player)
+            {
+                int previewSellPrice = CalculateSellPrice(unit);
+
+                // Highlight color + show preview
+                if (backgroundImage != null)
+                    backgroundImage.color = Color.Lerp(backgroundImage.color, highlightColor, Time.deltaTime * 5f);
+
+                if (sellText != null)
+                    sellText.text = $"Sell for {previewSellPrice}";
+            }
         }
-        else if (backgroundImage != null && backgroundImage.color != normalColor)
+        else
         {
-            backgroundImage.color = Color.Lerp(backgroundImage.color, normalColor, Time.deltaTime * 5f);
-            if (sellText != null && sellText.text == "Click to Sell")
+            // Reset to normal appearance
+            if (backgroundImage != null)
+                backgroundImage.color = Color.Lerp(backgroundImage.color, normalColor, Time.deltaTime * 5f);
+
+            if (sellText != null)
                 sellText.text = "Sell Zone";
         }
     }
+
 
     private void ResetSellText()
     {
