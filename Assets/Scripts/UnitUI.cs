@@ -33,7 +33,10 @@ public class UnitUI : MonoBehaviour
         if (Camera.main != null)
             transform.rotation = Camera.main.transform.rotation;
     }
-
+    public void SetMaxHealth(float newMaxHealth)
+    {
+        maxHealth = newMaxHealth;
+    }
     public void UpdateHealth(float currentHealth)
     {
         if (healthFill != null)

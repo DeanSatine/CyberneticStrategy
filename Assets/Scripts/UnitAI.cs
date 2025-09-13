@@ -361,7 +361,7 @@ public class UnitAI : MonoBehaviour
 
                 Debug.Log($"💗 [AFTER] {enemy.unitName} health: {enemy.currentHealth}/{enemy.maxHealth}");
             }
-
+ 
             GainMana(10);
             OnAttackEvent?.Invoke(enemy);
         }
@@ -909,7 +909,7 @@ public class UnitAI : MonoBehaviour
             switch (unitName)
             {
                 case "Needlebot":
-                    desiredWorldScale = new Vector3(0.8f, 0.65f, 0.8f);
+                    desiredWorldScale = new Vector3(0.8f, 0.85f, 0.8f);
                     break;
                 case "BOP":
                     desiredWorldScale = new Vector3(1.3f, 1.05f, 1.3f);
@@ -992,14 +992,20 @@ public class UnitAI : MonoBehaviour
             Destroy(vfx, 1f);
         }
 
-        // Update UI
+        // after this line:
+        currentHealth = maxHealth;
+
+        // ✅ Fix: make sure the UnitUI knows about the new max health
         if (ui != null)
+        {
+            // Reset both stored max and current values
+            ui.SetMaxHealth(maxHealth);
             ui.UpdateHealth(currentHealth);
+        }
+
 
         Debug.Log($"[Upgrade] {unitName} {oldStar}★ -> {starLevel}★. HP: {maxHealth}, AD: {attackDamage}");
     }
-
-
 
 
     // ✅ Helper method for alternative movement
