@@ -374,6 +374,7 @@ MonoBehaviour:
     type: 3}
   firePoint: {fileID: 7937988245072803385}
   projectileSpeed: 15
+  portraitSprite: {fileID: 0}
   unitUIPrefab: {fileID: 6939982145822855837, guid: 63931d92c48ef65418d45ec02069a522,
     type: 3}
   ui: {fileID: 0}
@@ -495,8 +496,7 @@ MonoBehaviour:
   vfxConfig:
     autoAttackProjectile: {fileID: 8548050680436672203, guid: 2a331e91a1dc8324e89e4056de1bf7c6,
       type: 3}
-    autoAttackMuzzleFlash: {fileID: 1743301284569550, guid: ad2ab49d0a2a17148bd51c93d977bdbc,
-      type: 3}
+    autoAttackMuzzleFlash: {fileID: 0}
     autoAttackHitEffect: {fileID: 2955623459812423943, guid: f5507a8c6a22c404ab324980c4e8a11b,
       type: 3}
     abilityEffect: {fileID: 8443315704496310910, guid: 6ef35fa36e3a65043b2d800600204bdd,

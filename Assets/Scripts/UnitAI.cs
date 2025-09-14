@@ -42,6 +42,9 @@ public class UnitAI : MonoBehaviour
     public Transform firePoint;         // optional: empty child object for projectile spawn
     public float projectileSpeed = 15f;
 
+    [Header("Portrait & Ability")]
+    public Sprite portraitSprite; // assign in Inspector
+
     [Header("UI")]
     public GameObject unitUIPrefab;
     public UnitUI ui;
@@ -782,6 +785,15 @@ public class UnitAI : MonoBehaviour
         Debug.Log($"✅ {unitName} reset for new round - HP: {currentHealth}/{maxHealth}, Mana: {currentMana}/{maxMana}");
     }
 
+    private void OnMouseOver()
+    {
+        if (Input.GetMouseButtonDown(1)) // right click
+        {
+            UnitInfoPanelUI panel = FindObjectOfType<UnitInfoPanelUI>();
+            if (panel != null)
+                panel.Show(this);
+        }
+    }
 
     private void UpdateCurrentTile()
     {
@@ -801,6 +813,85 @@ public class UnitAI : MonoBehaviour
                 closestTile.occupyingUnit = this;
             }
             // If tile is occupied, we're just passing through - don't claim it
+        }
+    }
+    public string GetAbilityDescription()
+    {
+        float ad = attackDamage;
+        float maxHp = maxHealth;
+        int star = starLevel;
+
+        switch (unitName)
+        {
+            case "Needlebot":
+                {
+                    var ability = GetComponent<NeedleBotAbility>();
+                    if (ability != null)
+                    {
+                        float dmg = ability.damagePerStar[Mathf.Clamp(star - 1, 0, ability.damagePerStar.Length - 1)];
+                        return $"Rapidly throw {ability.baseNeedleCount} needles split between the nearest 2 enemies, " +
+                               $"each dealing {dmg + ad} damage. Every 10 needles thrown, increase the needle count by 1 permanently.";
+                    }
+                    return "Needlebot ability missing.";
+                }
+
+            case "ManaDrive":
+                {
+                    var ability = GetComponent<ManaDriveAbility>();
+                    if (ability != null)
+                    {
+                        float dmg = ability.damagePerStar[Mathf.Clamp(star - 1, 0, ability.damagePerStar.Length - 1)];
+                        return $"Hurl a bomb at the largest group, dealing {dmg} damage. " +
+                               $"If the bomb kills, ManaDrive gains {ability.attackSpeedGain * 100:F0}% attack speed " +
+                               $"and casts again at {(1f - ability.recursiveDamageReduction) * 100:F0}% effectiveness.";
+                    }
+                    return "ManaDrive ability missing.";
+                }
+
+            case "KillSwitch":
+                {
+                    var ability = GetComponent<KillSwitchAbility>();
+                    if (ability != null)
+                    {
+                        float slamDmg = ability.slamDamagePerStar[Mathf.Clamp(star - 1, 0, ability.slamDamagePerStar.Length - 1)];
+                        return $"Passive: Every other attack lowers the target’s armour by {ability.armorShred}. " +
+                               $"When changing targets, slam the previous one for {ability.passiveSlamDamage + ad} damage and heal {ability.healOnTargetSwap}.\n" +
+                               $"Active: Leap up to {ability.maxLeapRange} hexes and slam for {slamDmg + ad} damage. " +
+                               $"Temporarily gains boosted attack speed.";
+                    }
+                    return "KillSwitch ability missing.";
+                }
+
+            case "Haymaker":
+                {
+                    var ability = GetComponent<HaymakerAbility>();
+                    if (ability != null)
+                    {
+                        float stabDmg = ability.stabDamage[Mathf.Clamp(star - 1, 0, ability.stabDamage.Length - 1)];
+                        float slamDmg = ability.slamDamage[Mathf.Clamp(star - 1, 0, ability.slamDamage.Length - 1)];
+                        return $"Passive: Summons a clone at 25% stats. Gains +1% health & damage for every 5 souls absorbed.\n" +
+                               $"Active: Stabs target for {stabDmg + ad} damage, then slams for {slamDmg + ad} in a 2-hex radius.";
+                    }
+                    return "Haymaker ability missing.";
+                }
+
+            case "BOP":
+                {
+                    var ability = GetComponent<BOPAbility>();
+                    if (ability != null)
+                    {
+                        float buffHp = maxHp * ability.chestBuffPercent[Mathf.Clamp(star - 1, 0, ability.chestBuffPercent.Length - 1)];
+                        float dmgAmp = ability.damageAmpPerStar[Mathf.Clamp(star - 1, 0, ability.damageAmpPerStar.Length - 1)];
+                        float bonkDmg = (maxHp * 0.2f) + dmgAmp;
+
+                        return $"Chest pound: Permanently gains {buffHp:F0} health.\n" +
+                               $"Bonk: Deals {bonkDmg:F0} damage (20% max HP + damage amp).";
+                    }
+                    return "B.O.P ability missing.";
+                }
+
+            default:
+                return "This unit has no ability description yet.";
         }
     }
 
@@ -891,8 +982,7 @@ public class UnitAI : MonoBehaviour
             if (animator) animator.SetBool("IsRunning", false);
         }
     }
-    // ⭐ Upgrade Star Level (called from GameManager when merging)
-    // ⭐ Upgrade Star Level (called from GameManager when merging)
+
     // ⭐ Upgrade Star Level (called from GameManager when merging)
     public void UpgradeStarLevel()
     {

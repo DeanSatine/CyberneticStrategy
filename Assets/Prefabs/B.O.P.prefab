@@ -314,7 +314,7 @@ MonoBehaviour:
   team: 0
   maxHealth: 900
   currentHealth: 900
-  attackDamage: 35
+  attackDamage: 40
   attackSpeed: 0.7
   armor: 50
   attackRange: 1.8
@@ -329,6 +329,7 @@ MonoBehaviour:
   projectilePrefab: {fileID: 0}
   firePoint: {fileID: 0}
   projectileSpeed: 15
+  portraitSprite: {fileID: 0}
   unitUIPrefab: {fileID: 6939982145822855837, guid: 63931d92c48ef65418d45ec02069a522,
     type: 3}
   ui: {fileID: 0}
