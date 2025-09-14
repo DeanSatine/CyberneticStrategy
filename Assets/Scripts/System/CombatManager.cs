@@ -16,22 +16,19 @@ public class CombatManager : MonoBehaviour
     {
         Debug.Log("⚔️ Combat started!");
 
-        savedPlayerPositions.Clear(); // reset from previous round
+        // ✅ Reset lingering trait visuals at round start
+        EradicatorTrait.ResetAllEradicators();
+
+        savedPlayerPositions.Clear();
 
         foreach (var unit in FindObjectsOfType<UnitAI>())
         {
-            // Skip dead or benched units completely
             if (!unit.isAlive || unit.currentState == UnitAI.UnitState.Bench)
-            {
-                Debug.Log($"⏭️ Skipping {unit.unitName} ({unit.team}) because it is {(unit.isAlive ? "benched" : "dead")}");
                 continue;
-            }
 
-            // Save player positions before combat (only for board units)
             if (unit.team == Team.Player && unit.currentTile != null)
                 savedPlayerPositions[unit] = unit.currentTile;
 
-            // ✅ Set only board units (not benched) to combat state
             unit.SetState(UnitAI.UnitState.Combat);
             Debug.Log($"✅ Set {unit.team} unit {unit.unitName} to Combat state");
         }

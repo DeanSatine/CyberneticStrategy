@@ -71,15 +71,17 @@ public class TraitManager : MonoBehaviour
     public Dictionary<Trait, int> CountTraits(List<UnitAI> units)
     {
         Dictionary<Trait, int> counts = new Dictionary<Trait, int>();
-
-        // Track which unit types have already contributed
         HashSet<string> contributedUnits = new HashSet<string>();
 
         foreach (var unit in units)
         {
             if (unit == null) continue;
 
-            // Skip if we've already counted this unit type (by name)
+            // ❌ Skip benched units
+            if (unit.currentState == UnitAI.UnitState.Bench)
+                continue;
+
+            // ❌ Skip if this unit type already contributed
             if (contributedUnits.Contains(unit.unitName))
                 continue;
 
@@ -96,6 +98,7 @@ public class TraitManager : MonoBehaviour
 
         return counts;
     }
+
 
     public bool IsTraitActive(Trait trait, int count)
     {
@@ -174,7 +177,10 @@ public class TraitManager : MonoBehaviour
         {
             if (unit == null) continue;
 
-            // Skip if we've already counted this unit type (by name)
+            // ❌ Skip benched units
+            if (unit.currentState == UnitAI.UnitState.Bench)
+                continue;
+
             if (contributedUnits.Contains(unit.unitName))
                 continue;
 
@@ -184,6 +190,7 @@ public class TraitManager : MonoBehaviour
             {
                 if (!traitCounts.ContainsKey(trait))
                     traitCounts[trait] = 0;
+
                 traitCounts[trait]++;
             }
         }
@@ -191,6 +198,7 @@ public class TraitManager : MonoBehaviour
         // ✅ push to UI
         TraitUIManager.Instance.UpdateTraitUI(traitCounts);
     }
+
 
     private void ApplyBonuses(List<UnitAI> playerUnits, Dictionary<Trait, int> activeTraits)
     {
@@ -205,41 +213,45 @@ public class TraitManager : MonoBehaviour
                 // ERADICATOR
                 // =====================
                 case Trait.Eradicator:
-                    foreach (var unit in playerUnits)
+                    if (count >= eradicatorThreshold2)
                     {
-                        if (unit.traits.Contains(Trait.Eradicator))
+                        foreach (var unit in playerUnits)
                         {
-                            var ability = unit.GetComponent<EradicatorTrait>();
-                            if (ability == null) ability = unit.gameObject.AddComponent<EradicatorTrait>();
+                            if (unit.currentState == UnitAI.UnitState.Bench) continue;
 
-                            if (count >= eradicatorThreshold2)
+                            if (unit.traits.Contains(Trait.Eradicator))
                             {
+                                var ability = unit.GetComponent<EradicatorTrait>();
+                                if (ability == null) ability = unit.gameObject.AddComponent<EradicatorTrait>();
+
                                 ability.executeThreshold = (count >= eradicatorThreshold3)
                                     ? eradicatorExecuteThreshold3
                                     : eradicatorExecuteThreshold2;
 
                                 ability.pressPrefab = hydraulicPressPrefab;
-
-                                // ✅ make sure press exists during planning & combat
                                 ability.SpawnPressIfNeeded();
-                            }
-                            else
-                            {
-                                // ✅ not enough Eradicators anymore → despawn press
-                                ability.DespawnPress();
                             }
                         }
                     }
+                    else
+                    {
+                        // ✅ Trait inactive → clean up press globally
+                        EradicatorTrait.ResetAllEradicators();
+                    }
                     break;
+
 
                 // =====================
                 // BULKHEAD
                 // =====================
                 case Trait.Bulkhead:
+
                     if (count >= bulkheadThreshold)
                     {
                         foreach (var unit in playerUnits)
                         {
+                            if (unit.currentState == UnitAI.UnitState.Bench) continue;
+
                             if (unit.traits.Contains(Trait.Bulkhead))
                             {
                                 var ability = unit.GetComponent<BulkheadTrait>();
@@ -260,6 +272,8 @@ public class TraitManager : MonoBehaviour
                     {
                         foreach (var unit in playerUnits)
                         {
+                            if (unit.currentState == UnitAI.UnitState.Bench) continue;
+
                             if (unit.traits.Contains(Trait.Clobbertron))
                             {
                                 var ability = unit.GetComponent<ClobbertronTrait>();
@@ -281,6 +295,8 @@ public class TraitManager : MonoBehaviour
                     {
                         foreach (var unit in playerUnits)
                         {
+                            if (unit.currentState == UnitAI.UnitState.Bench) continue;
+
                             if (unit.traits.Contains(Trait.Strikebyte))
                             {
                                 var ability = unit.GetComponent<StrikebyteTrait>();
