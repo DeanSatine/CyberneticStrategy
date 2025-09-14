@@ -93,6 +93,9 @@ public class StageManager : MonoBehaviour
         // ✅ Reset Eradicator statics first
         EradicatorTrait.ResetAllEradicators();
 
+        // ✅ Clear all leftover projectiles
+        CombatManager.Instance.ClearProjectiles();
+
         foreach (var kvp in CombatManager.Instance.GetSavedPlayerPositions())
         {
             UnitAI unit = kvp.Key;
