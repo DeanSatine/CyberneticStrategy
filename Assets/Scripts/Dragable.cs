@@ -8,7 +8,7 @@ public class Draggable : MonoBehaviour
     public bool isDragging = false;
     private Vector3 oldPosition;
     private UnitAI unitAI;
-
+    public static Draggable currentlyDragging;
     private void Awake()
     {
         unitAI = GetComponent<UnitAI>();
@@ -28,13 +28,22 @@ public class Draggable : MonoBehaviour
             Debug.LogWarning("Tried to pick up a unit that shares a tile with another. Ignored.");
             return;
         }
+
+        // ✅ Prevent picking up another unit if one is already being dragged
         if (!isDragging)
         {
+            if (currentlyDragging != null && currentlyDragging != this)
+            {
+                Debug.Log($"🚫 Already dragging {currentlyDragging.unitAI.unitName}, can’t pick up another.");
+                return;
+            }
+
             // Pick up the unit
             isDragging = true;
+            currentlyDragging = this;
             oldPosition = transform.position;
 
-            // Free its previously occupied tile immediately (so other units may be placed there while dragging)
+            // Free its previously occupied tile immediately
             if (unitAI != null && unitAI.currentTile != null)
             {
                 if (unitAI.currentTile.occupyingUnit == unitAI)
@@ -47,9 +56,11 @@ public class Draggable : MonoBehaviour
         {
             // Drop the unit
             isDragging = false;
+            currentlyDragging = null;
             SnapToClosestObject();
         }
     }
+
 
     private bool CanInteractWithUnit()
     {
@@ -101,6 +112,15 @@ public class Draggable : MonoBehaviour
             {
                 Debug.Log("❌ Combat started while dragging! Dropping unit.");
                 isDragging = false;
+                SnapToClosestObject();
+                return;
+            }
+
+            if (!CanInteractWithUnit())
+            {
+                Debug.Log("❌ Combat started while dragging! Dropping unit.");
+                isDragging = false;
+                currentlyDragging = null; // ✅ reset global reference
                 SnapToClosestObject();
                 return;
             }

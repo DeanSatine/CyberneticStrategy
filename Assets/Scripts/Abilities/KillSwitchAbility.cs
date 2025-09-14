@@ -29,11 +29,17 @@ public class KillSwitchAbility : MonoBehaviour, IUnitAbility
     public void Cast(UnitAI _ignored)
     {
         UnitAI target = FindNearestEnemyInRange(maxLeapRange);
-        if (target != null)
-            StartCoroutine(LeapAndSlam(target));
-        else
-            Debug.Log($"{unitAI.unitName} tried to leap, but no enemies within {maxLeapRange}!");
+
+        // 🚫 Skip if no target or if target is benched
+        if (target == null || target.currentState == UnitState.Bench)
+        {
+            Debug.Log($"{unitAI.unitName} tried to leap, but no valid enemies within {maxLeapRange}!");
+            return;
+        }
+
+        StartCoroutine(LeapAndSlam(target));
     }
+
 
     public void OnAttack(UnitAI target)
     {
@@ -59,7 +65,7 @@ public class KillSwitchAbility : MonoBehaviour, IUnitAbility
 
     private IEnumerator LeapAndSlam(UnitAI target)
     {
-        if (target == null) yield break;
+        if (target == null || !target.isAlive || target.currentState == UnitState.Bench) yield break;
 
         // starting position
         Vector3 startPos = unitAI.transform.position;
@@ -195,8 +201,7 @@ public class KillSwitchAbility : MonoBehaviour, IUnitAbility
 
         foreach (var unit in allUnits)
         {
-            if (unit == unitAI || !unit.isAlive) continue;
-            if (unit.team == unitAI.team) continue;
+            if (unit == unitAI || !unit.isAlive || unit.team == unitAI.team || unit.currentState == UnitState.Bench) continue;
 
             float dist = Vector3.Distance(unitAI.transform.position, unit.transform.position);
             if (dist < minDist && dist <= range)

@@ -540,7 +540,16 @@ public class UnitAI : MonoBehaviour
         {
             if (ability is IUnitAbility unitAbility)
             {
-                unitAbility.Cast(currentTarget?.GetComponent<UnitAI>());
+                UnitAI targetAI = currentTarget?.GetComponent<UnitAI>();
+
+                // ✅ Skip casting on benched or invalid targets
+                if (targetAI == null || !targetAI.isAlive || targetAI.currentState == UnitState.Bench)
+                {
+                    Debug.Log($"🚫 {unitName} tried to cast ability on invalid/benched target.");
+                    continue;
+                }
+
+                unitAbility.Cast(targetAI);
                 break;
             }
         }

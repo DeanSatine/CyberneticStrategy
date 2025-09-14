@@ -189,7 +189,7 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
     private IEnumerator PerformAbility()
     {
         UnitAI target = unitAI.GetCurrentTarget();
-        if (target == null) yield break;
+        if (target == null || !target.isAlive || target.currentState == UnitState.Bench) yield break;
 
         // --- STAB ---
         if (unitAI.animator) unitAI.animator.SetTrigger("StabTrigger");
@@ -292,7 +292,7 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
 
         foreach (var u in allUnits)
         {
-            if (u == unitAI || !u.isAlive || u.team == unitAI.team) continue;
+            if (u == unitAI || !u.isAlive || u.team == unitAI.team || u.currentState == UnitState.Bench) continue;
             if (Vector3.Distance(transform.position, u.transform.position) <= searchRadius)
                 enemies.Add(u);
         }
@@ -332,7 +332,7 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
 
         foreach (var u in allUnits)
         {
-            if (u == unitAI || !u.isAlive || u.team == unitAI.team) continue;
+            if (u == unitAI || !u.isAlive || u.team == unitAI.team || u.currentState == UnitState.Bench) continue;
             if (Vector3.Distance(center.Value, u.transform.position) <= radius)
                 enemies.Add(u);
         }

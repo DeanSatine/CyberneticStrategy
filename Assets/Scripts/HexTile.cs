@@ -18,16 +18,22 @@ public class HexTile : MonoBehaviour
     public TileOwner owner = TileOwner.Neutral; // ✅ new field
     public UnitAI occupyingUnit; // ✅ Track which unit is on this tile
     public Vector2Int gridPosition;
-  
+
     public bool TryClaim(UnitAI unit)
     {
+        // ✅ If tile already has a unit, block placement (both board + bench)
         if (occupyingUnit != null && occupyingUnit != unit)
+            return false;
+
+        // ✅ Special case: bench should strictly allow only 1 unit
+        if (tileType == TileType.Bench && occupyingUnit != null && occupyingUnit != unit)
             return false;
 
         occupyingUnit = unit;
         unit.currentTile = this;
         return true;
     }
+
 
     public void Free(UnitAI unit)
     {

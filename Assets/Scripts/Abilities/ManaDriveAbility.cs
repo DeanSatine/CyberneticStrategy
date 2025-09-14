@@ -115,7 +115,7 @@ public class ManaDriveAbility : MonoBehaviour, IUnitAbility
         UnitAI[] allUnits = FindObjectsOfType<UnitAI>();
         foreach (UnitAI enemy in allUnits)
         {
-            if (enemy != null && enemy.isAlive && enemy.team != unitAI.team)
+            if (enemy != null && enemy.isAlive && enemy.team != unitAI.team && enemy.currentState != UnitState.Bench)
             {
                 float distance = Vector3.Distance(enemy.transform.position, explosionPos);
                 if (distance <= splashRadius)
@@ -161,7 +161,7 @@ public class ManaDriveAbility : MonoBehaviour, IUnitAbility
 
         foreach (var unit in allUnits)
         {
-            if (unit != unitAI && unit.isAlive && unit.team != unitAI.team)
+            if (unit != unitAI && unit.isAlive && unit.team != unitAI.team && unit.currentState != UnitState.Bench)
                 enemies.Add(unit);
         }
 

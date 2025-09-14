@@ -36,7 +36,8 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
 
         if (unitAI.animator != null)
             unitAI.animator.SetTrigger("AbilityTrigger");
-
+        if (target != null && target.currentState == UnitAI.UnitState.Bench)
+            return;
         if (vfxManager != null)
             vfxManager.PlayNeedlebotRapidThrow();
 
@@ -66,7 +67,7 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
         {
             UnitAI target = targets[needleIndex % targets.Count]; // Alternate between targets
 
-            if (target != null && target.isAlive)
+            if (target != null && target.isAlive && target.currentState != UnitState.Bench)
             {
                 if (unitAI.projectilePrefab != null)
                 {
@@ -197,7 +198,7 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
         GameObject needle = Instantiate(unitAI.projectilePrefab, startPos, Quaternion.identity);
         float speed = 20f;
 
-        while (needle != null && target != null && target.isAlive)
+        while (needle != null && target != null && target.isAlive && target.currentState != UnitState.Bench)
         {
             Vector3 targetPos = target.transform.position + Vector3.up * 1.2f;
             Vector3 direction = (targetPos - needle.transform.position).normalized;

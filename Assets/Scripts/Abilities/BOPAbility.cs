@@ -44,7 +44,7 @@ public class BOPAbility : MonoBehaviour, IUnitAbility
     public void DoBonkDamage()
     {
         UnitAI target = unitAI.GetCurrentTarget();
-        if (target != null && target.isAlive)
+        if (target != null && target.isAlive && target.currentState != UnitState.Bench)
         {
             float damageAmp = damageAmpPerStar[Mathf.Clamp(unitAI.starLevel - 1, 0, damageAmpPerStar.Length - 1)];
             float damage = (unitAI.maxHealth * 0.2f) + damageAmp;

@@ -60,8 +60,16 @@ public class CombatManager : MonoBehaviour
     {
         List<UnitAI> allUnits = FindObjectsOfType<UnitAI>().ToList();
 
-        bool anyPlayersAlive = allUnits.Any(u => u.team == Team.Player && u.isAlive);
-        bool anyEnemiesAlive = allUnits.Any(u => u.team == Team.Enemy && u.isAlive);
+        // ✅ Only count units that are alive AND not benched
+        bool anyPlayersAlive = allUnits.Any(u =>
+            u.team == Team.Player &&
+            u.isAlive &&
+            u.currentState != UnitAI.UnitState.Bench);
+
+        bool anyEnemiesAlive = allUnits.Any(u =>
+            u.team == Team.Enemy &&
+            u.isAlive &&
+            u.currentState != UnitAI.UnitState.Bench);
 
         if (!anyEnemiesAlive)
         {
