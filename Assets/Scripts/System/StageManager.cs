@@ -84,6 +84,8 @@ public class StageManager : MonoBehaviour
         Debug.Log("⚔️ Entering Combat Phase");
         currentPhase = GamePhase.Combat;
 
+        CombatManager.Instance.ClearProjectiles();
+
         UIManager.Instance.ShowFightButton(false);
         CombatManager.Instance.StartCombat();
     }
