@@ -59,21 +59,46 @@ public class GameManager : MonoBehaviour
         Debug.Log($"🔎 Checking for merges{(triggerUnit ? $" triggered by {triggerUnit.unitName}" : "")}");
 
         bool anyMergesOccurred = false;
+        bool mergesThisPass;
 
-        // Group units by name and star level
-        var unitGroups = playerUnits
-            .Where(u => u != null && u.isAlive)
-            .GroupBy(u => new { u.unitName, u.starLevel })
-            .ToList();
+        // Keep checking for merges until no more are possible
+        do
+        {
+            mergesThisPass = ProcessAllPossibleMerges();
+            if (mergesThisPass)
+            {
+                anyMergesOccurred = true;
+                Debug.Log("🔄 Checking for additional merges...");
+            }
+        }
+        while (mergesThisPass);
+
+        // Re-evaluate traits after all merging is complete
+        if (anyMergesOccurred)
+        {
+            TraitManager.Instance.EvaluateTraits(playerUnits);
+            TraitManager.Instance.ApplyTraits(playerUnits);
+
+            Debug.Log("✅ All possible merges completed! Traits re-evaluated.");
+        }
+    }
+
+    // --- Process all possible merges in one pass ---
+    private bool ProcessAllPossibleMerges()
+    {
+        bool anyMergesThisPass = false;
 
         // Check for merges at each star level (1->2, then 2->3)
         for (int starLevel = 1; starLevel <= 2; starLevel++)
         {
-            var mergeableGroups = unitGroups
+            // Group units by name and star level
+            var unitGroups = playerUnits
+                .Where(u => u != null && u.isAlive)
+                .GroupBy(u => new { u.unitName, u.starLevel })
                 .Where(g => g.Key.starLevel == starLevel && g.Count() >= 3)
                 .ToList();
 
-            foreach (var group in mergeableGroups)
+            foreach (var group in unitGroups)
             {
                 // Process all possible merges for this group (e.g., 6 units = 2 merges)
                 var availableUnits = group.ToList();
@@ -96,7 +121,7 @@ public class GameManager : MonoBehaviour
                     if (starUpVFXPrefab != null)
                     {
                         var vfx = Instantiate(starUpVFXPrefab, upgradedUnit.transform.position, Quaternion.identity);
-                        Destroy(vfx, 2f); // Longer duration for 3-star merges
+                        Destroy(vfx, 2f);
                     }
 
                     // Remove and destroy the other two units
@@ -112,13 +137,13 @@ public class GameManager : MonoBehaviour
 
                         // Unregister and destroy
                         UnregisterUnit(unitToRemove);
-                        availableUnits.Remove(unitToRemove); // Remove from our local list too
+                        availableUnits.Remove(unitToRemove);
                         Destroy(unitToRemove.gameObject);
                     }
 
                     // Remove the upgraded unit from available units to prevent processing it again
                     availableUnits.Remove(upgradedUnit);
-                    anyMergesOccurred = true;
+                    anyMergesThisPass = true;
 
                     Debug.Log($"✅ {upgradedUnit.unitName} upgraded to {upgradedUnit.starLevel} stars!");
 
@@ -131,15 +156,9 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        // Re-evaluate traits after merging
-        if (anyMergesOccurred)
-        {
-            TraitManager.Instance.EvaluateTraits(playerUnits);
-            TraitManager.Instance.ApplyTraits(playerUnits);
-
-            Debug.Log("🔄 Traits re-evaluated after merging");
-        }
+        return anyMergesThisPass;
     }
+
     // --- Helper method to get merge progress for UI ---
     public string GetMergeProgress(string unitName)
     {
