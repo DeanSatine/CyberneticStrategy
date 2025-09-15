@@ -213,16 +213,7 @@ public class Draggable : MonoBehaviour
                 transform.position.y,
                 targetTile.transform.position.z);
 
-            // ✅ NOW evaluate traits AFTER unit is properly placed and registered
-            TraitManager.Instance.EvaluateTraits(GameManager.Instance.playerUnits);
-            TraitManager.Instance.ApplyTraits(GameManager.Instance.playerUnits);
-
-            // ✅ CRITICAL: Check for merging after moving a unit
-            if (unitAI.team == Team.Player)
-            {
-                GameManager.Instance.TryMergeUnits(unitAI);
-            }
-
+            // ✅ CRITICAL: Update state FIRST, then evaluate traits
             if (targetTile.tileType == TileType.Board)
             {
                 unitAI.currentState = UnitState.BoardIdle;
@@ -234,6 +225,16 @@ public class Draggable : MonoBehaviour
                 GameManager.Instance.UnregisterUnit(unitAI);
             }
 
+            // ✅ NOW evaluate traits AFTER unit state is properly updated
+            TraitManager.Instance.EvaluateTraits(GameManager.Instance.playerUnits);
+            TraitManager.Instance.ApplyTraits(GameManager.Instance.playerUnits);
+
+            // ✅ Check for merging after moving a unit
+            if (unitAI.team == Team.Player)
+            {
+                GameManager.Instance.TryMergeUnits(unitAI);
+            }
+
             // ✅ Update fight button after state changes
             if (unitAI.team == Team.Player && UIManager.Instance != null)
             {
@@ -243,6 +244,7 @@ public class Draggable : MonoBehaviour
             Debug.Log($"✅ {unitAI.unitName} placed successfully at {targetTile.gridPosition}");
             return;
         }
+
 
         // No valid tile found → snap back
         Debug.Log($"❌ No valid placement found for {unitAI.unitName}. Returning to original position.");
