@@ -40,31 +40,56 @@ public class GameManager : MonoBehaviour
     }
 
     // --- Try merging when a new unit is bought ---
-    public void TryMergeUnits(UnitAI newUnit)
+    public void TryMergeUnits(UnitAI triggerUnit = null)
     {
-        Debug.Log($"🔎 Checking for merge on {newUnit.unitName} (star {newUnit.starLevel})");
+        Debug.Log($"🔎 Checking for merges{(triggerUnit ? $" triggered by {triggerUnit.unitName}" : "")}");
 
-        foreach (var u in playerUnits)
-        {
-            Debug.Log($"   -> {u.unitName}, star {u.starLevel}");
-        }
-
-        var sameUnits = playerUnits
-            .Where(u => u.unitName == newUnit.unitName && u.starLevel == newUnit.starLevel)
+        // Group units by name and star level
+        var unitGroups = playerUnits
+            .Where(u => u != null && u.isAlive)
+            .GroupBy(u => new { u.unitName, u.starLevel })
+            .Where(g => g.Count() >= 3)
             .ToList();
 
-        if (sameUnits.Count >= 3)
+        foreach (var group in unitGroups)
         {
-            UnitAI upgradedUnit = sameUnits[0];
+            var unitsToMerge = group.Take(3).ToList();
+            Debug.Log($"🌟 Merging 3x {group.Key.unitName} (star {group.Key.starLevel})");
+
+            // Keep the first unit and upgrade it
+            UnitAI upgradedUnit = unitsToMerge[0];
             upgradedUnit.UpgradeStarLevel();
 
-            // Remove the other two
-            for (int i = 1; i < 3; i++)
+            // Spawn merge VFX if available
+            if (starUpVFXPrefab != null)
             {
-                UnitAI unitToRemove = sameUnits[i];
-                playerUnits.Remove(unitToRemove);
+                Instantiate(starUpVFXPrefab, upgradedUnit.transform.position, Quaternion.identity);
+            }
+
+            // Remove and destroy the other two units
+            for (int i = 1; i < unitsToMerge.Count; i++)
+            {
+                UnitAI unitToRemove = unitsToMerge[i];
+
+                // Free the tile properly
+                if (unitToRemove.currentTile != null)
+                {
+                    unitToRemove.currentTile.Free(unitToRemove);
+                }
+
+                // Unregister and destroy
+                UnregisterUnit(unitToRemove);
                 Destroy(unitToRemove.gameObject);
             }
+
+            Debug.Log($"✅ {upgradedUnit.unitName} upgraded to {upgradedUnit.starLevel} stars!");
+        }
+
+        // Re-evaluate traits after merging
+        if (unitGroups.Any())
+        {
+            TraitManager.Instance.EvaluateTraits(playerUnits);
+            TraitManager.Instance.ApplyTraits(playerUnits);
         }
     }
 

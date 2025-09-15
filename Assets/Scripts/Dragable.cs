@@ -213,21 +213,15 @@ public class Draggable : MonoBehaviour
                 transform.position.y,
                 targetTile.transform.position.z);
 
-            // State logic
-            if (targetTile.tileType == TileType.Board)
-            {
-                unitAI.currentState = UnitState.BoardIdle;
-                GameManager.Instance.RegisterUnit(unitAI, unitAI.team == Team.Player);
-            }
-            else if (targetTile.tileType == TileType.Bench)
-            {
-                unitAI.currentState = UnitState.Bench;
-                GameManager.Instance.UnregisterUnit(unitAI);
-            }
-
             // ✅ NOW evaluate traits AFTER unit is properly placed and registered
             TraitManager.Instance.EvaluateTraits(GameManager.Instance.playerUnits);
             TraitManager.Instance.ApplyTraits(GameManager.Instance.playerUnits);
+
+            // ✅ CRITICAL: Check for merging after moving a unit
+            if (unitAI.team == Team.Player)
+            {
+                GameManager.Instance.TryMergeUnits(unitAI);
+            }
 
             Debug.Log($"✅ {unitAI.unitName} placed successfully at {targetTile.gridPosition}");
             return;
