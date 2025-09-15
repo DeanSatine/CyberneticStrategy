@@ -789,11 +789,11 @@ public class UnitAI : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(1)) // right click
         {
-            UnitInfoPanelUI panel = FindObjectOfType<UnitInfoPanelUI>();
-            if (panel != null)
-                panel.Show(this);
+            Debug.Log($"Right-clicked {unitName}");
+            UnitInfoPanelManager.Instance.ShowPanel(this);
         }
     }
+
 
     private void UpdateCurrentTile()
     {

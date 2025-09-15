@@ -10,12 +10,11 @@ public class UnitInfoPanelUI : MonoBehaviour
     public TMP_Text asText;
     public TMP_Text hpText;
     public TMP_Text armorText;
-    public TMP_Text rangeText;
     public TMP_Text manaText;
 
     [Header("Ability")]
     public Image abilityIcon;
-    public GameObject abilityTooltip;       // Panel with TMP_Text
+    public GameObject abilityTooltip;
     public TMP_Text abilityTooltipText;
 
     private UnitAI currentUnit;
@@ -30,7 +29,12 @@ public class UnitInfoPanelUI : MonoBehaviour
     {
         currentUnit = unit;
         gameObject.SetActive(true);
-        Refresh();
+
+        // ✅ Static values
+        if (portraitImage) portraitImage.sprite = unit.portraitSprite;
+        if (abilityTooltipText != null) abilityTooltipText.text = unit.GetAbilityDescription();
+
+        RefreshDynamic();
     }
 
     public void Hide()
@@ -42,27 +46,21 @@ public class UnitInfoPanelUI : MonoBehaviour
     private void Update()
     {
         if (currentUnit != null)
-            Refresh(); // ✅ keep live updating
+            RefreshDynamic();
     }
 
-    private void Refresh()
+    private void RefreshDynamic()
     {
         if (currentUnit == null) return;
-
-        if (portraitImage) portraitImage.sprite = currentUnit.portraitSprite;
 
         adText.text = $"AD: {currentUnit.attackDamage:F0}";
         asText.text = $"AS: {currentUnit.attackSpeed:F2}";
         hpText.text = $"HP: {currentUnit.currentHealth:F0}/{currentUnit.maxHealth:F0}";
         armorText.text = $"Armor: {currentUnit.armor:F0}";
-        rangeText.text = $"Range: {currentUnit.attackRange:F1}";
         manaText.text = $"Mana: {currentUnit.currentMana:F0}/{currentUnit.maxMana:F0}";
-
-        if (abilityTooltipText != null)
-            abilityTooltipText.text = currentUnit.GetAbilityDescription();
     }
 
-    // Hover handlers (wired via EventTrigger or IPointerEnter/Exit)
+    // Hover handlers
     public void OnAbilityIconEnter()
     {
         if (abilityTooltip != null) abilityTooltip.SetActive(true);
