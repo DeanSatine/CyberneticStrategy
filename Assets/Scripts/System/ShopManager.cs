@@ -230,13 +230,17 @@ public class ShopManager : MonoBehaviour
             return;
         }
 
-        // Find first empty bench slot
+        // ✅ FIXED: Find first empty bench slot using HexTile system
         Transform freeSlot = null;
+        HexTile freeTile = null;
+
         foreach (Transform benchSlot in benchSlots)
         {
-            if (benchSlot.childCount == 0)
+            HexTile hexTile = benchSlot.GetComponent<HexTile>();
+            if (hexTile != null && hexTile.tileType == TileType.Bench && hexTile.occupyingUnit == null)
             {
                 freeSlot = benchSlot;
+                freeTile = hexTile;
                 break;
             }
         }
@@ -251,9 +255,19 @@ public class ShopManager : MonoBehaviour
         // Spawn unit on free bench slot
         GameObject unit = Instantiate(slot.unitPrefab, freeSlot.position, Quaternion.identity);
         unit.transform.rotation = Quaternion.Euler(0f, -90f, 0f);
-        unit.transform.SetParent(freeSlot);
 
+        // ✅ CRITICAL: Properly claim the tile instead of just setting parent
         UnitAI newUnit = unit.GetComponent<UnitAI>();
+        if (!freeTile.TryClaim(newUnit))
+        {
+            Debug.LogError("Failed to claim free tile - this shouldn't happen!");
+            Destroy(unit);
+            EconomyManager.Instance.AddGold(slot.cost);
+            return;
+        }
+
+        // Set proper state
+        newUnit.currentState = UnitAI.UnitState.Bench;
 
         // ✅ Register new unit with GameManager so it's tracked
         GameManager.Instance.RegisterUnit(newUnit, true);
@@ -270,4 +284,5 @@ public class ShopManager : MonoBehaviour
         }
         Destroy(slot.gameObject);
     }
+
 }

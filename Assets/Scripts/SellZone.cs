@@ -163,11 +163,12 @@ public class SellZone : MonoBehaviour
 
         // Stop dragging
         draggable.isDragging = false;
+        Draggable.currentlyDragging = null; // ✅ Reset global reference
 
         // Add gold to player
         EconomyManager.Instance.AddGold(sellPrice);
 
-        // Clear tile assignment
+        // ✅ CRITICAL: Clear tile assignment PROPERLY
         if (unit.currentTile != null)
         {
             unit.currentTile.Free(unit);
