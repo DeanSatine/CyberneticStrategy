@@ -18,6 +18,7 @@ public class UnitInfoPanelUI : MonoBehaviour
     public TMP_Text abilityTooltipText;     // description text
 
     private UnitAI currentUnit;
+    public bool IsShowingUnit(UnitAI unit) => currentUnit == unit;
 
     private void Awake()
     {
@@ -47,6 +48,11 @@ public class UnitInfoPanelUI : MonoBehaviour
     {
         if (currentUnit != null)
             RefreshDynamic();
+    }
+    public void ForceRefresh()
+    {
+        if (currentUnit != null)
+            RefreshDynamic(); // (RefreshDynamic() in your current script is private; make it internal/private/protected as needed)
     }
 
     private void RefreshDynamic()

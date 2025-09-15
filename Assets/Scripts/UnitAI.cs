@@ -104,6 +104,9 @@ public class UnitAI : MonoBehaviour
     public float twoStarScale = 1.10f;
 
     [Tooltip("Scale at 3-star (relative to base)")]
+    // runtime baseline + modifiers so buffs persist
+    [HideInInspector] public float baseMaxHealth;
+    [HideInInspector] public float bonusMaxHealth;
 
     public float threeStarScale = 1.25f;
     private List<GameObject> activeProjectiles = new List<GameObject>();
@@ -156,6 +159,11 @@ public class UnitAI : MonoBehaviour
         float offsetRange = 0.2f; // tweak this for spacing
         moveOffset = new Vector3(Random.Range(-offsetRange, offsetRange), 0, Random.Range(-offsetRange, offsetRange));
 
+        // initialize base/buff values so runtime buffs persist
+        baseMaxHealth = maxHealth;
+        bonusMaxHealth = 0f;
+        RecalculateMaxHealth();
+
         currentHealth = maxHealth;
         currentMana = 0f;
 
@@ -167,6 +175,7 @@ public class UnitAI : MonoBehaviour
         }
         SetupUnitCollision();
     }
+
     private void Update()
     {
         if (!isAlive) return;
@@ -194,13 +203,15 @@ public class UnitAI : MonoBehaviour
 
         else
         {
-            // ✅ If target is alive but too far, recheck periodically
             float dist = Vector3.Distance(transform.position, currentTarget.position);
-            if (dist > attackRange * 2f) // tweak multiplier if needed
+
+            // If target is too far to chase reasonably, retarget
+            if (dist > attackRange * 3f) // allow bigger leash before retarget
             {
                 currentTarget = FindNearestEnemy();
                 currentPath.Clear();
             }
+            // ✅ Otherwise: do nothing here. Movement/attack will be handled below.
         }
 
         if (currentTarget != null && canAttack)
@@ -884,7 +895,7 @@ public class UnitAI : MonoBehaviour
                         float dmgAmp = ability.damageAmpPerStar[Mathf.Clamp(star - 1, 0, ability.damageAmpPerStar.Length - 1)];
                         float bonkDmg = (maxHp * 0.2f) + dmgAmp;
 
-                        return $"Chest pound: Permanently gains {buffHp:F0} health.\n" +
+                        return $"Chest pound: B.O.P gains {buffHp:F0} health.\n" +
                                $"Bonk: Deals {bonkDmg:F0} damage (20% max HP + AD).";
                     }
                     return "B.O.P ability missing.";
@@ -982,6 +993,21 @@ public class UnitAI : MonoBehaviour
             if (animator) animator.SetBool("IsRunning", false);
         }
     }
+    public void RecalculateMaxHealth()
+    {
+        // effective max
+        maxHealth = baseMaxHealth + bonusMaxHealth;
+
+        // don't let currentHealth exceed the new max (but we don't *force* downwards elsewhere)
+        if (currentHealth > maxHealth) currentHealth = maxHealth;
+
+        // immediately sync unit UI (if present)
+        if (ui != null)
+        {
+            ui.SetMaxHealth(maxHealth);
+            ui.UpdateHealth(currentHealth);
+        }
+    }
 
     // ⭐ Upgrade Star Level (called from GameManager when merging)
     public void UpgradeStarLevel()
@@ -996,9 +1022,18 @@ public class UnitAI : MonoBehaviour
         starLevel++;
 
         float multiplier = (starLevel == 2) ? twoStarMultiplier : threeStarMultiplier;
-        maxHealth = Mathf.Round(maxHealth * multiplier);
+
+        // scale base and existing bonus so relative bonuses remain consistent
+        baseMaxHealth = Mathf.Round(baseMaxHealth * multiplier);
+        bonusMaxHealth = Mathf.Round(bonusMaxHealth * multiplier);
+
         attackDamage = Mathf.Round(attackDamage * multiplier);
+
+        // recompute effective max and sync UI
+        RecalculateMaxHealth();
+
         currentHealth = maxHealth;
+
 
         // 📏 Force scaling rules by unit name
         // 📏 Force scaling rules by unit name

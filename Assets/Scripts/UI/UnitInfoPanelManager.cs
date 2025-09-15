@@ -37,6 +37,13 @@ public class UnitInfoPanelManager : MonoBehaviour
             UnitInfoPanelManager.Instance.HideActivePanel();
         }
     }
+    public void RefreshActivePanelIfMatches(UnitAI unit)
+    {
+        if (activePanel != null && activePanel.IsShowingUnit(unit))
+        {
+            activePanel.ForceRefresh();
+        }
+    }
 
     public void ShowPanel(UnitAI unit)
     {

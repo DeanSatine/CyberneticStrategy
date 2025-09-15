@@ -7,7 +7,7 @@ public class BOPAbility : MonoBehaviour, IUnitAbility
 
     [Header("Ability Stats")]
     public float[] damageAmpPerStar = { 30, 40, 50 };
-    public float[] chestBuffPercent = { 0.05f, 0.05f, 0.05f }; // +5% per cast
+    public float[] chestBuffPercent = { 0.1f, 0.12f, 0.15f }; // +5% per cast
 
     [Header("Optional VFX")]
     public GameObject chestVFX;
@@ -26,19 +26,38 @@ public class BOPAbility : MonoBehaviour, IUnitAbility
             unitAI.animator.SetTrigger("AbilityTrigger");
     }
 
-
     // 👊 Animation Event: Chest Pound frame
     public void ApplyChestBuff()
     {
-        float buffAmount = unitAI.maxHealth * chestBuffPercent[Mathf.Clamp(unitAI.starLevel - 1, 0, chestBuffPercent.Length - 1)];
-        unitAI.maxHealth += buffAmount;
+        float buffAmount = unitAI.maxHealth * chestBuffPercent[
+            Mathf.Clamp(unitAI.starLevel - 1, 0, chestBuffPercent.Length - 1)
+        ];
+
+        // store as a bonus so recalculations won't wipe it
+        unitAI.bonusMaxHealth += buffAmount;
+
+        // recompute effective max (updates unitAI.maxHealth and the unit UI)
+        unitAI.RecalculateMaxHealth();
+
+        // heal current health by the same amount
         unitAI.currentHealth += buffAmount;
+        if (unitAI.currentHealth > unitAI.maxHealth) unitAI.currentHealth = unitAI.maxHealth;
+
+        // ensure UI shows the new current health
+        if (unitAI.ui != null)
+            unitAI.ui.UpdateHealth(unitAI.currentHealth);
+
+        // refresh Unit Info Panel if it's showing this unit (see manager helper below)
+        if (UnitInfoPanelManager.Instance != null)
+            UnitInfoPanelManager.Instance.RefreshActivePanelIfMatches(unitAI);
 
         if (chestVFX != null)
             Instantiate(chestVFX, transform.position, Quaternion.identity);
 
-        Debug.Log($"{unitAI.unitName} pounds chest! +{buffAmount} max HP (now {unitAI.maxHealth}).");
+        Debug.Log($"{unitAI.unitName} pounds chest! +{buffAmount:F1} max HP (now {unitAI.maxHealth:F1}).");
     }
+
+
 
     // 🔨 Animation Event: Bonk Strike frame
     public void DoBonkDamage()
