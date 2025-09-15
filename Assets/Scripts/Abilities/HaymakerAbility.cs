@@ -64,7 +64,7 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
             if (cloneInstance != null)
                 DestroyClone();
 
-            // ✅ FIX: Stop any ongoing ability when state changes
+            // Stop any ongoing ability when state changes
             if (isPerformingAbility)
             {
                 StopAllCoroutines();
@@ -72,6 +72,22 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
             }
         }
     }
+
+    // ✅ NEW: Add Update method to continuously check clone health
+    private void Update()
+    {
+        // ✅ Continuous clone health monitoring
+        if (cloneInstance != null)
+        {
+            var cloneAI = cloneInstance.GetComponent<UnitAI>();
+            if (cloneAI != null && !cloneAI.isAlive)
+            {
+                Debug.Log("[HaymakerAbility] Clone died, cleaning up reference");
+                cloneInstance = null; // Clear reference to dead clone
+            }
+        }
+    }
+
 
     // ✅ NEW: Reset ability state method
     private void ResetAbilityState()
@@ -288,17 +304,17 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
                 break;
             }
 
-            // ✅ FIX: Check phase during slashing too
+            // Check phase during slashing too
             if (StageManager.Instance != null && StageManager.Instance.currentPhase != StageManager.GamePhase.Combat)
             {
                 Debug.Log("[HaymakerAbility] Phase changed during slashing, stopping ability");
                 break;
             }
 
-            // Find closest enemy for this slash
-            UnitAI slashTarget = FindClosestEnemy(2.5f);
+            // ✅ UPDATED: Find enemies within 3 hex radius (approximately 3 units)
+            List<UnitAI> slashTargets = FindEnemiesInRadius(3f, transform.position);
 
-            if (slashTarget != null)
+            if (slashTargets.Count > 0)
             {
                 // Trigger attack animation
                 if (unitAI.animator)
@@ -306,9 +322,14 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
                     unitAI.animator.SetTrigger("AttackTrigger");
                 }
 
-                // Apply slash damage
+                // ✅ UPDATED: Apply damage to ALL enemies within 3 hex radius
                 float slashDmg = slashDamage[Mathf.Clamp(unitAI.starLevel - 1, 0, slashDamage.Length - 1)];
-                slashTarget.TakeDamage(slashDmg);
+
+                foreach (UnitAI target in slashTargets)
+                {
+                    target.TakeDamage(slashDmg);
+                    Debug.Log($"💥 Slash {i + 1}/{totalSlashes}: {slashDmg} damage to {target.unitName}");
+                }
 
                 // Spawn slash VFX around Haymaker's position
                 if (slashVFX != null)
@@ -316,9 +337,9 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
                     // Create VFX in a circle around Haymaker
                     float angle = (float)i / totalSlashes * 360f; // Distribute around circle
                     Vector3 offset = new Vector3(
-                        Mathf.Cos(angle * Mathf.Deg2Rad) * 1f, // 1 unit radius
-                        0.5f, // Slightly above ground
-                        Mathf.Sin(angle * Mathf.Deg2Rad) * 1f
+                        Mathf.Cos(angle * Mathf.Deg2Rad) * 1.5f, // ✅ Slightly larger radius for VFX
+                        1f, // Chest level
+                        Mathf.Sin(angle * Mathf.Deg2Rad) * 1.5f
                     );
                     Vector3 vfxPos = transform.position + offset;
 
@@ -326,7 +347,11 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
                     Destroy(slashEffect, 1f);
                 }
 
-                Debug.Log($"💥 Slash {i + 1}/{totalSlashes}: {slashDmg} damage to {slashTarget.unitName}");
+                Debug.Log($"⚔️ Slash {i + 1}: Hit {slashTargets.Count} enemies within 3 hex radius");
+            }
+            else
+            {
+                Debug.Log($"⚔️ Slash {i + 1}: No enemies within 3 hex radius");
             }
 
             yield return new WaitForSeconds(timeBetweenSlashes);
@@ -339,13 +364,21 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         }
         unitAI.armor = originalArmor;
 
-        // ✅ PHASE 3: Clone slam on final target (with retargeting)
+        // ✅ PHASE 3: Clone slam (with clone death check)
         Debug.Log("💥 Phase 3: Clone slam!");
 
-        // ✅ FIX: Check if we're still in combat before clone slam
+        // Check if we're still in combat and clone is alive before slam
         if (StageManager.Instance != null && StageManager.Instance.currentPhase == StageManager.GamePhase.Combat)
         {
-            yield return StartCoroutine(PerformCloneSlamWithRetargeting());
+            // ✅ UPDATED: Check if clone is still alive before slam
+            if (cloneInstance != null && cloneInstance.GetComponent<UnitAI>().isAlive)
+            {
+                yield return StartCoroutine(PerformCloneSlamWithRetargeting());
+            }
+            else
+            {
+                Debug.Log("[HaymakerAbility] Clone is dead or missing, skipping slam");
+            }
         }
         else
         {
@@ -368,13 +401,21 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         Debug.Log("✅ Fury of Slashes complete!");
     }
 
-    // ✅ NEW: Clone slam with automatic retargeting
-    // ✅ UPDATED: Clone slam with chest-level VFX positioning
+
+    // ✅ UPDATED: Enhanced clone slam with multiple death checks
     private IEnumerator PerformCloneSlamWithRetargeting()
     {
+        // ✅ Initial clone death check
         if (cloneInstance == null)
         {
             Debug.Log("[HaymakerAbility] No clone available for slam");
+            yield break;
+        }
+
+        var cloneAI = cloneInstance.GetComponent<UnitAI>();
+        if (cloneAI == null || !cloneAI.isAlive)
+        {
+            Debug.Log("[HaymakerAbility] Clone is dead, cannot perform slam");
             yield break;
         }
 
@@ -399,6 +440,13 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         float elapsed = 0f;
         while (elapsed < slamDuration)
         {
+            // ✅ Continuous clone death check during slam animation
+            if (cloneInstance == null || cloneAI == null || !cloneAI.isAlive)
+            {
+                Debug.Log("[HaymakerAbility] Clone died during slam animation, aborting slam");
+                yield break;
+            }
+
             elapsed += Time.deltaTime;
             float t = elapsed / slamDuration;
 
@@ -423,6 +471,13 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
             yield return null;
         }
 
+        // ✅ Final clone death check before damage application
+        if (cloneInstance == null || cloneAI == null || !cloneAI.isAlive)
+        {
+            Debug.Log("[HaymakerAbility] Clone died before damage application, no slam damage");
+            yield break;
+        }
+
         // Final target validation before damage
         if (slamTarget != null && slamTarget.isAlive)
         {
@@ -430,11 +485,11 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
             float slamDmg = slamDamage[Mathf.Clamp(unitAI.starLevel - 1, 0, slamDamage.Length - 1)];
             slamTarget.TakeDamage(slamDmg);
 
-            // ✅ FIX: Spawn slam VFX at chest level, not ground level
+            // Spawn slam VFX at chest level
             if (slamVFX != null)
             {
                 Vector3 slamVFXPosition = slamPosition;
-                slamVFXPosition.y += 1.2f; // ✅ Raise to chest/torso level (adjust as needed)
+                slamVFXPosition.y += 1.2f; // Chest level
 
                 var slamEffect = Instantiate(slamVFX, slamVFXPosition, Quaternion.identity);
                 Destroy(slamEffect, 2f);
@@ -452,16 +507,25 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
             if (slamVFX != null)
             {
                 Vector3 slamVFXPosition = slamPosition;
-                slamVFXPosition.y += 1.2f; // ✅ Chest level even for missed slams
+                slamVFXPosition.y += 1.2f; // Chest level even for missed slams
 
                 var slamEffect = Instantiate(slamVFX, slamVFXPosition, Quaternion.identity);
                 Destroy(slamEffect, 2f);
             }
         }
 
-        // Return clone to original position
-        yield return StartCoroutine(MoveCloneToPosition(cloneStartPos));
+        // ✅ Final clone check before returning to position
+        if (cloneInstance != null && cloneAI != null && cloneAI.isAlive)
+        {
+            // Return clone to original position
+            yield return StartCoroutine(MoveCloneToPosition(cloneStartPos));
+        }
+        else
+        {
+            Debug.Log("[HaymakerAbility] Clone died, skipping return movement");
+        }
     }
+
 
 
     private IEnumerator DashToPosition(Vector3 targetPosition)
@@ -678,6 +742,10 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         return closest;
     }
 
+    // ✅ UPDATED: Remove this method since we're now using FindEnemiesInRadius directly
+    // The old FindClosestEnemy method is replaced by using FindEnemiesInRadius with 3f radius
+
+    // Keep the existing FindEnemiesInRadius method as-is since it's working correctly
     private List<UnitAI> FindEnemiesInRadius(float radius, Vector3? center = null)
     {
         if (center == null) center = transform.position;

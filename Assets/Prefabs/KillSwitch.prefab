@@ -372,7 +372,7 @@ MonoBehaviour:
   leapDuration: 0.5
   slamDuration: 0.7
   leapHeight: 2
-  maxLeapRange: 5
+  maxLeapRange: 8
 --- !u!65 &7128019543044565119
 BoxCollider:
   m_ObjectHideFlags: 0
