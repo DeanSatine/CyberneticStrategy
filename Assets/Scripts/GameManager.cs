@@ -58,53 +58,124 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log($"🔎 Checking for merges{(triggerUnit ? $" triggered by {triggerUnit.unitName}" : "")}");
 
+        bool anyMergesOccurred = false;
+
         // Group units by name and star level
         var unitGroups = playerUnits
             .Where(u => u != null && u.isAlive)
             .GroupBy(u => new { u.unitName, u.starLevel })
-            .Where(g => g.Count() >= 3)
             .ToList();
 
-        foreach (var group in unitGroups)
+        // Check for merges at each star level (1->2, then 2->3)
+        for (int starLevel = 1; starLevel <= 2; starLevel++)
         {
-            var unitsToMerge = group.Take(3).ToList();
-            Debug.Log($"🌟 Merging 3x {group.Key.unitName} (star {group.Key.starLevel})");
+            var mergeableGroups = unitGroups
+                .Where(g => g.Key.starLevel == starLevel && g.Count() >= 3)
+                .ToList();
 
-            // Keep the first unit and upgrade it
-            UnitAI upgradedUnit = unitsToMerge[0];
-            upgradedUnit.UpgradeStarLevel();
-
-            // Spawn merge VFX if available
-            if (starUpVFXPrefab != null)
+            foreach (var group in mergeableGroups)
             {
-                Instantiate(starUpVFXPrefab, upgradedUnit.transform.position, Quaternion.identity);
-            }
+                // Process all possible merges for this group (e.g., 6 units = 2 merges)
+                var availableUnits = group.ToList();
 
-            // Remove and destroy the other two units
-            for (int i = 1; i < unitsToMerge.Count; i++)
-            {
-                UnitAI unitToRemove = unitsToMerge[i];
-
-                // Free the tile properly
-                if (unitToRemove.currentTile != null)
+                while (availableUnits.Count >= 3)
                 {
-                    unitToRemove.currentTile.Free(unitToRemove);
+                    var unitsToMerge = availableUnits.Take(3).ToList();
+
+                    // Determine what we're upgrading to
+                    int newStarLevel = starLevel + 1;
+                    string mergeType = newStarLevel == 2 ? "⭐⭐" : "⭐⭐⭐";
+
+                    Debug.Log($"🌟 Merging 3x {group.Key.unitName} ({starLevel}★) → 1x {group.Key.unitName} ({newStarLevel}★) {mergeType}");
+
+                    // Keep the first unit and upgrade it
+                    UnitAI upgradedUnit = unitsToMerge[0];
+                    upgradedUnit.UpgradeStarLevel();
+
+                    // Spawn merge VFX if available
+                    if (starUpVFXPrefab != null)
+                    {
+                        var vfx = Instantiate(starUpVFXPrefab, upgradedUnit.transform.position, Quaternion.identity);
+                        Destroy(vfx, 2f); // Longer duration for 3-star merges
+                    }
+
+                    // Remove and destroy the other two units
+                    for (int i = 1; i < unitsToMerge.Count; i++)
+                    {
+                        UnitAI unitToRemove = unitsToMerge[i];
+
+                        // Free the tile properly
+                        if (unitToRemove.currentTile != null)
+                        {
+                            unitToRemove.currentTile.Free(unitToRemove);
+                        }
+
+                        // Unregister and destroy
+                        UnregisterUnit(unitToRemove);
+                        availableUnits.Remove(unitToRemove); // Remove from our local list too
+                        Destroy(unitToRemove.gameObject);
+                    }
+
+                    // Remove the upgraded unit from available units to prevent processing it again
+                    availableUnits.Remove(upgradedUnit);
+                    anyMergesOccurred = true;
+
+                    Debug.Log($"✅ {upgradedUnit.unitName} upgraded to {upgradedUnit.starLevel} stars!");
+
+                    // Special message for 3-star units
+                    if (upgradedUnit.starLevel == 3)
+                    {
+                        Debug.Log($"🏆 LEGENDARY! {upgradedUnit.unitName} reached maximum power (3★)!");
+                    }
                 }
-
-                // Unregister and destroy
-                UnregisterUnit(unitToRemove);
-                Destroy(unitToRemove.gameObject);
             }
-
-            Debug.Log($"✅ {upgradedUnit.unitName} upgraded to {upgradedUnit.starLevel} stars!");
         }
 
         // Re-evaluate traits after merging
-        if (unitGroups.Any())
+        if (anyMergesOccurred)
         {
             TraitManager.Instance.EvaluateTraits(playerUnits);
             TraitManager.Instance.ApplyTraits(playerUnits);
+
+            Debug.Log("🔄 Traits re-evaluated after merging");
         }
+    }
+    // --- Helper method to get merge progress for UI ---
+    public string GetMergeProgress(string unitName)
+    {
+        var unitsOfType = playerUnits
+            .Where(u => u != null && u.isAlive && u.unitName == unitName)
+            .GroupBy(u => u.starLevel)
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        string progress = "";
+
+        // Show 1-star progress (towards 2-star)
+        if (unitsOfType.ContainsKey(1))
+        {
+            int count = unitsOfType[1];
+            progress += $"1★: {count}/3";
+            if (count >= 3) progress += " ✅";
+        }
+
+        // Show 2-star progress (towards 3-star)
+        if (unitsOfType.ContainsKey(2))
+        {
+            int count = unitsOfType[2];
+            if (progress != "") progress += " | ";
+            progress += $"2★: {count}/3";
+            if (count >= 3) progress += " ✅";
+        }
+
+        // Show 3-star units (maxed)
+        if (unitsOfType.ContainsKey(3))
+        {
+            int count = unitsOfType[3];
+            if (progress != "") progress += " | ";
+            progress += $"3★: {count} 🏆";
+        }
+
+        return progress;
     }
 
     // --- Access ---

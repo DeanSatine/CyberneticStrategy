@@ -353,7 +353,9 @@ MonoBehaviour:
   twoStarMultiplier: 1.8
   threeStarMultiplier: 2.5
   twoStarScale: 1.1
-  threeStarScale: 1.25
+  baseMaxHealth: 0
+  bonusMaxHealth: 0
+  threeStarScale: 1.12
 --- !u!114 &6517958316986358636
 MonoBehaviour:
   m_ObjectHideFlags: 0

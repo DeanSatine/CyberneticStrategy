@@ -362,6 +362,7 @@ MonoBehaviour:
     type: 3}
   firePoint: {fileID: 6124733470185794249}
   projectileSpeed: 15
+  portraitSprite: {fileID: 0}
   unitUIPrefab: {fileID: 6939982145822855837, guid: 63931d92c48ef65418d45ec02069a522,
     type: 3}
   ui: {fileID: 0}
@@ -385,7 +386,9 @@ MonoBehaviour:
   twoStarMultiplier: 1.8
   threeStarMultiplier: 2.5
   twoStarScale: 1.1
-  threeStarScale: 1.25
+  baseMaxHealth: 0
+  bonusMaxHealth: 0
+  threeStarScale: 1.12
 --- !u!114 &1845309957721737311
 MonoBehaviour:
   m_ObjectHideFlags: 0
