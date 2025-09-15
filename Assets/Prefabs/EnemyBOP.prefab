@@ -308,8 +308,8 @@ MonoBehaviour:
   unitName: B.O.P
   starLevel: 1
   team: 1
-  maxHealth: 3000
-  currentHealth: 3000
+  maxHealth: 900
+  currentHealth: 900
   attackDamage: 35
   attackSpeed: 0.7
   armor: 50

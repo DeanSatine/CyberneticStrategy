@@ -369,6 +369,7 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
     }
 
     // ✅ NEW: Clone slam with automatic retargeting
+    // ✅ UPDATED: Clone slam with chest-level VFX positioning
     private IEnumerator PerformCloneSlamWithRetargeting()
     {
         if (cloneInstance == null)
@@ -377,7 +378,7 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
             yield break;
         }
 
-        // ✅ FIX: Find best target for slam (retarget if needed)
+        // Find best target for slam (retarget if needed)
         UnitAI slamTarget = FindClosestEnemy(5f); // Larger search radius for slam
 
         if (slamTarget == null)
@@ -401,10 +402,10 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
             elapsed += Time.deltaTime;
             float t = elapsed / slamDuration;
 
-            // ✅ Check if target is still valid during slam
+            // Check if target is still valid during slam
             if (slamTarget == null || !slamTarget.isAlive)
             {
-                // ✅ Retarget mid-slam if needed
+                // Retarget mid-slam if needed
                 UnitAI newTarget = FindClosestEnemy(5f);
                 if (newTarget != null)
                 {
@@ -422,18 +423,23 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
             yield return null;
         }
 
-        // ✅ Final target validation before damage
+        // Final target validation before damage
         if (slamTarget != null && slamTarget.isAlive)
         {
             // Apply slam damage
             float slamDmg = slamDamage[Mathf.Clamp(unitAI.starLevel - 1, 0, slamDamage.Length - 1)];
             slamTarget.TakeDamage(slamDmg);
 
-            // Spawn slam VFX
+            // ✅ FIX: Spawn slam VFX at chest level, not ground level
             if (slamVFX != null)
             {
-                var slamEffect = Instantiate(slamVFX, slamPosition, Quaternion.identity);
+                Vector3 slamVFXPosition = slamPosition;
+                slamVFXPosition.y += 1.2f; // ✅ Raise to chest/torso level (adjust as needed)
+
+                var slamEffect = Instantiate(slamVFX, slamVFXPosition, Quaternion.identity);
                 Destroy(slamEffect, 2f);
+
+                Debug.Log($"💥 Slam VFX spawned at chest level: {slamVFXPosition}");
             }
 
             Debug.Log($"🌪️ Clone slam: {slamDmg} damage to {slamTarget.unitName}");
@@ -445,7 +451,10 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
             // Still spawn VFX at slam position for visual feedback
             if (slamVFX != null)
             {
-                var slamEffect = Instantiate(slamVFX, slamPosition, Quaternion.identity);
+                Vector3 slamVFXPosition = slamPosition;
+                slamVFXPosition.y += 1.2f; // ✅ Chest level even for missed slams
+
+                var slamEffect = Instantiate(slamVFX, slamVFXPosition, Quaternion.identity);
                 Destroy(slamEffect, 2f);
             }
         }
@@ -453,6 +462,7 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         // Return clone to original position
         yield return StartCoroutine(MoveCloneToPosition(cloneStartPos));
     }
+
 
     private IEnumerator DashToPosition(Vector3 targetPosition)
     {
@@ -550,6 +560,7 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         cloneInstance.transform.position = targetPos;
     }
 
+    // ✅ NEW: Find position adjacent to enemy clump (not inside)
     private Vector3 FindBestClumpPosition(float searchRadius)
     {
         List<UnitAI> enemies = FindEnemiesInRadius(searchRadius);
@@ -576,8 +587,75 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
             }
         }
 
-        return bestCenter.transform.position;
+        // ✅ FIX: Find adjacent position instead of clump center
+        Vector3 clumpCenter = bestCenter.transform.position;
+        Vector3 haymakerPos = transform.position;
+
+        // Calculate direction from Haymaker to clump center
+        Vector3 directionToClump = (clumpCenter - haymakerPos).normalized;
+
+        // Find a position 1.5 units away from clump center (approximately 1 hex distance)
+        Vector3 targetPosition = clumpCenter - (directionToClump * 1.5f);
+
+        // Make sure the position is valid (not on top of another unit)
+        targetPosition = FindNearestValidPosition(targetPosition, clumpCenter, 1.5f);
+
+        Debug.Log($"🎯 Clump center at {clumpCenter}, Haymaker will dash to {targetPosition}");
+        return targetPosition;
     }
+
+    // ✅ NEW: Find nearest valid position around the target
+    private Vector3 FindNearestValidPosition(Vector3 preferredPos, Vector3 clumpCenter, float minDistance)
+    {
+        // Try the preferred position first
+        if (IsPositionValid(preferredPos, minDistance))
+        {
+            return preferredPos;
+        }
+
+        // If preferred position is blocked, try positions in a circle around clump center
+        float[] angles = { 0f, 45f, 90f, 135f, 180f, 225f, 270f, 315f };
+
+        foreach (float angle in angles)
+        {
+            Vector3 offset = new Vector3(
+                Mathf.Cos(angle * Mathf.Deg2Rad) * minDistance,
+                0f,
+                Mathf.Sin(angle * Mathf.Deg2Rad) * minDistance
+            );
+
+            Vector3 testPosition = clumpCenter + offset;
+
+            if (IsPositionValid(testPosition, 1f)) // Allow closer check for alternative positions
+            {
+                return testPosition;
+            }
+        }
+
+        // Fallback: return preferred position even if not ideal
+        return preferredPos;
+    }
+
+    // ✅ NEW: Check if position is valid (not too close to other units)
+    private bool IsPositionValid(Vector3 position, float minDistanceToUnits)
+    {
+        UnitAI[] allUnits = FindObjectsOfType<UnitAI>();
+
+        foreach (var unit in allUnits)
+        {
+            if (unit == unitAI || !unit.isAlive || unit.currentState == UnitState.Bench)
+                continue;
+
+            float distance = Vector3.Distance(position, unit.transform.position);
+            if (distance < minDistanceToUnits)
+            {
+                return false; // Too close to another unit
+            }
+        }
+
+        return true; // Position is valid
+    }
+
 
     private UnitAI FindClosestEnemy(float maxDistance)
     {
