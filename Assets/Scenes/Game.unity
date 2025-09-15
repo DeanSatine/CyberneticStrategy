@@ -1714,8 +1714,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -543.59937, y: -208.43858}
-  m_SizeDelta: {x: 361, y: 85.08841}
+  m_AnchoredPosition: {x: -543.59937, y: -233.1106}
+  m_SizeDelta: {x: 361, y: 134.4323}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &49674334
 MonoBehaviour:
@@ -2142,8 +2142,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -255.35764, y: -34.961845}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: -180.09726, y: -97.092636}
+  m_SizeDelta: {x: 350.5207, y: 174.2617}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &68374077
 MonoBehaviour:
@@ -2167,8 +2167,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: New Text
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: c2e0015ae8dc4064089ad542652af5be, type: 2}
-  m_sharedMaterial: {fileID: -15585104323898382, guid: c2e0015ae8dc4064089ad542652af5be,
+  m_fontAsset: {fileID: 11400000, guid: d81d8f46036ab584c8e06335cec4edcf, type: 2}
+  m_sharedMaterial: {fileID: -3898540586883707513, guid: d81d8f46036ab584c8e06335cec4edcf,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -7616,8 +7616,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -543.59937, y: -208.43858}
-  m_SizeDelta: {x: 361, y: 85.08841}
+  m_AnchoredPosition: {x: -543.59937, y: -234.06586}
+  m_SizeDelta: {x: 361, y: 136.3428}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &201621917
 MonoBehaviour:
@@ -10543,8 +10543,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -255.35764, y: -34.961845}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: -180.09726, y: -97.092636}
+  m_SizeDelta: {x: 350.5207, y: 174.2617}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &316953285
 MonoBehaviour:
@@ -10568,8 +10568,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: New Text
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: c2e0015ae8dc4064089ad542652af5be, type: 2}
-  m_sharedMaterial: {fileID: -15585104323898382, guid: c2e0015ae8dc4064089ad542652af5be,
+  m_fontAsset: {fileID: 11400000, guid: d81d8f46036ab584c8e06335cec4edcf, type: 2}
+  m_sharedMaterial: {fileID: -3898540586883707513, guid: d81d8f46036ab584c8e06335cec4edcf,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -17361,8 +17361,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -543.59937, y: -208.43858}
-  m_SizeDelta: {x: 361, y: 85.08841}
+  m_AnchoredPosition: {x: -543.59937, y: -246.2754}
+  m_SizeDelta: {x: 361, y: 160.762}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &483158551
 MonoBehaviour:
@@ -22374,6 +22374,7 @@ GameObject:
   - component: {fileID: 614731981}
   - component: {fileID: 614731983}
   - component: {fileID: 614731982}
+  - component: {fileID: 614731984}
   m_Layer: 5
   m_Name: Portrait
   m_TagString: Untagged
@@ -22439,6 +22440,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 614731980}
   m_CullTransparentMesh: 1
+--- !u!114 &614731984
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 614731980}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Delegates:
+  - eventID: 0
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 1499067925}
+          m_TargetAssemblyTypeName: UnitInfoPanelUI, Assembly-CSharp
+          m_MethodName: OnAbilityIconEnter
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - eventID: 1
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 1499067925}
+          m_TargetAssemblyTypeName: UnitInfoPanelUI, Assembly-CSharp
+          m_MethodName: OnAbilityIconExit
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!1 &614802538
 GameObject:
   m_ObjectHideFlags: 0
@@ -31245,8 +31291,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -255.35764, y: -34.961845}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: -180.49638, y: -95.3992}
+  m_SizeDelta: {x: 349.7226, y: 170.8748}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &888381801
 MonoBehaviour:
@@ -31270,8 +31316,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: New Text
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: c2e0015ae8dc4064089ad542652af5be, type: 2}
-  m_sharedMaterial: {fileID: -15585104323898382, guid: c2e0015ae8dc4064089ad542652af5be,
+  m_fontAsset: {fileID: 11400000, guid: d81d8f46036ab584c8e06335cec4edcf, type: 2}
+  m_sharedMaterial: {fileID: -3898540586883707513, guid: d81d8f46036ab584c8e06335cec4edcf,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -33385,8 +33431,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -543.59937, y: -208.43858}
-  m_SizeDelta: {x: 361, y: 85.08841}
+  m_AnchoredPosition: {x: -543.59937, y: -233.1106}
+  m_SizeDelta: {x: 361, y: 134.4323}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &950064960
 MonoBehaviour:
@@ -39663,6 +39709,7 @@ GameObject:
   - component: {fileID: 1180638335}
   - component: {fileID: 1180638337}
   - component: {fileID: 1180638336}
+  - component: {fileID: 1180638338}
   m_Layer: 5
   m_Name: Portrait
   m_TagString: Untagged
@@ -39728,6 +39775,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1180638334}
   m_CullTransparentMesh: 1
+--- !u!114 &1180638338
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1180638334}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Delegates:
+  - eventID: 0
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 859686240}
+          m_TargetAssemblyTypeName: UnitInfoPanelUI, Assembly-CSharp
+          m_MethodName: OnAbilityIconEnter
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - eventID: 1
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 859686240}
+          m_TargetAssemblyTypeName: UnitInfoPanelUI, Assembly-CSharp
+          m_MethodName: OnAbilityIconExit
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!1 &1193565085
 GameObject:
   m_ObjectHideFlags: 0
@@ -47053,8 +47145,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -255.35764, y: -34.961845}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: -180.09726, y: -97.092636}
+  m_SizeDelta: {x: 350.5207, y: 174.2617}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1431184386
 MonoBehaviour:
@@ -47078,8 +47170,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: New Text
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: c2e0015ae8dc4064089ad542652af5be, type: 2}
-  m_sharedMaterial: {fileID: -15585104323898382, guid: c2e0015ae8dc4064089ad542652af5be,
+  m_fontAsset: {fileID: 11400000, guid: d81d8f46036ab584c8e06335cec4edcf, type: 2}
+  m_sharedMaterial: {fileID: -3898540586883707513, guid: d81d8f46036ab584c8e06335cec4edcf,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -50020,8 +50112,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -255.35764, y: -34.961845}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: -180.09726, y: -97.092636}
+  m_SizeDelta: {x: 350.5207, y: 174.2617}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1539213930
 MonoBehaviour:
@@ -50045,8 +50137,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: New Text
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: c2e0015ae8dc4064089ad542652af5be, type: 2}
-  m_sharedMaterial: {fileID: -15585104323898382, guid: c2e0015ae8dc4064089ad542652af5be,
+  m_fontAsset: {fileID: 11400000, guid: d81d8f46036ab584c8e06335cec4edcf, type: 2}
+  m_sharedMaterial: {fileID: -3898540586883707513, guid: d81d8f46036ab584c8e06335cec4edcf,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -53524,8 +53616,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -543.59937, y: -208.43858}
-  m_SizeDelta: {x: 361, y: 85.08841}
+  m_AnchoredPosition: {x: -543.59937, y: -233.1106}
+  m_SizeDelta: {x: 361, y: 134.4323}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1684265660
 MonoBehaviour:
@@ -58746,6 +58838,7 @@ GameObject:
   - component: {fileID: 1842257169}
   - component: {fileID: 1842257171}
   - component: {fileID: 1842257170}
+  - component: {fileID: 1842257172}
   m_Layer: 5
   m_Name: Portrait
   m_TagString: Untagged
@@ -58811,6 +58904,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1842257168}
   m_CullTransparentMesh: 1
+--- !u!114 &1842257172
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1842257168}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Delegates:
+  - eventID: 0
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 2086570595}
+          m_TargetAssemblyTypeName: UnitInfoPanelUI, Assembly-CSharp
+          m_MethodName: OnAbilityIconEnter
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - eventID: 1
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 2086570595}
+          m_TargetAssemblyTypeName: UnitInfoPanelUI, Assembly-CSharp
+          m_MethodName: OnAbilityIconExit
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!1 &1847389788
 GameObject:
   m_ObjectHideFlags: 0
@@ -59580,6 +59718,7 @@ GameObject:
   - component: {fileID: 1866742575}
   - component: {fileID: 1866742577}
   - component: {fileID: 1866742576}
+  - component: {fileID: 1866742578}
   m_Layer: 5
   m_Name: Portrait
   m_TagString: Untagged
@@ -59645,6 +59784,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1866742574}
   m_CullTransparentMesh: 1
+--- !u!114 &1866742578
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1866742574}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Delegates:
+  - eventID: 0
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 1827951357}
+          m_TargetAssemblyTypeName: UnitInfoPanelUI, Assembly-CSharp
+          m_MethodName: OnAbilityIconEnter
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - eventID: 1
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 1827951357}
+          m_TargetAssemblyTypeName: UnitInfoPanelUI, Assembly-CSharp
+          m_MethodName: OnAbilityIconExit
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!1 &1868294722
 GameObject:
   m_ObjectHideFlags: 0
@@ -61410,6 +61594,7 @@ GameObject:
   - component: {fileID: 1927040333}
   - component: {fileID: 1927040335}
   - component: {fileID: 1927040334}
+  - component: {fileID: 1927040336}
   m_Layer: 5
   m_Name: Portrait
   m_TagString: Untagged
@@ -61475,6 +61660,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1927040332}
   m_CullTransparentMesh: 1
+--- !u!114 &1927040336
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1927040332}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Delegates:
+  - eventID: 0
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 434195427}
+          m_TargetAssemblyTypeName: UnitInfoPanelUI, Assembly-CSharp
+          m_MethodName: OnAbilityIconEnter
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - eventID: 1
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 434195427}
+          m_TargetAssemblyTypeName: UnitInfoPanelUI, Assembly-CSharp
+          m_MethodName: OnAbilityIconExit
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!1 &1929687283
 GameObject:
   m_ObjectHideFlags: 0

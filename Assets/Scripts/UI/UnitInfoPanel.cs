@@ -14,15 +14,16 @@ public class UnitInfoPanelUI : MonoBehaviour
 
     [Header("Ability")]
     public Image abilityIcon;
-    public GameObject abilityTooltip;
-    public TMP_Text abilityTooltipText;
+    public GameObject abilityTooltip;       // tooltip panel
+    public TMP_Text abilityTooltipText;     // description text
 
     private UnitAI currentUnit;
 
     private void Awake()
     {
         Hide();
-        if (abilityTooltip != null) abilityTooltip.SetActive(false);
+        if (abilityTooltip != null)
+            abilityTooltip.SetActive(false); // start hidden
     }
 
     public void Show(UnitAI unit)
@@ -30,7 +31,6 @@ public class UnitInfoPanelUI : MonoBehaviour
         currentUnit = unit;
         gameObject.SetActive(true);
 
-        // ✅ Static values
         if (portraitImage) portraitImage.sprite = unit.portraitSprite;
         if (abilityTooltipText != null) abilityTooltipText.text = unit.GetAbilityDescription();
 
@@ -60,14 +60,16 @@ public class UnitInfoPanelUI : MonoBehaviour
         manaText.text = $"Mana: {currentUnit.currentMana:F0}/{currentUnit.maxMana:F0}";
     }
 
-    // Hover handlers
+    // === Tooltip Hover ===
     public void OnAbilityIconEnter()
     {
-        if (abilityTooltip != null) abilityTooltip.SetActive(true);
+        if (abilityTooltip != null)
+            abilityTooltip.SetActive(true);
     }
 
     public void OnAbilityIconExit()
     {
-        if (abilityTooltip != null) abilityTooltip.SetActive(false);
+        if (abilityTooltip != null)
+            abilityTooltip.SetActive(false);
     }
 }

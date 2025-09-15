@@ -885,7 +885,7 @@ public class UnitAI : MonoBehaviour
                         float bonkDmg = (maxHp * 0.2f) + dmgAmp;
 
                         return $"Chest pound: Permanently gains {buffHp:F0} health.\n" +
-                               $"Bonk: Deals {bonkDmg:F0} damage (20% max HP + damage amp).";
+                               $"Bonk: Deals {bonkDmg:F0} damage (20% max HP + AD).";
                     }
                     return "B.O.P ability missing.";
                 }
