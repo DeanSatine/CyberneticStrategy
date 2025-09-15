@@ -27,6 +27,12 @@ public class UIManager : MonoBehaviour
             gameOverPanel.SetActive(false);
     }
 
+    private void Start()
+    {
+        // Check initial state
+        UpdateFightButtonVisibility();
+    }
+
     public void UpdateLivesUI(int lives)
     {
         if (livesText != null)
@@ -45,6 +51,52 @@ public class UIManager : MonoBehaviour
             fightButton.SetActive(visible);
     }
 
+    // ✅ NEW: Check and update fight button based on units on board
+    public void UpdateFightButtonVisibility()
+    {
+        bool hasUnitsOnBoard = HasUnitsOnBoard();
+        ShowFightButton(hasUnitsOnBoard);
+
+        Debug.Log($"🎯 Fight button visibility: {hasUnitsOnBoard} (Units on board: {GetUnitsOnBoardCount()})");
+    }
+
+    // ✅ NEW: Check if there are any player units on the board
+    private bool HasUnitsOnBoard()
+    {
+        if (GameManager.Instance == null) return false;
+
+        var playerUnits = GameManager.Instance.GetPlayerUnits();
+
+        foreach (var unit in playerUnits)
+        {
+            if (unit != null && unit.isAlive && unit.currentState == UnitAI.UnitState.BoardIdle)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    // ✅ NEW: Helper method to count units on board (for debugging)
+    private int GetUnitsOnBoardCount()
+    {
+        if (GameManager.Instance == null) return 0;
+
+        int count = 0;
+        var playerUnits = GameManager.Instance.GetPlayerUnits();
+
+        foreach (var unit in playerUnits)
+        {
+            if (unit != null && unit.isAlive && unit.currentState == UnitAI.UnitState.BoardIdle)
+            {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
     public void ShowGameOver()
     {
         if (gameOverPanel != null)
@@ -60,5 +112,4 @@ public class UIManager : MonoBehaviour
     {
         StageManager.Instance.EnterCombatPhase();
     }
-
 }

@@ -31,12 +31,26 @@ public class GameManager : MonoBehaviour
             if (!enemyUnits.Contains(unit))
                 enemyUnits.Add(unit);
         }
+
+        // ✅ Update fight button visibility when units change
+        if (isPlayer && UIManager.Instance != null)
+        {
+            UIManager.Instance.UpdateFightButtonVisibility();
+        }
     }
 
     public void UnregisterUnit(UnitAI unit)
     {
+        bool wasPlayerUnit = playerUnits.Contains(unit);
+
         playerUnits.Remove(unit);
         enemyUnits.Remove(unit);
+
+        // ✅ Update fight button visibility when units change
+        if (wasPlayerUnit && UIManager.Instance != null)
+        {
+            UIManager.Instance.UpdateFightButtonVisibility();
+        }
     }
 
     // --- Try merging when a new unit is bought ---

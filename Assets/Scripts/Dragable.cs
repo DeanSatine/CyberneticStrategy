@@ -223,6 +223,23 @@ public class Draggable : MonoBehaviour
                 GameManager.Instance.TryMergeUnits(unitAI);
             }
 
+            if (targetTile.tileType == TileType.Board)
+            {
+                unitAI.currentState = UnitState.BoardIdle;
+                GameManager.Instance.RegisterUnit(unitAI, unitAI.team == Team.Player);
+            }
+            else if (targetTile.tileType == TileType.Bench)
+            {
+                unitAI.currentState = UnitState.Bench;
+                GameManager.Instance.UnregisterUnit(unitAI);
+            }
+
+            // ✅ Update fight button after state changes
+            if (unitAI.team == Team.Player && UIManager.Instance != null)
+            {
+                UIManager.Instance.UpdateFightButtonVisibility();
+            }
+
             Debug.Log($"✅ {unitAI.unitName} placed successfully at {targetTile.gridPosition}");
             return;
         }

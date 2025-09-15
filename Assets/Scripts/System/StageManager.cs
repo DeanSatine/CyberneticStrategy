@@ -76,7 +76,11 @@ public class StageManager : MonoBehaviour
         GameManager.Instance.ResetPlayerUnits();  // snap players back
         EnemyWaveManager.Instance.SpawnEnemyWave(currentStage, roundInStage);
 
-        UIManager.Instance.ShowFightButton(true); // allow pressing fight
+        // ✅ UPDATED: Use the new visibility logic instead of always showing
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.UpdateFightButtonVisibility();
+        }
     }
 
     public void EnterCombatPhase()
