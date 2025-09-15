@@ -590,8 +590,7 @@ MonoBehaviour:
   canAttack: 1
   isAlive: 1
   isCastingAbility: 0
-  projectilePrefab: {fileID: 8548050680436672203, guid: 535ef7817c5bc78489aa45e25295e778,
-    type: 3}
+  projectilePrefab: {fileID: 0}
   firePoint: {fileID: 0}
   projectileSpeed: 15
   portraitSprite: {fileID: 0}
@@ -633,16 +632,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb9efea354552134eb730edcdf5b25cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stabDamage:
-  - 125
-  - 250
-  - 999
+  slashDamage:
+  - 30
+  - 40
+  - 500
   slamDamage:
   - 200
   - 250
   - 400
+  temporaryArmor:
+  - 160
+  - 180
+  - 190
+  slashDuration: 3
+  slashesPerAttackSpeed: 10
+  dashSpeed: 8
+  slashAnimationSpeedMultiplier: 3
   clonePrefab: {fileID: 3571069488247416756, guid: e500d4b71aabe274b88679a3f9566bed,
     type: 3}
+  slashVFX: {fileID: 1171201465392465800, guid: 4aa9f30a28a77224ba84b2a2c334c71b,
+    type: 3}
+  slamVFX: {fileID: 1329845292236604, guid: 88e6b468d16dd0146b46d32721338502, type: 3}
+  dashStartVFX: {fileID: 1000011396044746, guid: 96b2ec0239d11fa4b9792311efceb8ed,
+    type: 3}
+  dashEndVFX: {fileID: 1000011396044746, guid: 96b2ec0239d11fa4b9792311efceb8ed, type: 3}
 --- !u!114 &2716781428770711795
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -661,11 +674,9 @@ MonoBehaviour:
     autoAttackMuzzleFlash: {fileID: 0}
     autoAttackHitEffect: {fileID: 2965222256817593503, guid: a164e676dbbd6e54587237e619372c98,
       type: 3}
-    abilityEffect: {fileID: 1171201465392465800, guid: 4aa9f30a28a77224ba84b2a2c334c71b,
-      type: 3}
+    abilityEffect: {fileID: 0}
     abilityProjectile: {fileID: 0}
-    abilityImpactEffect: {fileID: 1025285306637258, guid: d8f0099df63275647a8bcf646df1ca00,
-      type: 3}
+    abilityImpactEffect: {fileID: 0}
     autoAttackSound: {fileID: 0}
     abilitySound: {fileID: 0}
     volume: 0.7

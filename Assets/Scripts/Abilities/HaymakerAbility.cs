@@ -9,18 +9,39 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
     private int soulCount = 0;
 
     [Header("Ability Stats")]
-    public float[] stabDamage = { 125f, 250f, 999f };
-    public float[] slamDamage = { 200f, 250f, 400f };
+    public float[] slashDamage = { 30f, 40f, 500f };
+    public float[] slamDamage = { 125f, 250f, 999f };
+    public float[] temporaryArmor = { 160f, 180f, 190f }; // 80/90/95% damage reduction
+
+    [Header("Ability Mechanics")]
+    public float slashDuration = 3f;                    // Total slashing time
+    public float slashesPerAttackSpeed = 10f;           // 1 slash per 0.10 attack speed (10 = 1.0 AS)
+    public float dashSpeed = 8f;                        // Speed of dash movement
+    public float slashAnimationSpeedMultiplier = 5f;    // ✅ INCREASED: Much faster slashing (was 3f)
 
     [Header("Passive Clone")]
-    public GameObject clonePrefab;   // assign in Inspector
+    public GameObject clonePrefab;
     private GameObject cloneInstance;
+
+    [Header("VFX")]
+    public GameObject slashVFX;        // VFX for each slash
+    public GameObject slamVFX;         // VFX for clone slam
+    public GameObject dashStartVFX;    // VFX when starting dash
+    public GameObject dashEndVFX;      // VFX when arriving at target
+
+    // Ability state tracking
+    private bool isPerformingAbility = false;
+    private Vector3 originalPosition;
+    private float originalArmor;
 
     private void Awake()
     {
         unitAI = GetComponent<UnitAI>();
         unitAI.OnStateChanged += HandleStateChanged;
         UnitAI.OnAnyUnitDeath += OnUnitDeath;
+
+        // Store original armor
+        originalArmor = unitAI.armor;
     }
 
     private void OnDestroy()
@@ -42,12 +63,35 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         {
             if (cloneInstance != null)
                 DestroyClone();
+
+            // ✅ FIX: Stop any ongoing ability when state changes
+            if (isPerformingAbility)
+            {
+                StopAllCoroutines();
+                ResetAbilityState();
+            }
         }
+    }
+
+    // ✅ NEW: Reset ability state method
+    private void ResetAbilityState()
+    {
+        isPerformingAbility = false;
+
+        // Reset animation speed
+        if (unitAI.animator)
+        {
+            unitAI.animator.speed = 1f;
+        }
+
+        // Reset armor
+        unitAI.armor = originalArmor;
+
+        Debug.Log("[HaymakerAbility] Ability state reset");
     }
 
     private void SpawnClone()
     {
-        // ✅ Find the actual hex tile to spawn on
         HexTile targetTile = FindClosestEmptyHexTile();
         if (targetTile == null)
         {
@@ -55,23 +99,17 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
             return;
         }
 
-        // ✅ Spawn at the hex tile position
         Vector3 spawnPos = targetTile.transform.position;
-        spawnPos.y = 0.6f; // Keep clone above ground like other units
+        spawnPos.y = 0.6f;
 
         cloneInstance = Instantiate(clonePrefab, spawnPos, Quaternion.identity);
-
-        // ✅ Force facing direction
         cloneInstance.transform.rotation = Quaternion.Euler(0f, -90f, 0f);
-
         cloneInstance.name = $"{unitAI.unitName} Clone";
 
         var cloneAI = cloneInstance.GetComponent<UnitAI>();
-
-        // ✅ CRITICAL: Assign clone to the hex tile
         cloneAI.AssignToTile(targetTile);
 
-        // scale stats
+        // Scale stats
         cloneAI.maxHealth = unitAI.maxHealth * 0.25f;
         cloneAI.currentHealth = cloneAI.maxHealth;
         cloneAI.attackDamage = unitAI.attackDamage * 0.25f;
@@ -81,24 +119,21 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         cloneAI.currentMana = 0f;
         cloneAI.isAlive = true;
 
-        // ✅ Put the clone directly into BoardIdle so it participates in combat
         cloneAI.SetState(UnitState.BoardIdle);
 
-        // prevent infinite cloning
+        // Prevent infinite cloning
         var selfAbility = cloneInstance.GetComponent<HaymakerAbility>();
         if (selfAbility) Destroy(selfAbility);
 
-        // disable traits so clone doesn't affect synergies
+        // Disable traits
         foreach (var mb in cloneInstance.GetComponents<MonoBehaviour>())
         {
             if (mb.GetType().Name.Contains("Trait"))
                 mb.enabled = false;
         }
 
-        // ✅ Register with GameManager AFTER tile assignment
         GameManager.Instance.RegisterUnit(cloneAI, cloneAI.team == Team.Player);
-
-        Debug.Log($"[HaymakerAbility] Clone spawned and assigned to hex tile {targetTile.gridPosition}");
+        Debug.Log($"[HaymakerAbility] Clone spawned at {targetTile.gridPosition}");
     }
 
     private void DestroyClone()
@@ -106,62 +141,41 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         if (cloneInstance != null)
         {
             var cloneAI = cloneInstance.GetComponent<UnitAI>();
-            
-            // ✅ Properly clean up tile assignment
+
             if (cloneAI != null)
             {
                 cloneAI.ClearTile();
                 GameManager.Instance.UnregisterUnit(cloneAI);
             }
-            
+
             Destroy(cloneInstance);
             cloneInstance = null;
-            Debug.Log("[HaymakerAbility] Clone destroyed and tile cleared.");
+            Debug.Log("[HaymakerAbility] Clone destroyed.");
         }
     }
 
-    // ✅ NEW: Find an actual empty hex tile near the Haymaker
     private HexTile FindClosestEmptyHexTile()
     {
-        if (BoardManager.Instance == null)
-        {
-            Debug.LogError("[HaymakerAbility] BoardManager not found!");
-            return null;
-        }
+        if (BoardManager.Instance == null) return null;
 
-        // ✅ Get player tiles (where the clone should spawn)
         List<HexTile> playerTiles = BoardManager.Instance.GetPlayerTiles();
-        if (playerTiles == null || playerTiles.Count == 0)
-        {
-            Debug.LogError("[HaymakerAbility] No player tiles found!");
-            return null;
-        }
+        if (playerTiles == null || playerTiles.Count == 0) return null;
 
-        // ✅ Find empty tiles and sort by distance to Haymaker
         List<HexTile> emptyTiles = new List<HexTile>();
         foreach (var tile in playerTiles)
         {
             if (tile.occupyingUnit == null)
-            {
                 emptyTiles.Add(tile);
-            }
         }
 
-        if (emptyTiles.Count == 0)
-        {
-            Debug.LogWarning("[HaymakerAbility] No empty player tiles available for clone!");
-            return null;
-        }
+        if (emptyTiles.Count == 0) return null;
 
-        // ✅ Sort by distance to Haymaker and return closest
         emptyTiles.Sort((a, b) =>
             Vector3.Distance(transform.position, a.transform.position)
             .CompareTo(Vector3.Distance(transform.position, b.transform.position))
         );
 
-        HexTile chosenTile = emptyTiles[0];
-        Debug.Log($"[HaymakerAbility] Found empty tile for clone at {chosenTile.gridPosition}");
-        return chosenTile;
+        return emptyTiles[0];
     }
 
     // Passive: absorb souls when units die
@@ -176,166 +190,432 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
             var cloneAI = cloneInstance.GetComponent<UnitAI>();
             cloneAI.maxHealth *= 1.01f;
             cloneAI.attackDamage *= 1.01f;
-            Debug.Log($"Clone empowered! Souls: {soulCount}");
+            Debug.Log($"💀 Clone empowered! Souls: {soulCount}");
         }
     }
 
     // Active ability
     public void Cast(UnitAI target)
     {
-        StartCoroutine(PerformAbility());
+        // ✅ FIX: Check if we're in the right phase and state
+        if (isPerformingAbility)
+        {
+            Debug.Log("[HaymakerAbility] Already performing ability, ignoring cast");
+            return;
+        }
+
+        // ✅ FIX: Only allow ability during combat phase
+        if (StageManager.Instance != null && StageManager.Instance.currentPhase != StageManager.GamePhase.Combat)
+        {
+            Debug.Log("[HaymakerAbility] Cannot cast ability outside of combat phase");
+            return;
+        }
+
+        // ✅ FIX: Only allow ability when in combat state
+        if (unitAI.currentState != UnitState.Combat && unitAI.currentState != UnitState.BoardIdle)
+        {
+            Debug.Log($"[HaymakerAbility] Cannot cast ability in state: {unitAI.currentState}");
+            return;
+        }
+
+        StartCoroutine(PerformFuryOfSlashes());
     }
 
-    private IEnumerator PerformAbility()
+    private IEnumerator PerformFuryOfSlashes()
     {
-        UnitAI target = unitAI.GetCurrentTarget();
-        if (target == null || !target.isAlive || target.currentState == UnitState.Bench) yield break;
+        isPerformingAbility = true;
+        originalPosition = transform.position;
 
-        // --- STAB ---
-        if (unitAI.animator) unitAI.animator.SetTrigger("StabTrigger");
+        Debug.Log($"⚡ [HaymakerAbility] Starting Fury of Slashes!");
 
-        // Lunge forward + back while stab animation is playing
-        Vector3 stabStart = transform.position;
-        Vector3 stabForward = stabStart + transform.forward * 0.5f; // small lunge
-        float stabDuration = 0.4f; // should match animation length
-        float halfDuration = stabDuration * 0.5f;
-
-        // forward
-        float elapsed = 0f;
-        while (elapsed < halfDuration)
+        // ✅ PHASE 1: Dash to enemy clump
+        Vector3 targetClumpPosition = FindBestClumpPosition(6f);
+        if (targetClumpPosition == Vector3.zero)
         {
-            elapsed += Time.deltaTime;
-            transform.position = Vector3.Lerp(stabStart, stabForward, elapsed / halfDuration);
-            yield return null;
+            // No enemies found, end ability
+            Debug.Log("[HaymakerAbility] No enemies found, ending ability");
+            isPerformingAbility = false;
+            yield break;
         }
 
-        // backward
-        elapsed = 0f;
-        while (elapsed < halfDuration)
+        // Spawn dash start VFX
+        if (dashStartVFX != null)
         {
-            elapsed += Time.deltaTime;
-            transform.position = Vector3.Lerp(stabForward, stabStart, elapsed / halfDuration);
-            yield return null;
+            var startVFX = Instantiate(dashStartVFX, transform.position, Quaternion.identity);
+            Destroy(startVFX, 2f);
         }
 
-        // Apply stab damage
-        float dmg = stabDamage[Mathf.Clamp(unitAI.starLevel - 1, 0, stabDamage.Length - 1)];
-        target.TakeDamage(dmg + unitAI.attackDamage);
+        Debug.Log($"🏃 Phase 1: Dashing to clump at {targetClumpPosition}");
 
-        yield return new WaitForSeconds(0.1f); // small delay before leap
+        // Dash to target position
+        yield return StartCoroutine(DashToPosition(targetClumpPosition));
 
-        // --- JUMP / SLAM ---
-        if (unitAI.animator) unitAI.animator.SetTrigger("JumpTrigger");
-
-        // Find clump of enemies to leap toward
-        Vector3 leapTarget = FindBestClumpPosition(5f); // 5 hex search radius
-        if (leapTarget == Vector3.zero) leapTarget = transform.position; // fallback
-
-        Vector3 jumpStart = transform.position;
-        Vector3 jumpEnd = leapTarget;
-        float jumpHeight = 2.5f;
-        float jumpDuration = 0.6f; // match animation
-
-        elapsed = 0f;
-        while (elapsed < jumpDuration)
+        // Spawn dash end VFX
+        if (dashEndVFX != null)
         {
-            elapsed += Time.deltaTime;
-            float t = elapsed / jumpDuration;
-
-            // arc
-            Vector3 pos = Vector3.Lerp(jumpStart, jumpEnd, t);
-            pos.y += Mathf.Sin(t * Mathf.PI) * jumpHeight;
-            transform.position = pos;
-
-            yield return null;
+            var endVFX = Instantiate(dashEndVFX, transform.position, Quaternion.identity);
+            Destroy(endVFX, 2f);
         }
 
-        // Slam on landing
-        // Slam on landing
-        if (unitAI.animator) unitAI.animator.SetTrigger("SlamTrigger");
+        // ✅ PHASE 2: Fury of Slashes (3 seconds)
+        Debug.Log("⚔️ Phase 2: Unleashing Fury of Slashes!");
 
-        yield return new WaitForSeconds(0.2f); // delay before damage lands
+        // Apply massive armor for damage reduction
+        int starIndex = Mathf.Clamp(unitAI.starLevel - 1, 0, temporaryArmor.Length - 1);
+        unitAI.armor = temporaryArmor[starIndex];
+        Debug.Log($"🛡️ Temporary armor active: {temporaryArmor[starIndex]} ({80 + (starIndex * 10)}% damage reduction)");
 
-        float slamDmg = slamDamage[Mathf.Clamp(unitAI.starLevel - 1, 0, slamDamage.Length - 1)];
-        List<UnitAI> aoeTargets = FindEnemiesInRadius(2.5f, jumpEnd);
+        // Calculate number of slashes based on attack speed
+        float attackSpeed = unitAI.attackSpeed;
+        int totalSlashes = Mathf.RoundToInt(attackSpeed * slashesPerAttackSpeed * slashDuration);
+        float timeBetweenSlashes = slashDuration / totalSlashes;
 
-        foreach (var e in aoeTargets)
-            e.TakeDamage(slamDmg + unitAI.attackDamage);
+        Debug.Log($"🗡️ Will perform {totalSlashes} slashes over {slashDuration} seconds (1 every {timeBetweenSlashes:F2}s)");
 
-        // ✅ Retarget after leap/slam
-        UnitAI newTarget = null;
-        float minDist = Mathf.Infinity;
-        foreach (var enemy in aoeTargets)
+        // Much faster slashing animation
+        if (unitAI.animator)
         {
-            if (!enemy.isAlive) continue;
-            float dist = Vector3.Distance(unitAI.transform.position, enemy.transform.position);
-            if (dist < minDist)
+            unitAI.animator.speed = slashAnimationSpeedMultiplier;
+        }
+
+        // Perform slashes
+        for (int i = 0; i < totalSlashes; i++)
+        {
+            // Check if ability should be interrupted
+            if (!isPerformingAbility || !unitAI.isAlive)
             {
-                minDist = dist;
-                newTarget = enemy;
+                Debug.Log("[HaymakerAbility] Ability interrupted, stopping slashes");
+                break;
+            }
+
+            // ✅ FIX: Check phase during slashing too
+            if (StageManager.Instance != null && StageManager.Instance.currentPhase != StageManager.GamePhase.Combat)
+            {
+                Debug.Log("[HaymakerAbility] Phase changed during slashing, stopping ability");
+                break;
+            }
+
+            // Find closest enemy for this slash
+            UnitAI slashTarget = FindClosestEnemy(2.5f);
+
+            if (slashTarget != null)
+            {
+                // Trigger attack animation
+                if (unitAI.animator)
+                {
+                    unitAI.animator.SetTrigger("AttackTrigger");
+                }
+
+                // Apply slash damage
+                float slashDmg = slashDamage[Mathf.Clamp(unitAI.starLevel - 1, 0, slashDamage.Length - 1)];
+                slashTarget.TakeDamage(slashDmg);
+
+                // Spawn slash VFX around Haymaker's position
+                if (slashVFX != null)
+                {
+                    // Create VFX in a circle around Haymaker
+                    float angle = (float)i / totalSlashes * 360f; // Distribute around circle
+                    Vector3 offset = new Vector3(
+                        Mathf.Cos(angle * Mathf.Deg2Rad) * 1f, // 1 unit radius
+                        0.5f, // Slightly above ground
+                        Mathf.Sin(angle * Mathf.Deg2Rad) * 1f
+                    );
+                    Vector3 vfxPos = transform.position + offset;
+
+                    var slashEffect = Instantiate(slashVFX, vfxPos, Quaternion.LookRotation(offset));
+                    Destroy(slashEffect, 1f);
+                }
+
+                Debug.Log($"💥 Slash {i + 1}/{totalSlashes}: {slashDmg} damage to {slashTarget.unitName}");
+            }
+
+            yield return new WaitForSeconds(timeBetweenSlashes);
+        }
+
+        // Reset animation speed and armor
+        if (unitAI.animator)
+        {
+            unitAI.animator.speed = 1f;
+        }
+        unitAI.armor = originalArmor;
+
+        // ✅ PHASE 3: Clone slam on final target (with retargeting)
+        Debug.Log("💥 Phase 3: Clone slam!");
+
+        // ✅ FIX: Check if we're still in combat before clone slam
+        if (StageManager.Instance != null && StageManager.Instance.currentPhase == StageManager.GamePhase.Combat)
+        {
+            yield return StartCoroutine(PerformCloneSlamWithRetargeting());
+        }
+        else
+        {
+            Debug.Log("[HaymakerAbility] Phase changed, skipping clone slam");
+        }
+
+        // ✅ PHASE 4: Dash back to original position (ONLY if still in combat)
+        if (StageManager.Instance != null && StageManager.Instance.currentPhase == StageManager.GamePhase.Combat &&
+            unitAI.isAlive && isPerformingAbility)
+        {
+            Debug.Log("🏃 Phase 4: Dashing back to original position");
+            yield return StartCoroutine(DashToPosition(originalPosition));
+        }
+        else
+        {
+            Debug.Log("[HaymakerAbility] Skipping return dash - phase changed or unit state invalid");
+        }
+
+        isPerformingAbility = false;
+        Debug.Log("✅ Fury of Slashes complete!");
+    }
+
+    // ✅ NEW: Clone slam with automatic retargeting
+    private IEnumerator PerformCloneSlamWithRetargeting()
+    {
+        if (cloneInstance == null)
+        {
+            Debug.Log("[HaymakerAbility] No clone available for slam");
+            yield break;
+        }
+
+        // ✅ FIX: Find best target for slam (retarget if needed)
+        UnitAI slamTarget = FindClosestEnemy(5f); // Larger search radius for slam
+
+        if (slamTarget == null)
+        {
+            Debug.Log("[HaymakerAbility] No valid target found for clone slam");
+            yield break;
+        }
+
+        Debug.Log($"🎯 Clone targeting {slamTarget.unitName} for slam");
+
+        Vector3 cloneStartPos = cloneInstance.transform.position;
+        Vector3 slamPosition = slamTarget.transform.position;
+
+        // Clone jumps up and slams down
+        float slamDuration = 0.8f;
+        float jumpHeight = 3f;
+
+        float elapsed = 0f;
+        while (elapsed < slamDuration)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / slamDuration;
+
+            // ✅ Check if target is still valid during slam
+            if (slamTarget == null || !slamTarget.isAlive)
+            {
+                // ✅ Retarget mid-slam if needed
+                UnitAI newTarget = FindClosestEnemy(5f);
+                if (newTarget != null)
+                {
+                    slamTarget = newTarget;
+                    slamPosition = slamTarget.transform.position;
+                    Debug.Log($"🔄 Clone retargeted to {slamTarget.unitName} mid-slam");
+                }
+            }
+
+            // Arc movement for clone
+            Vector3 pos = Vector3.Lerp(cloneStartPos, slamPosition, t);
+            pos.y += Mathf.Sin(t * Mathf.PI) * jumpHeight;
+            cloneInstance.transform.position = pos;
+
+            yield return null;
+        }
+
+        // ✅ Final target validation before damage
+        if (slamTarget != null && slamTarget.isAlive)
+        {
+            // Apply slam damage
+            float slamDmg = slamDamage[Mathf.Clamp(unitAI.starLevel - 1, 0, slamDamage.Length - 1)];
+            slamTarget.TakeDamage(slamDmg);
+
+            // Spawn slam VFX
+            if (slamVFX != null)
+            {
+                var slamEffect = Instantiate(slamVFX, slamPosition, Quaternion.identity);
+                Destroy(slamEffect, 2f);
+            }
+
+            Debug.Log($"🌪️ Clone slam: {slamDmg} damage to {slamTarget.unitName}");
+        }
+        else
+        {
+            Debug.Log("[HaymakerAbility] Clone slam target became invalid, no damage applied");
+
+            // Still spawn VFX at slam position for visual feedback
+            if (slamVFX != null)
+            {
+                var slamEffect = Instantiate(slamVFX, slamPosition, Quaternion.identity);
+                Destroy(slamEffect, 2f);
             }
         }
 
-        // Set new target if found
-        if (newTarget != null)
+        // Return clone to original position
+        yield return StartCoroutine(MoveCloneToPosition(cloneStartPos));
+    }
+
+    private IEnumerator DashToPosition(Vector3 targetPosition)
+    {
+        Vector3 startPos = transform.position;
+        float distance = Vector3.Distance(startPos, targetPosition);
+        float dashTime = distance / dashSpeed;
+
+        float elapsed = 0f;
+        while (elapsed < dashTime)
         {
-            unitAI.currentTarget = newTarget.transform;
-            unitAI.SetState(UnitAI.UnitState.Combat); // make sure AI resumes properly
+            // ✅ Enhanced interruption checks
+            if (!isPerformingAbility || !unitAI.isAlive)
+            {
+                Debug.Log("[HaymakerAbility] Dash interrupted - ability stopped or unit died");
+                yield break;
+            }
+
+            // ✅ FIX: Check phase during dash
+            if (StageManager.Instance != null && StageManager.Instance.currentPhase != StageManager.GamePhase.Combat)
+            {
+                Debug.Log("[HaymakerAbility] Dash interrupted - phase changed to non-combat");
+                yield break;
+            }
+
+            elapsed += Time.deltaTime;
+            float t = elapsed / dashTime;
+
+            transform.position = Vector3.Lerp(startPos, targetPosition, t);
+            yield return null;
         }
 
+        transform.position = targetPosition;
+    }
+
+
+    private IEnumerator PerformCloneSlam(UnitAI target)
+    {
+        if (cloneInstance == null) yield break;
+
+        Vector3 cloneStartPos = cloneInstance.transform.position;
+        Vector3 slamPosition = target.transform.position;
+
+        // Clone jumps up and slams down
+        float slamDuration = 0.8f;
+        float jumpHeight = 3f;
+
+        float elapsed = 0f;
+        while (elapsed < slamDuration)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / slamDuration;
+
+            // Arc movement for clone
+            Vector3 pos = Vector3.Lerp(cloneStartPos, slamPosition, t);
+            pos.y += Mathf.Sin(t * Mathf.PI) * jumpHeight;
+            cloneInstance.transform.position = pos;
+
+            yield return null;
+        }
+
+        // Apply slam damage
+        float slamDmg = slamDamage[Mathf.Clamp(unitAI.starLevel - 1, 0, slamDamage.Length - 1)];
+        target.TakeDamage(slamDmg);
+
+        // Spawn slam VFX
+        if (slamVFX != null)
+        {
+            var slamEffect = Instantiate(slamVFX, slamPosition, Quaternion.identity);
+            Destroy(slamEffect, 2f);
+        }
+
+        Debug.Log($"🌪️ Clone slam: {slamDmg} damage to {target.unitName}");
+
+        // Return clone to original position
+        yield return StartCoroutine(MoveCloneToPosition(cloneStartPos));
+    }
+
+    private IEnumerator MoveCloneToPosition(Vector3 targetPos)
+    {
+        if (cloneInstance == null) yield break;
+
+        Vector3 startPos = cloneInstance.transform.position;
+        float moveTime = 0.5f;
+
+        float elapsed = 0f;
+        while (elapsed < moveTime)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / moveTime;
+
+            cloneInstance.transform.position = Vector3.Lerp(startPos, targetPos, t);
+            yield return null;
+        }
+
+        cloneInstance.transform.position = targetPos;
     }
 
     private Vector3 FindBestClumpPosition(float searchRadius)
     {
-        UnitAI[] allUnits = FindObjectsOfType<UnitAI>();
-        List<UnitAI> enemies = new List<UnitAI>();
-
-        foreach (var u in allUnits)
-        {
-            if (u == unitAI || !u.isAlive || u.team == unitAI.team || u.currentState == UnitState.Bench) continue;
-            if (Vector3.Distance(transform.position, u.transform.position) <= searchRadius)
-                enemies.Add(u);
-        }
-
+        List<UnitAI> enemies = FindEnemiesInRadius(searchRadius);
         if (enemies.Count == 0) return Vector3.zero;
 
-        // Find enemy that has the most neighbors within 2 units (clump center)
+        // Find enemy with most neighbors (clump center)
         UnitAI bestCenter = enemies[0];
         int bestCount = 0;
 
-        foreach (var e in enemies)
+        foreach (var enemy in enemies)
         {
-            int nearby = 0;
+            int nearbyCount = 0;
             foreach (var other in enemies)
             {
-                if (other == e) continue;
-                if (Vector3.Distance(e.transform.position, other.transform.position) <= 2f)
-                    nearby++;
+                if (other == enemy) continue;
+                if (Vector3.Distance(enemy.transform.position, other.transform.position) <= 2.5f)
+                    nearbyCount++;
             }
 
-            if (nearby > bestCount)
+            if (nearbyCount > bestCount)
             {
-                bestCount = nearby;
-                bestCenter = e;
+                bestCount = nearbyCount;
+                bestCenter = enemy;
             }
         }
 
         return bestCenter.transform.position;
     }
 
+    private UnitAI FindClosestEnemy(float maxDistance)
+    {
+        List<UnitAI> enemies = FindEnemiesInRadius(maxDistance);
+        if (enemies.Count == 0) return null;
+
+        UnitAI closest = enemies[0];
+        float minDistance = Vector3.Distance(transform.position, closest.transform.position);
+
+        foreach (var enemy in enemies)
+        {
+            float distance = Vector3.Distance(transform.position, enemy.transform.position);
+            if (distance < minDistance)
+            {
+                minDistance = distance;
+                closest = enemy;
+            }
+        }
+
+        return closest;
+    }
 
     private List<UnitAI> FindEnemiesInRadius(float radius, Vector3? center = null)
     {
         if (center == null) center = transform.position;
+
         UnitAI[] allUnits = FindObjectsOfType<UnitAI>();
         List<UnitAI> enemies = new List<UnitAI>();
 
-        foreach (var u in allUnits)
+        foreach (var unit in allUnits)
         {
-            if (u == unitAI || !u.isAlive || u.team == unitAI.team || u.currentState == UnitState.Bench) continue;
-            if (Vector3.Distance(center.Value, u.transform.position) <= radius)
-                enemies.Add(u);
+            if (unit == unitAI || !unit.isAlive || unit.team == unitAI.team || unit.currentState == UnitState.Bench)
+                continue;
+
+            if (Vector3.Distance(center.Value, unit.transform.position) <= radius)
+                enemies.Add(unit);
         }
+
         return enemies;
     }
 }

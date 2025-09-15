@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 802171591968286027}
   - component: {fileID: 1710959538866916495}
   m_Layer: 0
-  m_Name: Sparks flashing green
+  m_Name: Haymakerstabvfx
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

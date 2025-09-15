@@ -878,13 +878,22 @@ public class UnitAI : MonoBehaviour
                     var ability = GetComponent<HaymakerAbility>();
                     if (ability != null)
                     {
-                        float stabDmg = ability.stabDamage[Mathf.Clamp(star - 1, 0, ability.stabDamage.Length - 1)];
+                        float slashDmg = ability.slashDamage[Mathf.Clamp(star - 1, 0, ability.slashDamage.Length - 1)];
                         float slamDmg = ability.slamDamage[Mathf.Clamp(star - 1, 0, ability.slamDamage.Length - 1)];
-                        return $"Passive: Summons a clone at 25% stats. Gains +1% health & damage for every 5 souls absorbed.\n" +
-                               $"Active: Stabs target for {stabDmg + ad} damage, then slams for {slamDmg + ad} in a 2-hex radius.";
+
+                        // Calculate damage reduction percentage for display
+                        int starIndex = Mathf.Clamp(star - 1, 0, ability.temporaryArmor.Length - 1);
+                        int damageReductionPercent = 80 + (starIndex * 10); // 80%, 90%, 95%
+
+                        // Calculate slashes per second based on attack speed
+                        float slashesPerSecond = attackSpeed * ability.slashesPerAttackSpeed / 10f;
+
+                        return $"Passive: Summons a clone at 25% stats. Clone gains +1% health & damage for every 5 enemy souls absorbed.\n" +
+                               $"Active: Dash to enemy clump and unleash fury of slashes for 3 seconds ({slashesPerSecond:F1} slashes/sec), each dealing {slashDmg} damage. Take {damageReductionPercent}% reduced damage while slashing. Clone slams final target for {slamDmg} damage.";
                     }
                     return "Haymaker ability missing.";
                 }
+
 
             case "BOP":
                 {

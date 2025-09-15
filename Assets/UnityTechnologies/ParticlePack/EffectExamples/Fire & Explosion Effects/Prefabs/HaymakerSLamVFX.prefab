@@ -187,7 +187,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 1, g: 1, b: 1, a: 1}
-      maxColor: {r: 0.366411, g: 0.15933903, b: 0.38679248, a: 1}
+      maxColor: {r: 0.7169812, g: 0.67998946, b: 0.08567693, a: 1}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -4820,7 +4820,7 @@ GameObject:
   - component: {fileID: 198856239026640498}
   - component: {fileID: 199756426985724656}
   m_Layer: 0
-  m_Name: EnergyExplosion2
+  m_Name: HaymakerSLamVFX
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4834,8 +4834,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1329845292236604}
   m_LocalRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 4.69, y: 3.41, z: -20.589817}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 4.69, y: 4.495, z: -20.589817}
+  m_LocalScale: {x: 0.58457, y: 0.58457, z: 0.58457}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4778554132450660}
@@ -5034,7 +5034,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 1, g: 1, b: 1, a: 1}
-      maxColor: {r: 1, g: 1, b: 1, a: 1}
+      maxColor: {r: 0.67871517, g: 0.6886792, b: 0.056307063, a: 1}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -6195,21 +6195,21 @@ ParticleSystem:
       maxColor: {r: 1, g: 1, b: 1, a: 1}
       maxGradient:
         serializedVersion: 2
-        key0: {r: 0.3695873, g: 0.14839207, b: 0.38679248, a: 1}
-        key1: {r: 0.67058825, g: 0, b: 0.14546905, a: 0}
-        key2: {r: 0.92380553, g: 0.36555114, b: 0.9528302, a: 0}
-        key3: {r: 0.9433962, g: 0.38863173, b: 0.9316483, a: 0}
-        key4: {r: 0.12953897, g: 0.6698113, b: 0.44545752, a: 0}
-        key5: {r: 0.91754806, g: 0.53103113, b: 0.9433962, a: 0}
-        key6: {r: 0.6627451, g: 0, b: 0.61654025, a: 0}
-        key7: {r: 0.68327045, g: 0.2786875, b: 0.7264151, a: 0}
+        key0: {r: 0.9716981, g: 0.8007529, b: 0.0061111883, a: 1}
+        key1: {r: 0.67058825, g: 0.55257875, b: 0, a: 0}
+        key2: {r: 0.9529412, g: 0.8964696, b: 0.3647059, a: 0}
+        key3: {r: 0.94509804, g: 0.85550886, b: 0.38823533, a: 0}
+        key4: {r: 0.6886792, g: 0.62105125, b: 0.043313082, a: 0}
+        key5: {r: 0.9150943, g: 0.7043164, b: 0.057553, a: 0}
+        key6: {r: 0.9811321, g: 0.92683727, b: 0.26533753, a: 0}
+        key7: {r: 0.9010926, g: 0.990566, b: 0.37068343, a: 0}
         ctime0: 2792
         ctime1: 4397
         ctime2: 6700
         ctime3: 8096
         ctime4: 9980
         ctime5: 11516
-        ctime6: 12912
+        ctime6: 15744
         ctime7: 45489
         atime0: 33291
         atime1: 65535
@@ -9959,7 +9959,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 1, g: 1, b: 1, a: 1}
-      maxColor: {r: 0.366411, g: 0.15933903, b: 0.38679248, a: 1}
+      maxColor: {r: 1, g: 0.8220303, b: 0.10062885, a: 1}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -14857,7 +14857,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 1, g: 1, b: 1, a: 1}
-      maxColor: {r: 0.366411, g: 0.15933903, b: 0.38679248, a: 1}
+      maxColor: {r: 0.9056604, g: 0.869721, b: 0.09113557, a: 1}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -16000,7 +16000,7 @@ ParticleSystem:
       maxColor: {r: 1, g: 1, b: 1, a: 1}
       maxGradient:
         serializedVersion: 2
-        key0: {r: 0.72327155, g: 0.30764204, b: 0.8018868, a: 0}
+        key0: {r: 0.9528302, g: 0.5670385, b: 0.11386012, a: 0}
         key1: {r: 1, g: 1, b: 1, a: 1}
         key2: {r: 0, g: 0, b: 0, a: 1}
         key3: {r: 0, g: 0, b: 0, a: 0}
