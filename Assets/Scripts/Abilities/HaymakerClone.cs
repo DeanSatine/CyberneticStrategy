@@ -22,7 +22,7 @@ public class HaymakerClone : MonoBehaviour
             // ✅ Ensure clone has proper unit name for ability descriptions
             if (!unitAI.unitName.Contains("Clone"))
             {
-                unitAI.unitName = $"{unitAI.unitName} Clone";
+                unitAI.unitName = "Haymaker Clone";
             }
 
             Debug.Log($"[HaymakerClone] Clone initialized with name: '{unitAI.unitName}'");
@@ -45,7 +45,7 @@ public class HaymakerClone : MonoBehaviour
         return 0f;
     }
 
-    // ✅ Enhanced empowerment status with detailed soul counter
+    // ✅ ENHANCED: Real-time detailed soul status with progress tracking
     public string GetDetailedSoulStatus()
     {
         var masterAbility = FindObjectOfType<HaymakerAbility>();
@@ -57,9 +57,37 @@ public class HaymakerClone : MonoBehaviour
 
             if (soulsToNext == 5) soulsToNext = 0; // If exactly divisible by 5
 
-            return $"Souls Absorbed: {totalSouls} | Empowerments: {empowerments} | Next in: {soulsToNext}";
+            string progressBar = GetProgressBar(totalSouls % 5, 5);
+
+            if (totalSouls == 0)
+            {
+                return $"No souls absorbed yet. Next empowerment in {soulsToNext} souls.";
+            }
+            else if (soulsToNext == 0)
+            {
+                return $"💀 {totalSouls} souls absorbed | {empowerments} empowerments | Ready for next! {progressBar}";
+            }
+            else
+            {
+                return $"💀 {totalSouls} souls absorbed | {empowerments} empowerments | Next in {soulsToNext} {progressBar}";
+            }
         }
-        return "Master Haymaker not found";
+        return "❌ Master Haymaker not found";
+    }
+
+    // ✅ NEW: Visual progress bar for souls
+    private string GetProgressBar(int current, int max)
+    {
+        string bar = "[";
+        for (int i = 0; i < max; i++)
+        {
+            if (i < current)
+                bar += "●"; // Filled
+            else
+                bar += "○"; // Empty
+        }
+        bar += "]";
+        return bar;
     }
 
     // ✅ Get current stat bonus percentage
@@ -74,7 +102,7 @@ public class HaymakerClone : MonoBehaviour
         return 0f;
     }
 
-    // ✅ Calculate actual HP and damage values including bonuses
+    // ✅ ENHANCED: Calculate actual HP and damage values including bonuses
     public (float currentHP, float currentDamage, float baseHP, float baseDamage) GetStatsWithBonuses()
     {
         var unitAI = GetComponent<UnitAI>();
@@ -91,7 +119,8 @@ public class HaymakerClone : MonoBehaviour
                 float baseDamage = masterUnitAI.attackDamage * 0.25f;
 
                 // Calculate bonus from souls
-                float bonusPercent = GetCurrentStatBonusPercent() / 100f; // Convert to decimal
+                int empowerments = masterAbility.SoulCount / 5;
+                float bonusPercent = empowerments * 1f / 100f; // Convert to decimal
                 float currentHP = baseHP * (1f + bonusPercent);
                 float currentDamage = baseDamage * (1f + bonusPercent);
 
@@ -103,7 +132,7 @@ public class HaymakerClone : MonoBehaviour
         return (unitAI.maxHealth, unitAI.attackDamage, unitAI.maxHealth, unitAI.attackDamage);
     }
 
-    // ✅ Get formatted stats comparison
+    // ✅ ENHANCED: Get formatted stats comparison with empowerment details
     public string GetStatsComparison()
     {
         var (currentHP, currentDamage, baseHP, baseDamage) = GetStatsWithBonuses();
@@ -111,11 +140,28 @@ public class HaymakerClone : MonoBehaviour
 
         if (bonusPercent > 0)
         {
-            return $"Stats: {currentHP:F0} HP ({baseHP:F0} +{bonusPercent:F0}%), {currentDamage:F0} AD ({baseDamage:F0} +{bonusPercent:F0}%)";
+            return $"⚡ Empowered: {currentHP:F0} HP, {currentDamage:F0} AD (+{bonusPercent:F0}% from souls)";
         }
         else
         {
-            return $"Stats: {baseHP:F0} HP, {baseDamage:F0} AD (25% of original)";
+            return $"📊 Base Stats: {baseHP:F0} HP, {baseDamage:F0} AD (25% of original)";
         }
+    }
+
+    // ✅ NEW: Get empowerment tier description
+    public string GetEmpowermentTier()
+    {
+        var masterAbility = FindObjectOfType<HaymakerAbility>();
+        if (masterAbility != null)
+        {
+            int empowerments = masterAbility.SoulCount / 5;
+
+            if (empowerments == 0) return "🔹 Tier: Base Clone";
+            else if (empowerments <= 5) return $"🔸 Tier: Awakened Clone (Level {empowerments})";
+            else if (empowerments <= 10) return $"🔶 Tier: Enhanced Clone (Level {empowerments})";
+            else if (empowerments <= 20) return $"🔥 Tier: Empowered Clone (Level {empowerments})";
+            else return $"💀 Tier: Soul Reaper (Level {empowerments})";
+        }
+        return "❓ Tier: Unknown";
     }
 }
