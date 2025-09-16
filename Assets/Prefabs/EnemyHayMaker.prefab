@@ -430,7 +430,7 @@ MonoBehaviour:
   attackSpeed: 0.8
   armor: 45
   attackRange: 1.7
-  mana: 0
+  mana: 2
   maxMana: 50
   currentMana: 0
   traits: 
@@ -442,6 +442,7 @@ MonoBehaviour:
     type: 3}
   firePoint: {fileID: 0}
   projectileSpeed: 15
+  portraitSprite: {fileID: 0}
   unitUIPrefab: {fileID: 6939982145822855837, guid: 63931d92c48ef65418d45ec02069a522,
     type: 3}
   ui: {fileID: 0}
@@ -465,6 +466,8 @@ MonoBehaviour:
   twoStarMultiplier: 1.8
   threeStarMultiplier: 2.5
   twoStarScale: 1.1
+  baseMaxHealth: 0
+  bonusMaxHealth: 0
   threeStarScale: 1.25
 --- !u!114 &2341522245247770583
 MonoBehaviour:
@@ -478,16 +481,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb9efea354552134eb730edcdf5b25cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stabDamage:
-  - 125
-  - 250
-  - 999
+  slashDamage:
+  - 30
+  - 40
+  - 500
   slamDamage:
   - 200
   - 250
   - 400
+  temporaryArmor:
+  - 160
+  - 180
+  - 190
+  slashDuration: 3
+  slashesPerAttackSpeed: 10
+  dashSpeed: 8
+  slashAnimationSpeedMultiplier: 3
   clonePrefab: {fileID: 3571069488247416756, guid: e950db6fcdd9f7244a32ce829f9c01e6,
     type: 3}
+  slashVFX: {fileID: 0}
+  slamVFX: {fileID: 0}
+  dashStartVFX: {fileID: 0}
+  dashEndVFX: {fileID: 0}
 --- !u!65 &1499806241345368472
 BoxCollider:
   m_ObjectHideFlags: 0

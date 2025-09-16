@@ -312,7 +312,7 @@ MonoBehaviour:
   attackSpeed: 1
   armor: 40
   attackRange: 2
-  mana: 0
+  mana: 2
   maxMana: 30
   currentMana: 0
   traits: 000000000100000003000000
@@ -376,8 +376,6 @@ MonoBehaviour:
   attackSpeedBuff: 1.5
   buffDuration: 4
   slamVFX: {fileID: 8378648546881499446, guid: 867c572a5be680d42a042d2349f10143, type: 3}
-  leapStartVFX: {fileID: 0}
-  leapLandVFX: {fileID: 0}
 --- !u!65 &7128019543044565119
 BoxCollider:
   m_ObjectHideFlags: 0

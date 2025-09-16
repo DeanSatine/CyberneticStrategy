@@ -308,7 +308,7 @@ MonoBehaviour:
   attackSpeed: 1
   armor: 40
   attackRange: 1.7
-  mana: 0
+  mana: 2
   maxMana: 30
   currentMana: 0
   traits: 
@@ -320,6 +320,7 @@ MonoBehaviour:
     type: 3}
   firePoint: {fileID: 0}
   projectileSpeed: 15
+  portraitSprite: {fileID: 0}
   unitUIPrefab: {fileID: 6939982145822855837, guid: 63931d92c48ef65418d45ec02069a522,
     type: 3}
   ui: {fileID: 0}
@@ -343,6 +344,8 @@ MonoBehaviour:
   twoStarMultiplier: 1.8
   threeStarMultiplier: 2.5
   twoStarScale: 1.1
+  baseMaxHealth: 0
+  bonusMaxHealth: 0
   threeStarScale: 1.25
 --- !u!114 &7161809393136151176
 MonoBehaviour:
@@ -367,6 +370,9 @@ MonoBehaviour:
   slamDuration: 0.7
   leapHeight: 2
   maxLeapRange: 3
+  attackSpeedBuff: 1.5
+  buffDuration: 4
+  slamVFX: {fileID: 0}
 --- !u!65 &7128019543044565119
 BoxCollider:
   m_ObjectHideFlags: 0

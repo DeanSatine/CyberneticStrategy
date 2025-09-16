@@ -178,11 +178,8 @@ public class UnitAI : MonoBehaviour
 
     private void Update()
     {
-        if (!isAlive) return;
-        if (currentState != UnitState.Combat) return;
         if (!isAlive || currentState != UnitState.Combat || isCastingAbility) return;
 
-        // ✅ Keep animator synced with attack speed
         if (animator) animator.SetFloat("AttackSpeed", attackSpeed);
 
         if (currentTarget != null)
@@ -190,35 +187,20 @@ public class UnitAI : MonoBehaviour
 
         attackCooldown -= Time.deltaTime;
 
+        // Retarget if invalid
         if (currentTarget == null
             || !currentTarget.GetComponent<UnitAI>().isAlive
             || currentTarget.GetComponent<UnitAI>().currentState == UnitState.Bench)
         {
             currentTarget = FindNearestEnemy();
             currentPath.Clear();
-
-            if (currentTarget != null)
-                attackCooldown = 0f; // 🔹 reset cooldown so we attack immediately
-        }
-
-        else
-        {
-            float dist = Vector3.Distance(transform.position, currentTarget.position);
-
-            // If target is too far to chase reasonably, retarget
-            if (dist > attackRange * 3f) // allow bigger leash before retarget
-            {
-                currentTarget = FindNearestEnemy();
-                currentPath.Clear();
-            }
-            // ✅ Otherwise: do nothing here. Movement/attack will be handled below.
+            if (currentTarget != null) attackCooldown = 0f;
         }
 
         if (currentTarget != null && canAttack)
         {
             float dist = Vector3.Distance(transform.position, currentTarget.position);
 
-            // Use actual distance instead of hex-based logic
             if (dist <= attackRange)
             {
                 if (attackCooldown <= 0f)
@@ -227,14 +209,15 @@ public class UnitAI : MonoBehaviour
                     attackCooldown = 1f / attackSpeed;
                 }
                 if (animator) animator.SetBool("IsRunning", false);
-                hasReachedDestination = true; // Stop moving when in attack range
+                hasReachedDestination = true;
             }
-            else if (canMove)
+            else if (canMove && dist > attackRange - 0.1f) // 🔹 buffer prevents stall
             {
                 MoveTowards(currentTarget.position);
             }
         }
     }
+
 
     private void Attack(Transform target)
     {
@@ -1018,7 +1001,28 @@ public class UnitAI : MonoBehaviour
         }
         else
         {
-            if (animator) animator.SetBool("IsRunning", false);
+            // ✅ Try full pathfinding as last resort
+            if (currentTile != null && currentTarget != null)
+            {
+                HexTile targetTile = BoardManager.Instance.GetTileFromWorld(currentTarget.position);
+                if (targetTile != null)
+                {
+                    List<HexTile> path = BoardManager.Instance.FindPath(currentTile, targetTile);
+                    if (path != null && path.Count > 1)
+                    {
+                        Vector3 nextStep = path[1].transform.position;
+                        nextStep.y = transform.position.y;
+
+                        Vector3 pathDir = (nextStep - transform.position).normalized;
+                        transform.position += pathDir * movementSpeed * Time.deltaTime;
+
+                        FaceDirection(pathDir);
+                        UpdateCurrentTile();
+
+                        if (animator) animator.SetBool("IsRunning", true);
+                    }
+                }
+            }
         }
     }
     public void RecalculateMaxHealth()
