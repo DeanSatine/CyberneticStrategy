@@ -102,6 +102,10 @@ public class StageManager : MonoBehaviour
         // ✅ Clear all leftover projectiles
         CombatManager.Instance.ClearProjectiles();
 
+        // ✅ NEW: Restore player units from pre-combat snapshots (TFT-style)
+        CombatManager.Instance.RestorePlayerUnitsFromSnapshots();
+
+        // ✅ OLD METHOD: Keep as fallback for any units not in snapshots
         foreach (var kvp in CombatManager.Instance.GetSavedPlayerPositions())
         {
             UnitAI unit = kvp.Key;
@@ -127,6 +131,7 @@ public class StageManager : MonoBehaviour
 
         currentPhase = GamePhase.Prep;
     }
+
 
     private void NextRound()
     {

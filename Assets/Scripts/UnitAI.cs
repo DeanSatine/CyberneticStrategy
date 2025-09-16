@@ -462,9 +462,27 @@ public class UnitAI : MonoBehaviour
     {
         // ✅ Guard: prevent multiple death calls
         if (!isAlive) return;
+
         CleanupProjectiles();
         isAlive = false;
         OnAnyUnitDeath?.Invoke(this);
+
+        // ✅ TFT-STYLE: Don't destroy or unregister player units during combat
+        // They will be restored from snapshots after combat ends
+        if (team == Team.Player && StageManager.Instance?.currentPhase == StageManager.GamePhase.Combat)
+        {
+            Debug.Log($"💀 {unitName} died in combat but will be restored after round ends");
+
+            // Hide the unit visually but don't destroy it
+            gameObject.SetActive(false);
+
+            // Clear from tile but keep registered for restoration
+            ClearTile();
+
+            return; // ✅ CRITICAL: Don't destroy player units during combat
+        }
+
+        // ✅ Normal death for enemies or non-combat scenarios
         GameManager.Instance.UnregisterUnit(this);
 
         // ✅ Snap to ground (align with tile or y = 0)
@@ -478,31 +496,14 @@ public class UnitAI : MonoBehaviour
         if (animator)
         {
             animator.SetTrigger("DieTrigger");
-
-            // Get death animation length safely
-            AnimatorStateInfo state = animator.GetCurrentAnimatorStateInfo(0);
-            float animLength = state.length > 0 ? state.length : 1.0f; // fallback to 1s
-
-            StartCoroutine(DeathSequence(animLength));
+            StartCoroutine(FadeAndDestroy(deathAnimLength));
         }
         else
         {
-            // No animator → just fade out
-            StartCoroutine(FadeAndDestroy(2.5f));
+            StartCoroutine(FadeAndDestroy(1.5f));
         }
-
-        // Disable collider so others can move onto this tile
-        Collider col = GetComponent<Collider>();
-        if (col != null) col.enabled = false;
-
-        ClearTile();
-
-        if (ui != null)
-            ui.gameObject.SetActive(false);
-
-        // Stop Update loop
-        this.enabled = false;
     }
+
 
     private IEnumerator DeathSequence(float animLength)
     {
