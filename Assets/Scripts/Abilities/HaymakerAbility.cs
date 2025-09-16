@@ -33,6 +33,7 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
     private bool isPerformingAbility = false;
     private Vector3 originalPosition;
     private float originalArmor;
+    private int displaySoulCount = 0; // ✅ For Inspector display
 
     private void Awake()
     {
@@ -194,13 +195,15 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         return emptyTiles[0];
     }
 
-    // Passive: absorb souls when units die
+    public int SoulCount => soulCount;
     private void OnUnitDeath(UnitAI deadUnit)
     {
         if (!unitAI.isAlive) return;
         if (deadUnit.team == unitAI.team) return;
 
         soulCount++;
+        displaySoulCount = soulCount; // ✅ Update display value
+
         if (soulCount % 5 == 0 && cloneInstance != null)
         {
             var cloneAI = cloneInstance.GetComponent<UnitAI>();

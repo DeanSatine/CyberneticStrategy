@@ -840,8 +840,8 @@ public class UnitAI : MonoBehaviour
                     if (ability != null)
                     {
                         float dmg = ability.damagePerStar[Mathf.Clamp(star - 1, 0, ability.damagePerStar.Length - 1)];
-                        return $"Rapidly throw {ability.baseNeedleCount} needles split between the nearest 2 enemies, " +
-                               $"each dealing {dmg + ad} damage. Every 10 needles thrown, increase the needle count by 1 permanently.";
+                        return $"Active: Rapidly throw {ability.baseNeedleCount} needles split between the nearest 2 enemies, each dealing {dmg + ad} damage.\n\n" +
+                               $"Every 10 needles thrown, increase the needle count by 1 permanently.";
                     }
                     return "Needlebot ability missing.";
                 }
@@ -852,9 +852,8 @@ public class UnitAI : MonoBehaviour
                     if (ability != null)
                     {
                         float dmg = ability.damagePerStar[Mathf.Clamp(star - 1, 0, ability.damagePerStar.Length - 1)];
-                        return $"Hurl a bomb at the largest group, dealing {dmg} damage. " +
-                               $"If the bomb kills, ManaDrive gains {ability.attackSpeedGain * 100:F0}% attack speed " +
-                               $"and casts again at {(1f - ability.recursiveDamageReduction) * 100:F0}% effectiveness.";
+                        return $"Hurl a massive bomb towards the largest group of enemies, dealing {dmg} damage.\n\n" +
+                               $"If the bomb kills a target, ManaDrive gains {ability.attackSpeedGain * 100:F0}% attack speed for the rest of combat and casts again, at {(1f - ability.recursiveDamageReduction) * 100:F0}% effectiveness.";
                     }
                     return "ManaDrive ability missing.";
                 }
@@ -865,10 +864,8 @@ public class UnitAI : MonoBehaviour
                     if (ability != null)
                     {
                         float slamDmg = ability.slamDamagePerStar[Mathf.Clamp(star - 1, 0, ability.slamDamagePerStar.Length - 1)];
-                        return $"Passive: Every other attack lowers the target’s armour by {ability.armorShred}. " +
-                               $"When changing targets, slam the previous one for {ability.passiveSlamDamage + ad} damage and heal {ability.healOnTargetSwap}.\n" +
-                               $"Active: Leap up to {ability.maxLeapRange} hexes and slam for {slamDmg + ad} damage. " +
-                               $"Temporarily gains boosted attack speed.";
+                        return $"Passive: Every other attack lowers the target's armour by {ability.armorShred}. When changing targets, slam the target dealing {ability.passiveSlamDamage + ad} damage and restoring {ability.healOnTargetSwap} hp.\n\n" +
+                               $"Active: Leap to the farthest enemy within {ability.maxLeapRange} hexes and slam them for {slamDmg + ad} damage. Grant KillSwitch 50% attack speed for 4 seconds.";
                     }
                     return "KillSwitch ability missing.";
                 }
@@ -888,12 +885,32 @@ public class UnitAI : MonoBehaviour
                         // Calculate slashes per second based on attack speed
                         float slashesPerSecond = attackSpeed * ability.slashesPerAttackSpeed / 10f;
 
-                        return $"Passive: Summons a clone at 25% stats. Clone gains +1% health & damage for every 5 enemy souls absorbed.\n" +
-                               $"Active: Dash to enemy clump and unleash fury of slashes for 3 seconds ({slashesPerSecond:F1} slashes/sec), each dealing {slashDmg} damage. Take {damageReductionPercent}% reduced damage while slashing. Clone slams final target for {slamDmg} damage.";
+                        return $"Passive: Summon a clone of Haymaker with 25% health and damage. The clone does not benefit from traits.\n\n" +
+                               $"When units on the board die, Haymaker absorbs their soul. The clone gains 1% health and damage for every 5 souls absorbed.\n\n" +
+                               $"Active: Dash to the center clump of enemies and unleash a fury of slashes (1 slash for every 0.10 attack speed) that each do {slashDmg} damage for 3 seconds.\n\n" +
+                               $"Then, the clone will slam onto the final target, dealing {slamDmg} damage. While slashing take {damageReductionPercent}% reduced damage. Then dash back to original position.";
                     }
                     return "Haymaker ability missing.";
                 }
 
+            case "Haymaker Clone":
+                {
+                    // Enhanced: Ability description for Haymaker Clone with soul counter
+                    var cloneComponent = GetComponent<HaymakerClone>();
+                    if (cloneComponent != null)
+                    {
+                        float slamDmg = cloneComponent.GetSlamDamage();
+                        string soulStatus = cloneComponent.GetDetailedSoulStatus();
+                        string statsComparison = cloneComponent.GetStatsComparison();
+
+                        return $"Passive: {statsComparison}. Gains +1% health & damage for every 5 enemy souls absorbed by Haymaker.\n\n" +
+                               $"Soul Status: {soulStatus}\n\n" +
+                               $"Active: Slams down at the last hit target when Haymaker finishes casting, dealing {slamDmg} damage.";
+                    }
+
+                    // Fallback if component is missing
+                    return "Slams down at the last hit target when Haymaker finishes casting.";
+                }
 
             case "BOP":
                 {
@@ -904,8 +921,8 @@ public class UnitAI : MonoBehaviour
                         float dmgAmp = ability.damageAmpPerStar[Mathf.Clamp(star - 1, 0, ability.damageAmpPerStar.Length - 1)];
                         float bonkDmg = (maxHp * 0.2f) + dmgAmp;
 
-                        return $"Chest pound: B.O.P gains {buffHp:F0} health.\n" +
-                               $"Bonk: Deals {bonkDmg:F0} damage (20% max HP + AD).";
+                        return $"B.O.P. pounds its chest, granting itself +{ability.chestBuffPercent[Mathf.Clamp(star - 1, 0, ability.chestBuffPercent.Length - 1)] * 100:F0}% max health.\n\n" +
+                               $"Then bonk the target, dealing 20% of B.O.P.'s max health + Attack Damage as damage ({bonkDmg:F0} damage).";
                     }
                     return "B.O.P ability missing.";
                 }
@@ -914,6 +931,7 @@ public class UnitAI : MonoBehaviour
                 return "This unit has no ability description yet.";
         }
     }
+
 
 
     private void MoveTowards(Vector3 targetPos)

@@ -363,6 +363,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: -5444784109813616411}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 4091e2ca91237fd4cb9e277c8685a4e6,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1805166379768951602}
   m_SourcePrefab: {fileID: 100100000, guid: 4091e2ca91237fd4cb9e277c8685a4e6, type: 3}
 --- !u!4 &2664505750195266861 stripped
 Transform:
@@ -420,7 +424,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3d9904e7b0c0e740bfea16738494774, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  unitName: HayMaker
+  unitName: Haymaker Clone
   starLevel: 1
   team: 0
   maxHealth: 275
@@ -544,3 +548,18 @@ MonoBehaviour:
   firePoint: {fileID: 0}
   chestPoint: {fileID: 0}
   weaponPoint: {fileID: 0}
+--- !u!114 &1805166379768951602
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3571069488247416756}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c888a8dfa38ace347b3fe4c991254d6b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  originalUnitName: 
+  canBeSold: 0
+  showInUI: 1
