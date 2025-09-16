@@ -871,7 +871,7 @@ public class UnitAI : MonoBehaviour
 
                         return $"Passive: Summon a clone of Haymaker with 25% health and damage. The clone does not benefit from traits.\n\n" +
                                $"When units on the board die, Haymaker absorbs their soul. The clone gains 1% health and damage for every 5 souls absorbed.\n\n" +
-                               $"Active: Dash to the center clump of enemies and unleash a fury of slashes (1 slash for every 0.10 attack speed) that each do {slashDmg} damage for 3 seconds.\n\n" +
+                               $"Active: Dash to the center clump of enemies and unleash a fury of slashes within 3 hexes (1 slash for every 0.10 attack speed) that each do {slashDmg} damage for 3 seconds.\n\n" +
                                $"Then, the clone will slam onto the final target, dealing {slamDmg} damage. While slashing take {damageReductionPercent}% reduced damage. Then dash back to original position.";
                     }
                     return "Haymaker ability missing.";

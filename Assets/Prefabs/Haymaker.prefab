@@ -470,6 +470,11 @@ PrefabInstance:
       propertyPath: m_Controller
       value: 
       objectReference: {fileID: 9100000, guid: 24c53e0fef4dd644989eeed75d79ca6c, type: 2}
+    - target: {fileID: 5866666021909216657, guid: 4091e2ca91237fd4cb9e277c8685a4e6,
+        type: 3}
+      propertyPath: m_WarningMessage
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 8817898888258712963, guid: 4091e2ca91237fd4cb9e277c8685a4e6,
         type: 3}
       propertyPath: m_Layer
@@ -539,7 +544,7 @@ Animation:
   serializedVersion: 3
   m_Animation: {fileID: 0}
   m_Animations:
-  - {fileID: -203655887218126122, guid: 662e16ecc52ae9f45ad95b8dc60828e1, type: 3}
+  - {fileID: -203655887218126122, guid: f06ca391c4b744741b422334b2b31924, type: 3}
   - {fileID: 7400000, guid: ae97e234beda8cb4b83646858f5fad0c, type: 2}
   - {fileID: -203655887218126122, guid: 084a337d0af3582468a8b305428a5c3d, type: 3}
   - {fileID: -203655887218126122, guid: c7e994702a16b4641a1d71575b9d66a7, type: 3}

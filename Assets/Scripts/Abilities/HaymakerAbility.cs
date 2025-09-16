@@ -497,6 +497,13 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
             return;
         }
 
+        // ✅ ADD THIS: Trigger ability animation at start of cast
+        if (unitAI.animator)
+        {
+            unitAI.animator.SetTrigger("AbilityTrigger");
+            Debug.Log("[HaymakerAbility] Triggered ability animation");
+        }
+
         StartCoroutine(PerformFuryOfSlashes());
     }
 
@@ -538,7 +545,11 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
 
         // ✅ PHASE 2: Fury of Slashes (3 seconds)
         Debug.Log("⚔️ Phase 2: Unleashing Fury of Slashes!");
-
+        if (unitAI.animator)
+        {
+            unitAI.animator.SetTrigger("AbilityTrigger");
+            Debug.Log("[HaymakerAbility] Triggered ability animation for slashing phase");
+        }
         // Apply massive armor for damage reduction
         int starIndex = Mathf.Clamp(unitAI.starLevel - 1, 0, temporaryArmor.Length - 1);
         unitAI.armor = temporaryArmor[starIndex];
@@ -579,10 +590,10 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
 
             if (slashTargets.Count > 0)
             {
-                // Trigger attack animation
-                if (unitAI.animator)
+                // Only trigger attack animation every few slashes to avoid animation conflicts
+                if (i % 3 == 0 && unitAI.animator) // Every 3rd slash
                 {
-                    unitAI.animator.SetTrigger("AttackTrigger");
+                    unitAI.animator.SetTrigger("AbilityTrigger");
                 }
 
                 // ✅ UPDATED: Apply damage to ALL enemies within 3 hex radius
