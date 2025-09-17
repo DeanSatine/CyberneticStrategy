@@ -90,7 +90,10 @@ public class EnemyWaveManager : MonoBehaviour
         HexTile chosen = enemyTiles[Random.Range(0, enemyTiles.Count)];
         return chosen.transform;
     }
-
+    public List<UnitAI> GetActiveEnemies()
+    {
+        return activeEnemies;
+    }
     private ShopUnit GetRandomUnitByStage(int stage)
     {
         int roll = Random.Range(0, 100);

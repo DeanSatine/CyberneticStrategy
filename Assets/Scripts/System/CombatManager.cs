@@ -76,30 +76,73 @@ public class CombatManager : MonoBehaviour
     private List<UnitSnapshot> preCombatPlayerSnapshots = new List<UnitSnapshot>();
     private bool combatSnapshotTaken = false;
 
+    // ✅ NEW: Current phase reference for death tracking
+    private StageManager.GamePhase currentPhase => StageManager.Instance?.currentPhase ?? StageManager.GamePhase.Prep;
+
     public void StartCombat()
     {
-        Debug.Log("⚔️ Combat started!");
+        Debug.Log("⚔️ Starting Combat");
 
-        // ✅ Reset lingering trait visuals at round start
-        EradicatorTrait.ResetAllEradicators();
+        // ✅ Clear any previous death tracking
+        unitsDeadThisCombat.Clear();
 
-        // ✅ Take snapshots of all player units before combat
+        // ✅ Take snapshots RIGHT before setting combat state
         TakePlayerUnitSnapshots();
 
+        SavePlayerPositions();
+
+        foreach (var unit in GameManager.Instance.GetPlayerUnits())
+        {
+            if (unit != null && unit.currentState != UnitAI.UnitState.Bench)
+            {
+                unit.SetState(UnitAI.UnitState.Combat);
+            }
+        }
+
+        foreach (var enemy in EnemyWaveManager.Instance.GetActiveEnemies())
+        {
+            if (enemy != null && enemy.isAlive)
+            {
+                enemy.SetState(UnitAI.UnitState.Combat);
+            }
+        }
+
+        StartCoroutine(MonitorCombat());
+    }
+
+    // ✅ Add this method
+    private void SavePlayerPositions()
+    {
         savedPlayerPositions.Clear();
 
-        foreach (var unit in FindObjectsOfType<UnitAI>())
+        foreach (var unit in GameManager.Instance.GetPlayerUnits())
         {
-            if (!unit.isAlive || unit.currentState == UnitAI.UnitState.Bench)
-                continue;
-
-            if (unit.team == Team.Player && unit.currentTile != null)
+            if (unit != null && unit.currentState != UnitAI.UnitState.Bench)
+            {
                 savedPlayerPositions[unit] = unit.currentTile;
+                Debug.Log($"📍 Saved position for {unit.unitName}: {unit.currentTile?.name}");
+            }
+        }
 
-            unit.SetState(UnitAI.UnitState.Combat);
-            Debug.Log($"✅ Set {unit.team} unit {unit.unitName} to Combat state");
+        Debug.Log($"📍 Saved {savedPlayerPositions.Count} player unit positions");
+    }
+
+    // ✅ Add this method
+    private System.Collections.IEnumerator MonitorCombat()
+    {
+        yield return new WaitForSeconds(0.5f); // Initial delay
+
+        while (true)
+        {
+            // Subscribe to unit death events for round end checking
+            UnitAI.OnAnyUnitDeath -= HandleUnitDeath;
+            UnitAI.OnAnyUnitDeath += HandleUnitDeath;
+
+            yield return new WaitForSeconds(0.1f); // Check every 0.1 seconds
         }
     }
+
+
 
     // ✅ NEW: Take snapshots of all player units before combat
     private void TakePlayerUnitSnapshots()
@@ -131,17 +174,40 @@ public class CombatManager : MonoBehaviour
 
         Debug.Log("🔄 Restoring player units from pre-combat snapshots...");
 
+        // ✅ First restore all snapshotted units
         foreach (var snapshot in preCombatPlayerSnapshots)
         {
             RestoreUnitFromSnapshot(snapshot);
         }
 
-        // ✅ Clear snapshots after restoration
+        // ✅ NEW: Handle units that died during combat but need restoration
+        foreach (var deadUnit in unitsDeadThisCombat)
+        {
+            if (deadUnit != null)
+            {
+                // Find the snapshot for this dead unit
+                var matchingSnapshot = preCombatPlayerSnapshots.FirstOrDefault(s => s.originalUnit == deadUnit);
+                if (matchingSnapshot != null)
+                {
+                    Debug.Log($"🔄 Force-restoring late death: {deadUnit.unitName}");
+
+                    // Force restore this unit even if it was hidden
+                    deadUnit.gameObject.SetActive(true);
+                    deadUnit.isAlive = true;
+
+                    RestoreExistingUnit(deadUnit, matchingSnapshot);
+                }
+            }
+        }
+
+        // ✅ Clear tracking lists
+        unitsDeadThisCombat.Clear();
         preCombatPlayerSnapshots.Clear();
         combatSnapshotTaken = false;
 
         Debug.Log("✅ All player units restored from snapshots!");
     }
+
 
     // ✅ NEW: Restore individual unit from snapshot
     private void RestoreUnitFromSnapshot(UnitSnapshot snapshot)
@@ -243,6 +309,35 @@ public class CombatManager : MonoBehaviour
             unit.ui.gameObject.SetActive(true);
         }
     }
+    // ✅ NEW: Track units that died during this combat round
+    private List<UnitAI> unitsDeadThisCombat = new List<UnitAI>();
+
+    // ✅ NEW: Subscribe to death events to track deaths during combat
+    private void OnEnable()
+    {
+        UnitAI.OnAnyUnitDeath += TrackCombatDeath;
+    }
+
+    private void OnDisable()
+    {
+        UnitAI.OnAnyUnitDeath -= TrackCombatDeath;
+    }
+
+    // ✅ NEW: Track when player units die during combat
+    private void TrackCombatDeath(UnitAI deadUnit)
+    {
+        if (deadUnit.team == Team.Player && currentPhase == StageManager.GamePhase.Combat)
+        {
+            if (!unitsDeadThisCombat.Contains(deadUnit))
+            {
+                unitsDeadThisCombat.Add(deadUnit);
+                Debug.Log($"📋 Tracked combat death: {deadUnit.unitName}");
+            }
+        }
+    }
+
+
+
 
     public void ClearProjectiles()
     {
@@ -259,16 +354,6 @@ public class CombatManager : MonoBehaviour
     public Dictionary<UnitAI, HexTile> GetSavedPlayerPositions()
     {
         return savedPlayerPositions;
-    }
-
-    private void OnEnable()
-    {
-        UnitAI.OnAnyUnitDeath += HandleUnitDeath;
-    }
-
-    private void OnDisable()
-    {
-        UnitAI.OnAnyUnitDeath -= HandleUnitDeath;
     }
 
     private void HandleUnitDeath(UnitAI deadUnit)

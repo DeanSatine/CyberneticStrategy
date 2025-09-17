@@ -85,6 +85,8 @@ public class UnitAI : MonoBehaviour
 
     [Header("Animation Settings")]
     [SerializeField] private float deathAnimLength = 1.2f; // match clip length
+    private bool isBeingRestored = false; // ✅ NEW: Flag to prevent death interference
+
     private Vector3 moveOffset;
     private Vector3 currentDestination;
     private bool hasReachedDestination = true;
@@ -443,8 +445,12 @@ public class UnitAI : MonoBehaviour
 
     private void Die()
     {
-        // ✅ Guard: prevent multiple death calls
-        if (!isAlive) return;
+        // ✅ Enhanced guards: prevent multiple death calls and restoration interference
+        if (!isAlive || isBeingRestored)
+        {
+            if (isBeingRestored) Debug.Log($"🚫 {unitName} death blocked - unit is being restored");
+            return;
+        }
 
         CleanupProjectiles();
         isAlive = false;
@@ -456,11 +462,12 @@ public class UnitAI : MonoBehaviour
         {
             Debug.Log($"💀 {unitName} died in combat but will be restored after round ends");
 
-            // Hide the unit visually but don't destroy it
-            gameObject.SetActive(false);
-
+            // ✅ FIX: Play death animation FIRST, then hide after animation completes
             // Clear from tile but keep registered for restoration
             ClearTile();
+
+            // ✅ NEW: Start death sequence but don't hide immediately
+            StartCoroutine(HandleCombatDeath());
 
             return; // ✅ CRITICAL: Don't destroy player units during combat
         }
@@ -487,6 +494,95 @@ public class UnitAI : MonoBehaviour
         }
     }
 
+    // ✅ ENHANCED: Handle death animation during combat without immediate hiding
+    private IEnumerator HandleCombatDeath()
+    {
+        // ✅ Snap to ground (align with tile or y = 0)
+        Vector3 pos = transform.position;
+        pos.y = currentTile != null ? currentTile.transform.position.y : 0f;
+        transform.position = pos;
+
+        // ✅ Reset move offset so unit doesn't "die in the air"
+        moveOffset = Vector3.zero;
+
+        // ✅ Play death animation immediately
+        if (animator)
+        {
+            animator.SetTrigger("DieTrigger");
+            Debug.Log($"💀 Playing death animation for {unitName}");
+
+            // Wait for death animation to complete, but check for restoration
+            float elapsedTime = 0f;
+            while (elapsedTime < deathAnimLength)
+            {
+                // ✅ NEW: Exit early if unit is being restored
+                if (isBeingRestored)
+                {
+                    Debug.Log($"🔄 Death animation interrupted by restoration for {unitName}");
+                    yield break; // Stop the coroutine
+                }
+
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
+        }
+        else
+        {
+            // No animation, just wait a brief moment but still check for restoration
+            float elapsedTime = 0f;
+            while (elapsedTime < 0.5f)
+            {
+                if (isBeingRestored)
+                {
+                    Debug.Log($"🔄 Death delay interrupted by restoration for {unitName}");
+                    yield break;
+                }
+
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
+        }
+
+        // ✅ Only hide if NOT being restored
+        if (!isBeingRestored)
+        {
+            gameObject.SetActive(false);
+            Debug.Log($"👻 {unitName} hidden after death animation completed");
+        }
+    }
+    // ✅ NEW: Public method to handle restoration from combat manager
+    public void RestoreFromCombat()
+    {
+        Debug.Log($"🔄 Starting restoration for {unitName}");
+
+        // ✅ Stop any ongoing death processes
+        isBeingRestored = true;
+        StopAllCoroutines(); // Stop death animations and other coroutines
+
+        // ✅ Ensure unit is active and alive
+        gameObject.SetActive(true);
+        isAlive = true;
+
+        // ✅ Reset animation state
+        if (animator)
+        {
+            animator.SetBool("isDead", false);
+            animator.ResetTrigger("DieTrigger");
+            animator.Rebind();
+            animator.Update(0f);
+        }
+
+        // ✅ Clear restoration flag after a brief delay
+        StartCoroutine(ClearRestorationFlag());
+    }
+
+    // ✅ NEW: Clear restoration flag after restoration is complete
+    private IEnumerator ClearRestorationFlag()
+    {
+        yield return new WaitForSeconds(0.1f); // Brief delay to ensure restoration is complete
+        isBeingRestored = false;
+        Debug.Log($"✅ Restoration completed for {unitName}");
+    }
 
     private IEnumerator DeathSequence(float animLength)
     {
