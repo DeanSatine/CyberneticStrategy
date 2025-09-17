@@ -1169,6 +1169,14 @@ public class UnitAI : MonoBehaviour
             ui.UpdateHealth(currentHealth);
         }
 
+        Debug.Log($"[Upgrade] {unitName} {oldStar}★ -> {starLevel}★. HP: {maxHealth}, AD: {attackDamage}");
+
+        // ✅ FIX: Notify HaymakerAbility about star upgrade
+        var haymakerAbility = GetComponent<HaymakerAbility>();
+        if (haymakerAbility != null)
+        {
+            haymakerAbility.OnStarLevelUpgraded();
+        }
 
         Debug.Log($"[Upgrade] {unitName} {oldStar}★ -> {starLevel}★. HP: {maxHealth}, AD: {attackDamage}");
     }

@@ -90,18 +90,28 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
 
         if (state == UnitState.BoardIdle)
         {
-            // ✅ ENHANCED: Multiple validation checks before spawning
-            if (ShouldSpawnClone())
+            // ✅ ENHANCED: Always ensure clone exists when entering BoardIdle
+            if (!shouldHaveClone || cloneInstance == null)
             {
-                shouldHaveClone = true;
-                SpawnClone();
-            }
-            else if (shouldHaveClone && cloneInstance == null)
-            {
-                // ✅ Only respawn if we lost our clone but should still have one
-                if (HasLostClone())
+                if (ShouldSpawnClone())
+                {
+                    shouldHaveClone = true;
+                    SpawnClone();
+                }
+                else if (shouldHaveClone && cloneInstance == null && HasLostClone())
                 {
                     Debug.Log("[HaymakerAbility] Clone missing but should exist, respawning...");
+                    SpawnClone();
+                }
+            }
+            else
+            {
+                // ✅ NEW: Validate existing clone is still good
+                var cloneAI = cloneInstance?.GetComponent<UnitAI>();
+                if (cloneAI == null || !cloneAI.isAlive)
+                {
+                    Debug.Log("[HaymakerAbility] Existing clone invalid, respawning...");
+                    cloneInstance = null;
                     SpawnClone();
                 }
             }
@@ -131,9 +141,10 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
             }
         }
     }
+
     private void Update()
     {
-        if (!isInitialized) return; // ✅ ADD THIS LINE
+        if (!isInitialized) return;
 
         // ✅ Continuous clone health monitoring
         if (cloneInstance != null)
@@ -142,7 +153,7 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
             if (cloneAI != null && !cloneAI.isAlive)
             {
                 Debug.Log("[HaymakerAbility] Clone died, cleaning up reference");
-                cloneInstance = null; // Clear reference to dead clone
+                cloneInstance = null;
 
                 // ✅ Respawn clone if we should still have one
                 if (shouldHaveClone && unitAI.currentState == UnitState.BoardIdle)
@@ -152,7 +163,19 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
                 }
             }
         }
+
+        // ✅ NEW: Check if clone went missing during upgrades
+        else if (shouldHaveClone && unitAI.currentState == UnitState.BoardIdle && cloneInstance == null)
+        {
+            // Clone went missing, try to find it or respawn
+            if (HasLostClone())
+            {
+                Debug.Log("[HaymakerAbility] Clone missing during board state, respawning...");
+                SpawnClone();
+            }
+        }
     }
+
 
     // ✅ NEW: Validate existing clones to prevent duplicates
     private void ValidateExistingClones()
@@ -675,6 +698,57 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         Debug.Log("✅ Fury of Slashes complete!");
     }
 
+    // ✅ NEW: Handle star upgrade events
+    public void OnStarLevelUpgraded()
+    {
+        Debug.Log($"[HaymakerAbility] {unitAI.unitName} upgraded to {unitAI.starLevel} stars");
+
+        // If we're on the board and should have a clone, ensure clone is maintained
+        if (unitAI.currentState == UnitState.BoardIdle && shouldHaveClone)
+        {
+            // Validate our clone is still good
+            if (cloneInstance != null)
+            {
+                var cloneAI = cloneInstance.GetComponent<UnitAI>();
+                if (cloneAI != null && cloneAI.isAlive)
+                {
+                    // Update clone's star level to match
+                    cloneAI.starLevel = unitAI.starLevel;
+
+                    // Recalculate clone stats based on new star level
+                    UpdateCloneStatsAfterUpgrade(cloneAI);
+
+                    Debug.Log($"✅ Clone maintained and updated for {unitAI.starLevel}★ {unitAI.unitName}");
+                    return;
+                }
+            }
+
+            // If we got here, we need to respawn the clone
+            Debug.Log($"🔄 Respawning clone after star upgrade for {unitAI.unitName}");
+            SpawnClone();
+        }
+    }
+
+    // ✅ NEW: Update clone stats after star upgrade
+    private void UpdateCloneStatsAfterUpgrade(UnitAI cloneAI)
+    {
+        // Recalculate clone stats based on upgraded Haymaker
+        cloneAI.maxHealth = unitAI.maxHealth * 0.25f;
+        cloneAI.currentHealth = cloneAI.maxHealth;
+        cloneAI.attackDamage = unitAI.attackDamage * 0.25f;
+
+        // Apply any existing soul bonuses
+        ApplySoulBonusesToClone(cloneAI);
+
+        // Update UI if present
+        if (cloneAI.ui != null)
+        {
+            cloneAI.ui.SetMaxHealth(cloneAI.maxHealth);
+            cloneAI.ui.UpdateHealth(cloneAI.currentHealth);
+        }
+
+        Debug.Log($"📈 Clone stats updated: HP {cloneAI.maxHealth:F0}, AD {cloneAI.attackDamage:F0}");
+    }
 
     // ✅ UPDATED: Enhanced clone slam with multiple death checks
     private IEnumerator PerformCloneSlamWithRetargeting()

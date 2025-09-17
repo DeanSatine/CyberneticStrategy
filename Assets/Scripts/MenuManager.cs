@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class MenuManager : MonoBehaviour
@@ -29,6 +29,12 @@ public class MenuManager : MonoBehaviour
     public void PlayGame()
     {
         SceneManager.LoadScene(gameSceneName);
+    }
+
+    // ✅ NEW: Load Test scene
+    public void LoadTestScene()
+    {
+        SceneManager.LoadScene("Test");
     }
 
     // Called by Credits button
