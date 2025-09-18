@@ -920,11 +920,18 @@ public class UnitAI : MonoBehaviour
                     if (ability != null)
                     {
                         float dmg = ability.damagePerStar[Mathf.Clamp(star - 1, 0, ability.damagePerStar.Length - 1)];
-                        return $"Active: Rapidly throw {ability.baseNeedleCount} needles split between the nearest 2 enemies, each dealing {dmg + ad} damage.\n\n" +
-                               $"Every 10 needles thrown, increase the needle count by 1 permanently.";
+
+                        // ✅ Calculate current bonus needles
+                        int bonusNeedles = ability.needlesPerCast - ability.baseNeedleCount;
+                        string bonusText = bonusNeedles > 0 ? $" (+{bonusNeedles})" : "";
+
+                        return $"Active: Rapidly throw {ability.needlesPerCast}{bonusText} needles split between the nearest 2 enemies, each dealing {dmg + ad} damage.\n\n" +
+                               $"Every 10 needles thrown, increase the needle count by 1 permanently.\n\n" +
+                               $"Bonus Needle Count: {bonusNeedles}";
                     }
                     return "Needlebot ability missing.";
                 }
+
 
             case "ManaDrive":
                 {

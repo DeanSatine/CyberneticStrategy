@@ -13,7 +13,7 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
     public int needlesPerCast;
     public float[] damagePerStar = { 100f, 150f, 175f };
 
-    private int totalNeedlesThrown = 0;
+   public int totalNeedlesThrown = 0;
 
     [Header("Timings")]
     public float startDelay = 0.25f;

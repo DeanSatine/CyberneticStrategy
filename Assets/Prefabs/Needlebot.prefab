@@ -425,12 +425,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd941696d7db68241a373173841cfd91, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseNeedleCount: 4
+  baseNeedleCount: 3
   needlesPerCast: 0
   damagePerStar:
   - 45
   - 65
   - 95
+  totalNeedlesThrown: 0
   startDelay: 0.25
   throwInterval: 0.1
   abilityDuration: 1.5
