@@ -1,6 +1,7 @@
 ﻿using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class UIManager : MonoBehaviour
 {
@@ -17,7 +18,9 @@ public class UIManager : MonoBehaviour
 
     [Header("Fight Button UI")]
     public GameObject fightButton; // 👈 drag your button object here
-
+    [Header("Win/Lose UI")]
+    public GameObject winLosePanel;    // Simple panel with text
+    public TMP_Text winLoseText;
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -25,6 +28,9 @@ public class UIManager : MonoBehaviour
 
         if (gameOverPanel != null)
             gameOverPanel.SetActive(false);
+
+        if (winLosePanel != null)
+            winLosePanel.SetActive(false);
     }
 
     private void Start()
@@ -58,6 +64,32 @@ public class UIManager : MonoBehaviour
         ShowFightButton(hasUnitsOnBoard);
 
         Debug.Log($"🎯 Fight button visibility: {hasUnitsOnBoard} (Units on board: {GetUnitsOnBoardCount()})");
+    }
+    // ✅ ENHANCED: Color-coded win/lose display
+    public IEnumerator ShowWinLose(bool playerWon)
+    {
+        string message = playerWon ? "WIN!" : "LOSE!";
+        Color textColor = playerWon ? Color.green : Color.red;
+
+        Debug.Log($"🎭 Showing win/lose UI: {message}");
+
+        if (winLosePanel != null)
+        {
+            winLosePanel.SetActive(true);
+
+            if (winLoseText != null)
+            {
+                winLoseText.text = message;
+                winLoseText.color = textColor;  // Green for WIN, red for LOSE
+            }
+        }
+
+        yield return new WaitForSeconds(2.0f);
+
+        if (winLosePanel != null)
+            winLosePanel.SetActive(false);
+
+        Debug.Log($"🎭 Win/lose UI hidden");
     }
 
     // ✅ NEW: Check if there are any player units on the board

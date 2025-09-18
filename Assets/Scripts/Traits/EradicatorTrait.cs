@@ -6,10 +6,11 @@ public class EradicatorTrait : MonoBehaviour
     [HideInInspector] public float executeThreshold;
     [HideInInspector] public GameObject pressPrefab;
 
-    // ✅ Make press management more robust
+    // ✅ Enhanced press management with slam completion protection
     private static GameObject pressInstance;
-    private static Vector3 pressIdlePosition = new Vector3(0, 5f, -12f); // ✅ Your preferred position
+    private static Vector3 pressIdlePosition = new Vector3(0, 5f, -12f);
     private static bool isPressing;
+    private static bool isSlammingDown; // ✅ NEW: Track when we're in the critical slam phase
     private static int activeEradicatorCount = 0;
 
     [Header("VFX")]
@@ -22,11 +23,9 @@ public class EradicatorTrait : MonoBehaviour
         activeEradicatorCount++;
         Debug.Log($"✅ EradicatorTrait enabled. Active count: {activeEradicatorCount}");
 
-        // ✅ Subscribe to damage events to catch low-health enemies
         UnitAI unitAI = GetComponent<UnitAI>();
         if (unitAI != null)
         {
-            // Subscribe to all unit damage events
             SubscribeToAllUnits();
         }
     }
@@ -36,8 +35,8 @@ public class EradicatorTrait : MonoBehaviour
         activeEradicatorCount--;
         Debug.Log($"❌ EradicatorTrait disabled. Active count: {activeEradicatorCount}");
 
-        // ✅ Clean up press if no more eradicators
-        if (activeEradicatorCount <= 0)
+        // ✅ Only clean up if no more eradicators AND not currently slamming
+        if (activeEradicatorCount <= 0 && !isSlammingDown)
         {
             CleanupPress();
         }
@@ -45,13 +44,11 @@ public class EradicatorTrait : MonoBehaviour
 
     private void Update()
     {
-        // ✅ Only operate if we have valid threshold and press
+        // ✅ Only operate if we have valid threshold and NOT pressing
         if (executeThreshold <= 0 || isPressing) return;
 
-        // ✅ Ensure press exists and is valid
         if (!EnsurePressExists()) return;
 
-        // ✅ Check for enemies that are already below threshold
         CheckForExecutableEnemies();
     }
 
@@ -66,27 +63,17 @@ public class EradicatorTrait : MonoBehaviour
             if (hpPercent <= executeThreshold)
             {
                 Debug.Log($"🔥 Eradicator found executable enemy: {enemy.unitName} ({hpPercent:P} HP)");
-                StartCoroutine(PressSequence(enemy));
+                StartCoroutine(GuaranteedSlamSequence(enemy));
                 return; // Only execute one at a time
             }
         }
     }
 
-    // ✅ Subscribe to damage events on all enemy units
     private void SubscribeToAllUnits()
     {
-        UnitAI[] allUnits = FindObjectsOfType<UnitAI>();
-        foreach (var unit in allUnits)
-        {
-            if (unit.team == Team.Enemy)
-            {
-                // We'll check on each frame instead of events for now
-                // This ensures we don't miss fast deaths
-            }
-        }
+        // Check on each frame for now to ensure we don't miss fast deaths
     }
 
-    // ✅ Robust press spawning with your preferred position
     public void SpawnPressIfNeeded()
     {
         if (pressPrefab != null)
@@ -95,20 +82,25 @@ public class EradicatorTrait : MonoBehaviour
         }
     }
 
-    // ✅ Safe press cleanup
     public void DespawnPress()
     {
-        CleanupPress();
+        // ✅ Only allow cleanup if not currently slamming
+        if (!isSlammingDown)
+        {
+            CleanupPress();
+        }
+        else
+        {
+            Debug.Log("🚫 Cannot despawn press - slam in progress!");
+        }
     }
 
     private bool EnsurePressExists()
     {
         if (pressPrefab == null) return false;
 
-        // ✅ Check if press is destroyed or null
         if (pressInstance == null || pressInstance.Equals(null))
         {
-            // ✅ Use your preferred spawn position
             pressIdlePosition = new Vector3(0, 5f, -12f);
             pressInstance = Instantiate(pressPrefab, pressIdlePosition, Quaternion.identity);
             Debug.Log($"✅ Hydraulic press spawned at {pressIdlePosition}");
@@ -120,6 +112,13 @@ public class EradicatorTrait : MonoBehaviour
 
     private static void CleanupPress()
     {
+        // ✅ Safety check - don't cleanup during slam
+        if (isSlammingDown)
+        {
+            Debug.Log("🚫 Cannot cleanup press - slam in progress!");
+            return;
+        }
+
         if (pressInstance != null)
         {
             Destroy(pressInstance);
@@ -129,7 +128,8 @@ public class EradicatorTrait : MonoBehaviour
         }
     }
 
-    private IEnumerator PressSequence(UnitAI target)
+    // ✅ NEW: Guaranteed slam sequence that cannot be interrupted
+    private IEnumerator GuaranteedSlamSequence(UnitAI target)
     {
         if (!EnsurePressExists() || target == null)
         {
@@ -138,59 +138,81 @@ public class EradicatorTrait : MonoBehaviour
         }
 
         isPressing = true;
-        Debug.Log($"⚔️ Eradicator press sequence started on {target.unitName}");
+        Debug.Log($"⚔️ Eradicator GUARANTEED slam sequence started on {target.unitName}");
 
         // Move press above target
         Vector3 targetAbove = target.transform.position + Vector3.up * 5f;
         yield return MovePress(targetAbove, 0.6f);
 
-        // ✅ Check target is still valid and below threshold before slamming
+        // ✅ Early exit checks (before we commit to the slam)
         if (target == null || !target.isAlive)
         {
-            Debug.Log("❌ Target died during press movement");
+            Debug.Log("❌ Target died during press movement - returning to idle");
             yield return MovePress(pressIdlePosition, 0.8f);
             isPressing = false;
             yield break;
         }
 
-        // ✅ Double-check threshold right before execution
         float currentHpPercent = (float)target.currentHealth / target.maxHealth;
         if (currentHpPercent > executeThreshold)
         {
-            Debug.Log($"❌ Target {target.unitName} healed above threshold ({currentHpPercent:P} > {executeThreshold:P})");
+            Debug.Log($"❌ Target {target.unitName} healed above threshold - returning to idle");
             yield return MovePress(pressIdlePosition, 0.8f);
             isPressing = false;
             yield break;
         }
 
-        // Slam down
-        Vector3 crushPos = target.transform.position + Vector3.up * 1.3f;
+        // ✅ CRITICAL SLAM PHASE - NO INTERRUPTIONS ALLOWED
+        Debug.Log($"🔥 ENTERING CRITICAL SLAM PHASE - NO INTERRUPTIONS!");
+        isSlammingDown = true;
+
+        // Store the original target position to ensure we slam the right spot
+        Vector3 originalTargetPos = target.transform.position;
+        Vector3 crushPos = originalTargetPos + Vector3.up * 1.3f;
+
+        // Slam down to the ORIGINAL position (even if target moves/dies)
         yield return MovePress(crushPos, 0.2f);
 
-        // 🔥 Execute the target
+        // ✅ Execute at the slam location (regardless of where target moved)
+        Debug.Log($"💀 Eradicator GUARANTEED execution at {crushPos}!");
+
+        // Apply effects at slam location
+        if (slamEffectPrefab != null)
+        {
+            GameObject fx = Instantiate(slamEffectPrefab, originalTargetPos, Quaternion.identity);
+            Destroy(fx, 2f);
+        }
+        StartCoroutine(CameraShake(cameraShakeIntensity, cameraShakeDuration));
+
+        // Execute the target if it's still alive and at the slam location
         if (target != null && target.isAlive)
         {
-            Debug.Log($"💀 Eradicator executed {target.unitName}!");
-
-            if (slamEffectPrefab != null)
+            float distanceToSlam = Vector3.Distance(target.transform.position, originalTargetPos);
+            if (distanceToSlam <= 2f) // Within slam radius
             {
-                GameObject fx = Instantiate(slamEffectPrefab, target.transform.position, Quaternion.identity);
-                Destroy(fx, 2f);
+                Debug.Log($"💀 Target {target.unitName} executed by slam!");
+                target.TakeDamage(999999);
             }
-            StartCoroutine(CameraShake(cameraShakeIntensity, cameraShakeDuration));
-
-            // ✅ Kill instantly with massive damage
-            target.TakeDamage(999999);
+            else
+            {
+                Debug.Log($"💨 Target {target.unitName} moved away from slam zone - escaped!");
+            }
         }
 
-        // Rise back above target
+        // ✅ MANDATORY COMPLETION PHASE - Wait for slam to "settle"
+        Debug.Log($"⏳ Slam impact settling...");
+        yield return new WaitForSeconds(0.3f); // Brief pause for impact
+
+        // Rise back above the slam location
         yield return MovePress(targetAbove, 0.4f);
 
-        // Return to idle position
+        // Return to idle position - THIS ALWAYS HAPPENS
         yield return MovePress(pressIdlePosition, 0.8f);
 
+        // ✅ SLAM COMPLETED - Reset all flags
+        isSlammingDown = false;
         isPressing = false;
-        Debug.Log("✅ Eradicator press sequence completed");
+        Debug.Log("✅ Eradicator GUARANTEED slam sequence completed - press fully returned!");
     }
 
     private IEnumerator MovePress(Vector3 dest, float duration)
@@ -207,6 +229,10 @@ public class EradicatorTrait : MonoBehaviour
                 pressInstance.transform.position = Vector3.Lerp(start, dest, t);
             yield return null;
         }
+
+        // ✅ Ensure we reach the exact destination
+        if (pressInstance != null)
+            pressInstance.transform.position = dest;
     }
 
     private IEnumerator CameraShake(float intensity, float duration)
@@ -227,13 +253,37 @@ public class EradicatorTrait : MonoBehaviour
         Camera.main.transform.position = originalPos;
     }
 
-    // ✅ Static cleanup method for round resets
+    // ✅ Enhanced static cleanup with slam protection
     public static void ResetAllEradicators()
     {
+        // ✅ Only reset if not currently slamming
+        if (isSlammingDown)
+        {
+            Debug.Log("🚫 Cannot reset Eradicators - slam in progress! Will reset after completion.");
+            return;
+        }
+
         CleanupPress();
         activeEradicatorCount = 0;
         isPressing = false;
-        pressIdlePosition = new Vector3(0, 5f, -12f); // ✅ Reset to your preferred position
+        isSlammingDown = false;
+        pressIdlePosition = new Vector3(0, 5f, -12f);
         Debug.Log("🔄 All Eradicator traits reset for new round");
+    }
+
+    // ✅ NEW: Force reset method for emergency situations
+    public static void ForceResetAllEradicators()
+    {
+        if (pressInstance != null)
+        {
+            Destroy(pressInstance);
+            pressInstance = null;
+        }
+
+        activeEradicatorCount = 0;
+        isPressing = false;
+        isSlammingDown = false;
+        pressIdlePosition = new Vector3(0, 5f, -12f);
+        Debug.Log("🚨 FORCE RESET: All Eradicator traits forcefully reset!");
     }
 }

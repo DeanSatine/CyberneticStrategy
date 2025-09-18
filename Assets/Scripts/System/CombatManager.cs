@@ -266,7 +266,8 @@ public class CombatManager : MonoBehaviour
         // Reset combat flags
         unit.currentTarget = null;
         unit.isCastingAbility = false;
-
+        unit.canAttack = true;
+        unit.canMove = true;
         // ✅ Ensure unit is properly re-registered
         if (!GameManager.Instance.GetPlayerUnits().Contains(unit))
         {
@@ -444,20 +445,99 @@ public class CombatManager : MonoBehaviour
             }
         }
 
+        // ✅ NEW: Start delayed round transition instead of immediate transition
         if (!anyEnemiesAlive)
         {
             Debug.Log("🏆 Player Victory - All enemies defeated!");
-            StageManager.Instance.OnCombatEnd(true);
+            StartCoroutine(DelayedRoundTransition(true));
         }
         else if (!anyPlayersAlive)
         {
             Debug.Log("💔 Player Defeat - All players defeated!");
-            StageManager.Instance.OnCombatEnd(false);
+            StartCoroutine(DelayedRoundTransition(false));
         }
         else
         {
             Debug.Log("⚔️ Combat continues - both sides have units alive");
         }
+    }
+
+    // ✅ NEW: Add 2-second delay before round transition
+    // ✅ UPDATED: Use simple WIN/LOSE UI
+    private IEnumerator DelayedRoundTransition(bool playerWon)
+    {
+        Debug.Log($"⏳ Round ended! Showing win/lose UI... (Player won: {playerWon})");
+
+        // ✅ Set flag to prevent multiple transitions
+        isCheckingForRoundEnd = true;
+
+        // ✅ Stop all unit actions to prevent weird behavior during transition
+        var allUnits = FindObjectsOfType<UnitAI>();
+        foreach (var unit in allUnits)
+        {
+            if (unit != null)
+            {
+                unit.canAttack = false;
+                unit.canMove = false;
+            }
+        }
+
+        // ✅ NEW: Show simple WIN/LOSE UI (handles the 2-second delay)
+        if (UIManager.Instance != null)
+        {
+            yield return StartCoroutine(UIManager.Instance.ShowWinLose(playerWon));
+        }
+        else
+        {
+            // ✅ Fallback: Just wait 2 seconds if no UIManager
+            Debug.LogWarning("⚠️ UIManager not found, using fallback delay");
+            yield return new WaitForSeconds(2.0f);
+        }
+
+        Debug.Log($"✅ Win/lose UI complete! Moving to next round...");
+
+        // ✅ Now trigger the actual round transition
+        StageManager.Instance.OnCombatEnd(playerWon);
+
+        // ✅ Reset the checking flag
+        isCheckingForRoundEnd = false;
+    }
+
+    private IEnumerator DelayedRoundTransitionWithUI(bool playerWon)
+    {
+        string transitionMessage = playerWon ? "🏆 VICTORY!" : "💔 DEFEAT!";
+        Debug.Log($"⏳ {transitionMessage} Preparing for next round...");
+
+        // ✅ Show transition message in UI (if you have a UI system for this)
+        // UIManager.Instance?.ShowTransitionMessage(transitionMessage);
+
+        // ✅ Prevent any new round end checks during transition
+        isCheckingForRoundEnd = true;
+
+        // ✅ Stop all unit actions
+        var allUnits = FindObjectsOfType<UnitAI>();
+        foreach (var unit in allUnits)
+        {
+            if (unit != null)
+            {
+                unit.canAttack = false;
+                unit.canMove = false;
+            }
+        }
+
+        // ✅ Wait 2 seconds for all deaths and effects to process
+        yield return new WaitForSeconds(2.0f);
+
+        Debug.Log($"✅ Transition complete! Moving to next round...");
+
+        // ✅ Hide transition UI
+        // UIManager.Instance?.HideTransitionMessage();
+
+        // ✅ Trigger the actual round transition
+        StageManager.Instance.OnCombatEnd(playerWon);
+
+        // ✅ Reset the checking flag
+        isCheckingForRoundEnd = false;
     }
 
 }
