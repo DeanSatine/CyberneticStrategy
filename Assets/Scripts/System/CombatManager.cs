@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -71,7 +72,9 @@ public class CombatManager : MonoBehaviour
     }
 
     public Dictionary<UnitAI, HexTile> savedPlayerPositions = new Dictionary<UnitAI, HexTile>();
-
+    private bool isCheckingForRoundEnd = false;
+    private Coroutine roundEndCheckCoroutine = null;
+    private float deathProcessingDelay = 1.0f;
     // ✅ NEW: TFT-style unit persistence system
     private List<UnitSnapshot> preCombatPlayerSnapshots = new List<UnitSnapshot>();
     private bool combatSnapshotTaken = false;
@@ -82,6 +85,14 @@ public class CombatManager : MonoBehaviour
     public void StartCombat()
     {
         Debug.Log("⚔️ Starting Combat");
+
+        // ✅ Reset round end checking state
+        isCheckingForRoundEnd = false;
+        if (roundEndCheckCoroutine != null)
+        {
+            StopCoroutine(roundEndCheckCoroutine);
+            roundEndCheckCoroutine = null;
+        }
 
         // ✅ Clear any previous death tracking
         unitsDeadThisCombat.Clear();
@@ -323,21 +334,28 @@ public class CombatManager : MonoBehaviour
         UnitAI.OnAnyUnitDeath -= TrackCombatDeath;
     }
 
-    // ✅ NEW: Track when player units die during combat
+    // ✅ ENHANCED: Track when player units die during combat
     private void TrackCombatDeath(UnitAI deadUnit)
     {
+        Debug.Log($"📋 TrackCombatDeath called for {deadUnit.unitName} (Team: {deadUnit.team})");
+
         if (deadUnit.team == Team.Player && currentPhase == StageManager.GamePhase.Combat)
         {
             if (!unitsDeadThisCombat.Contains(deadUnit))
             {
                 unitsDeadThisCombat.Add(deadUnit);
-                Debug.Log($"📋 Tracked combat death: {deadUnit.unitName}");
+                Debug.Log($"📋 ✅ Tracked combat death: {deadUnit.unitName} (Total tracked: {unitsDeadThisCombat.Count})");
+            }
+            else
+            {
+                Debug.Log($"📋 ⚠️ {deadUnit.unitName} already tracked");
             }
         }
+        else
+        {
+            Debug.Log($"📋 ⚠️ Not tracking {deadUnit.unitName} - Team: {deadUnit.team}, Phase: {currentPhase}");
+        }
     }
-
-
-
 
     public void ClearProjectiles()
     {
@@ -358,11 +376,49 @@ public class CombatManager : MonoBehaviour
 
     private void HandleUnitDeath(UnitAI deadUnit)
     {
-        CheckForRoundEnd();
+        Debug.Log($"💀 HandleUnitDeath called for {deadUnit.unitName}");
+
+        // ✅ Start delayed round end check (or restart if already checking)
+        StartDelayedRoundEndCheck();
+    }
+    private void StartDelayedRoundEndCheck()
+    {
+        // ✅ Cancel any existing round end check
+        if (roundEndCheckCoroutine != null)
+        {
+            StopCoroutine(roundEndCheckCoroutine);
+            Debug.Log("🔄 Restarting round end check timer due to new death");
+        }
+
+        // ✅ Start new delayed check
+        roundEndCheckCoroutine = StartCoroutine(DelayedRoundEndCheck());
     }
 
+    // ✅ NEW: Wait for all death events before checking round end
+    private IEnumerator DelayedRoundEndCheck()
+    {
+        isCheckingForRoundEnd = true;
+        Debug.Log($"⏳ Starting delayed round end check - waiting {deathProcessingDelay} seconds for all deaths...");
+
+        // ✅ Wait for death processing delay
+        yield return new WaitForSeconds(deathProcessingDelay);
+
+        // ✅ Final check for round end
+        Debug.Log("🔍 Death processing delay complete - performing final round end check");
+        CheckForRoundEnd();
+
+        isCheckingForRoundEnd = false;
+        roundEndCheckCoroutine = null;
+    }
     private void CheckForRoundEnd()
     {
+        // ✅ Only check during combat phase
+        if (StageManager.Instance?.currentPhase != StageManager.GamePhase.Combat)
+        {
+            Debug.Log("🚫 Skipping round end check - not in combat phase");
+            return;
+        }
+
         List<UnitAI> allUnits = FindObjectsOfType<UnitAI>().ToList();
 
         // Only count units that are alive AND not benched
@@ -376,13 +432,32 @@ public class CombatManager : MonoBehaviour
             u.isAlive &&
             u.currentState != UnitAI.UnitState.Bench);
 
+        Debug.Log($"🔍 Round End Check: Players Alive: {anyPlayersAlive}, Enemies Alive: {anyEnemiesAlive}");
+        Debug.Log($"📋 Deaths tracked this combat: {unitsDeadThisCombat.Count}");
+
+        // ✅ Log all tracked deaths
+        foreach (var deadUnit in unitsDeadThisCombat)
+        {
+            if (deadUnit != null)
+            {
+                Debug.Log($"💀 Tracked death: {deadUnit.unitName}");
+            }
+        }
+
         if (!anyEnemiesAlive)
         {
+            Debug.Log("🏆 Player Victory - All enemies defeated!");
             StageManager.Instance.OnCombatEnd(true);
         }
         else if (!anyPlayersAlive)
         {
+            Debug.Log("💔 Player Defeat - All players defeated!");
             StageManager.Instance.OnCombatEnd(false);
         }
+        else
+        {
+            Debug.Log("⚔️ Combat continues - both sides have units alive");
+        }
     }
+
 }
