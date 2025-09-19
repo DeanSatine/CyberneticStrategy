@@ -94042,7 +94042,7 @@ MonoBehaviour:
   currentStage: 1
   roundInStage: 1
   roundsPerStage: 3
-  maxLives: 3
+  maxLives: 99
 --- !u!114 &2052790677
 MonoBehaviour:
   m_ObjectHideFlags: 0
