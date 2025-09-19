@@ -644,7 +644,7 @@ MonoBehaviour:
   slamDamage:
   - 200
   - 250
-  - 400
+  - 2500
   temporaryArmor:
   - 160
   - 180

@@ -370,12 +370,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   damageAmpPerStar:
   - 35
-  - 45
-  - 55
+  - 50
+  - 95
   chestBuffPercent:
-  - 0.05
-  - 0.05
-  - 0.05
+  - 0.1
+  - 0.12
+  - 0.15
   chestVFX: {fileID: 0}
   strikeVFX: {fileID: 0}
 --- !u!114 &-6310200264870255643

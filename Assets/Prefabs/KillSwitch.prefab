@@ -365,7 +365,7 @@ MonoBehaviour:
   slamDamagePerStar:
   - 100
   - 150
-  - 250
+  - 600
   passiveSlamDamage: 100
   healOnTargetSwap: 200
   armorShred: 3
