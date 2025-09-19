@@ -441,32 +441,48 @@ public class CombatManager : MonoBehaviour
         {
             if (deadUnit != null)
             {
-                Debug.Log($"💀 Tracked death: {deadUnit.unitName}");
+                Debug.Log($"💀 Tracked death: {deadUnit.unitName} (Team: {deadUnit.team}, Alive: {deadUnit.isAlive})");
             }
         }
 
-        // ✅ NEW: Start delayed round transition instead of immediate transition
-        if (!anyEnemiesAlive)
+        // ✅ NEW: Check if we should end the round
+        bool shouldEndRound = false;
+        bool playerWon = false;
+
+        if (!anyEnemiesAlive && !anyPlayersAlive)
         {
-            Debug.Log("🏆 Player Victory - All enemies defeated!");
-            StartCoroutine(DelayedRoundTransition(true));
+            // ✅ Both sides wiped out - check who died last or default to player loss
+            Debug.Log("💥 Both sides eliminated - determining winner by death order");
+            shouldEndRound = true;
+            playerWon = false; // Default to player loss in mutual elimination
+        }
+        else if (!anyEnemiesAlive)
+        {
+            Debug.Log("🎉 All enemies defeated - Player wins!");
+            shouldEndRound = true;
+            playerWon = true;
         }
         else if (!anyPlayersAlive)
         {
-            Debug.Log("💔 Player Defeat - All players defeated!");
-            StartCoroutine(DelayedRoundTransition(false));
+            Debug.Log("💀 All players defeated - Player loses!");
+            shouldEndRound = true;
+            playerWon = false;
+        }
+
+        if (shouldEndRound)
+        {
+            Debug.Log($"🏁 Round ending - Player won: {playerWon}");
+            StartCoroutine(DelayedRoundTransition(playerWon));
         }
         else
         {
-            Debug.Log("⚔️ Combat continues - both sides have units alive");
+            Debug.Log("⏳ Combat continues - both sides have alive units");
         }
     }
 
-    // ✅ NEW: Add 2-second delay before round transition
-    // ✅ UPDATED: Use simple WIN/LOSE UI
     private IEnumerator DelayedRoundTransition(bool playerWon)
     {
-        Debug.Log($"⏳ Round ended! Showing win/lose UI... (Player won: {playerWon})");
+        Debug.Log($"🎬 Starting delayed round transition - Player won: {playerWon}");
 
         // ✅ Set flag to prevent multiple transitions
         isCheckingForRoundEnd = true;
@@ -482,7 +498,7 @@ public class CombatManager : MonoBehaviour
             }
         }
 
-        // ✅ NEW: Show simple WIN/LOSE UI (handles the 2-second delay)
+        // ✅ Show win/lose UI (handles the 2-second delay)
         if (UIManager.Instance != null)
         {
             yield return StartCoroutine(UIManager.Instance.ShowWinLose(playerWon));
@@ -496,12 +512,36 @@ public class CombatManager : MonoBehaviour
 
         Debug.Log($"✅ Win/lose UI complete! Moving to next round...");
 
-        // ✅ Now trigger the actual round transition
-        StageManager.Instance.OnCombatEnd(playerWon);
+        // ✅ Enhanced: Check for StageManager before calling
+        if (StageManager.Instance != null)
+        {
+            StageManager.Instance.OnCombatEnd(playerWon);
+        }
+        else
+        {
+            Debug.LogError("❌ StageManager.Instance is null! Cannot end round properly.");
+            // ✅ Fallback: Reset to prep phase manually if StageManager is missing
+            Debug.LogWarning("🔄 Attempting manual phase reset...");
+
+            // Reset combat manager state
+            isCheckingForRoundEnd = false;
+
+            // Re-enable unit actions as fallback
+            foreach (var unit in allUnits)
+            {
+                if (unit != null && unit.team == Team.Player)
+                {
+                    unit.canAttack = true;
+                    unit.canMove = true;
+                    unit.SetState(UnitAI.UnitState.BoardIdle); // ✅ FIXED: Use BoardIdle instead of Prep
+                }
+            }
+        }
 
         // ✅ Reset the checking flag
         isCheckingForRoundEnd = false;
     }
+
 
     private IEnumerator DelayedRoundTransitionWithUI(bool playerWon)
     {
