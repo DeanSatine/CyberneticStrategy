@@ -13,7 +13,8 @@ public class GameManager : MonoBehaviour
     public GameObject starUpVFXPrefab;
     [Header("🔊 Star Up Audio")]
     public AudioClip starUpSound;
-
+    [Header("🔊 Purchase Audio")]
+    public AudioClip purchaseSound;
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -54,6 +55,13 @@ public class GameManager : MonoBehaviour
         {
             UIManager.Instance.UpdateFightButtonVisibility();
         }
+    }
+
+    public void PlayPurchaseSound()
+    {
+        AudioSource audioSource = GetComponent<AudioSource>();
+        if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
+        if (purchaseSound != null) audioSource.PlayOneShot(purchaseSound);
     }
 
     // --- Try merging when a new unit is bought ---

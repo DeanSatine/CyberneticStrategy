@@ -295,8 +295,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -55.00004, y: -157}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: -46.79998, y: -157}
+  m_SizeDelta: {x: 341.4027, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &3498685
 MonoBehaviour:
@@ -16530,8 +16530,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -55.00004, y: -157}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: -46.79998, y: -157}
+  m_SizeDelta: {x: 341.4027, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &327566428
 MonoBehaviour:
@@ -22923,7 +22923,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &434195426
 RectTransform:
   m_ObjectHideFlags: 0
@@ -29048,8 +29048,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -55.00004, y: -157}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: -46.79998, y: -157}
+  m_SizeDelta: {x: 341.4027, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &571123082
 MonoBehaviour:
@@ -32074,7 +32074,7 @@ GameObject:
   - component: {fileID: 621921605}
   - component: {fileID: 621921604}
   m_Layer: 5
-  m_Name: MANA
+  m_Name: MANAICON
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -32310,8 +32310,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -55.00004, y: -157}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: -46.79998, y: -157}
+  m_SizeDelta: {x: 341.4027, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &624650404
 MonoBehaviour:
@@ -33479,7 +33479,7 @@ GameObject:
   - component: {fileID: 656931966}
   - component: {fileID: 656931965}
   m_Layer: 5
-  m_Name: MANA
+  m_Name: MANAICON
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -41823,7 +41823,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &859686239
 RectTransform:
   m_ObjectHideFlags: 0
@@ -56544,7 +56544,7 @@ GameObject:
   - component: {fileID: 1204987148}
   - component: {fileID: 1204987147}
   m_Layer: 5
-  m_Name: MANA
+  m_Name: MANAICON
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -58644,8 +58644,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -55.00004, y: -157}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: -46.79998, y: -157}
+  m_SizeDelta: {x: 341.4027, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1269882223
 MonoBehaviour:
@@ -59755,7 +59755,7 @@ GameObject:
   - component: {fileID: 1294361371}
   - component: {fileID: 1294361370}
   m_Layer: 5
-  m_Name: MANA
+  m_Name: MANAICON
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -68367,7 +68367,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1499067924
 RectTransform:
   m_ObjectHideFlags: 0
@@ -68561,7 +68561,7 @@ GameObject:
   - component: {fileID: 1499793596}
   - component: {fileID: 1499793595}
   m_Layer: 5
-  m_Name: MANA
+  m_Name: MANAICON
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -74818,8 +74818,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -55.00004, y: -157}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: -46.8, y: -157}
+  m_SizeDelta: {x: 341.4027, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1695687744
 CanvasRenderer:
@@ -92996,7 +92996,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &2086570594
 RectTransform:
   m_ObjectHideFlags: 0
@@ -95649,7 +95649,7 @@ GameObject:
   - component: {fileID: 2141571190}
   - component: {fileID: 2141571189}
   m_Layer: 5
-  m_Name: MANA
+  m_Name: MANAICON
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -95936,6 +95936,16 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 835031862}
     m_Modifications:
+    - target: {fileID: 733270962967138839, guid: 0b88a13b667b65a49b6fe796211de552,
+        type: 3}
+      propertyPath: starUpSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 53394c4c892f7d64bac5850992d0301c, type: 3}
+    - target: {fileID: 733270962967138839, guid: 0b88a13b667b65a49b6fe796211de552,
+        type: 3}
+      propertyPath: purchaseSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 17cf165ef3c9eb74ca34622ef33eda18, type: 3}
     - target: {fileID: 733270962967138839, guid: 0b88a13b667b65a49b6fe796211de552,
         type: 3}
       propertyPath: starUpVFXPrefab

@@ -18,6 +18,8 @@ public class ShopSlotUI : MonoBehaviour
 
     public void OnBuyClicked()
     {
+        GameManager.Instance.PlayPurchaseSound();
+
         ShopManager.Instance.TryBuyUnit(this);
     }
     public GameObject GetUnitPrefab()

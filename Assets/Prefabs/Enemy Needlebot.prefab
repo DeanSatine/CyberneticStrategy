@@ -270,6 +270,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 6971845291381606759}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 2013060faca6a4b4997345f68fa7e83d,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -3328148058424787533}
   m_SourcePrefab: {fileID: 100100000, guid: 2013060faca6a4b4997345f68fa7e83d, type: 3}
 --- !u!1 &8772506818969043707 stripped
 GameObject:
@@ -439,3 +443,31 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 36
   m_CollisionDetection: 0
+--- !u!114 &-3328148058424787533
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8772506818969043707}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7771fb580d6217a4da3ee7324885b101, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  vfxConfig:
+    autoAttackProjectile: {fileID: 0}
+    autoAttackMuzzleFlash: {fileID: 0}
+    autoAttackHitEffect: {fileID: 0}
+    abilityEffect: {fileID: 0}
+    abilityProjectile: {fileID: 0}
+    abilityImpactEffect: {fileID: 0}
+    autoAttackSound: {fileID: 8300000, guid: d8535463815d3934ea2002ded5e82ead, type: 3}
+    abilitySound: {fileID: 8300000, guid: 2cb3e5f2cfb64384cacf9725b924abe7, type: 3}
+    volume: 0.7
+  deathVFX: {fileID: 0}
+  levelUpVFX: {fileID: 0}
+  damageNumbersPrefab: {fileID: 0}
+  firePoint: {fileID: 0}
+  chestPoint: {fileID: 0}
+  weaponPoint: {fileID: 0}

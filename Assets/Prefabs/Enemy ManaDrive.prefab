@@ -362,6 +362,7 @@ MonoBehaviour:
     type: 3}
   firePoint: {fileID: 0}
   projectileSpeed: 15
+  portraitSprite: {fileID: 0}
   unitUIPrefab: {fileID: 6939982145822855837, guid: 63931d92c48ef65418d45ec02069a522,
     type: 3}
   ui: {fileID: 0}
@@ -385,6 +386,8 @@ MonoBehaviour:
   twoStarMultiplier: 1.8
   threeStarMultiplier: 2.5
   twoStarScale: 1.1
+  baseMaxHealth: 0
+  bonusMaxHealth: 0
   threeStarScale: 1.25
 --- !u!114 &1845309957721737311
 MonoBehaviour:
@@ -410,6 +413,12 @@ MonoBehaviour:
   impactVFX: {fileID: 2884259778889931343, guid: 7891a2be7089e084899e28c139bcc52d,
     type: 3}
   splashVFX: {fileID: 0}
+  abilityStartSound: {fileID: 0}
+  bombLaunchSound: {fileID: 8300000, guid: ff2bd0ef740f7394a89a0491845fc4f0, type: 3}
+  bombExplosionSound: {fileID: 8300000, guid: 598d20696bf898547a059abb95dece97, type: 3}
+  attackSpeedGainSound: {fileID: 0}
+  recursiveBombSound: {fileID: 0}
+  abilityAudioVolume: 1
 --- !u!114 &4186335470939740577
 MonoBehaviour:
   m_ObjectHideFlags: 0

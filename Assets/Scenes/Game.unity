@@ -136,7 +136,7 @@ GameObject:
   - component: {fileID: 3498686}
   - component: {fileID: 3498685}
   m_Layer: 5
-  m_Name: MANA
+  m_Name: MANAtext
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -149,7 +149,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3498683}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -159,7 +159,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -55.00004, y: -157}
+  m_AnchoredPosition: {x: -46.80005, y: -156.99997}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &3498685
@@ -2800,7 +2800,10 @@ MonoBehaviour:
   highlightColor: {r: 0.990566, g: 0.94489604, b: 0.41740823, a: 0.5882353}
   backgroundImage: {fileID: 464929060}
   sellText: {fileID: 298230860}
-  sellSound: {fileID: 0}
+  sellSound: {fileID: 8300000, guid: 2e3dfb5d7fac273478643bd50e547566, type: 3}
+  sellFailSound: {fileID: 0}
+  sellHoverSound: {fileID: 0}
+  sellAudioVolume: 1
 --- !u!114 &101331255
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8496,7 +8499,7 @@ GameObject:
   - component: {fileID: 327566429}
   - component: {fileID: 327566428}
   m_Layer: 5
-  m_Name: MANA
+  m_Name: MANAtext
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8509,7 +8512,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 327566426}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -8519,7 +8522,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -55.00004, y: -157}
+  m_AnchoredPosition: {x: -46.80005, y: -156.99997}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &327566428
@@ -15411,7 +15414,7 @@ GameObject:
   - component: {fileID: 571123083}
   - component: {fileID: 571123082}
   m_Layer: 5
-  m_Name: MANA
+  m_Name: MANAtext
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -15424,7 +15427,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 571123080}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -15434,7 +15437,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -55.00004, y: -157}
+  m_AnchoredPosition: {x: -46.80005, y: -156.99997}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &571123082
@@ -17490,7 +17493,7 @@ GameObject:
   - component: {fileID: 624650405}
   - component: {fileID: 624650404}
   m_Layer: 5
-  m_Name: MANA
+  m_Name: MANAtext
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -17503,7 +17506,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 624650402}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -17513,7 +17516,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -55.00004, y: -157}
+  m_AnchoredPosition: {x: -46.80005, y: -156.99997}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &624650404
@@ -30747,7 +30750,7 @@ GameObject:
   - component: {fileID: 1269882224}
   - component: {fileID: 1269882223}
   m_Layer: 5
-  m_Name: MANA
+  m_Name: MANAtext
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -30760,7 +30763,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1269882221}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -30770,7 +30773,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -55.00004, y: -157}
+  m_AnchoredPosition: {x: -46.80005, y: -156.99997}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1269882223
@@ -39671,7 +39674,7 @@ GameObject:
   - component: {fileID: 1695687744}
   - component: {fileID: 1695687745}
   m_Layer: 5
-  m_Name: MANA
+  m_Name: MANAtext
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -39684,7 +39687,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1695687742}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -39694,7 +39697,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -55.00004, y: -157}
+  m_AnchoredPosition: {x: -46.80005, y: -156.99997}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1695687744
@@ -51391,6 +51394,16 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 835031862}
     m_Modifications:
+    - target: {fileID: 733270962967138839, guid: 0b88a13b667b65a49b6fe796211de552,
+        type: 3}
+      propertyPath: starUpSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 53394c4c892f7d64bac5850992d0301c, type: 3}
+    - target: {fileID: 733270962967138839, guid: 0b88a13b667b65a49b6fe796211de552,
+        type: 3}
+      propertyPath: purchaseSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 17cf165ef3c9eb74ca34622ef33eda18, type: 3}
     - target: {fileID: 733270962967138839, guid: 0b88a13b667b65a49b6fe796211de552,
         type: 3}
       propertyPath: starUpVFXPrefab
