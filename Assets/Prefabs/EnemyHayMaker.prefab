@@ -499,8 +499,9 @@ MonoBehaviour:
   slashAnimationSpeedMultiplier: 3
   clonePrefab: {fileID: 3571069488247416756, guid: e950db6fcdd9f7244a32ce829f9c01e6,
     type: 3}
-  slashVFX: {fileID: 0}
-  slamVFX: {fileID: 0}
+  slashVFX: {fileID: 1171201465392465800, guid: 5f6f021840241284b971482b7008235b,
+    type: 3}
+  slamVFX: {fileID: 1025285306637258, guid: 74ef6f19b89150f4180f64229deebb38, type: 3}
   dashStartVFX: {fileID: 0}
   dashEndVFX: {fileID: 0}
 --- !u!65 &1499806241345368472

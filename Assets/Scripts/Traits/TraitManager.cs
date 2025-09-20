@@ -10,6 +10,35 @@ public class TraitManager : MonoBehaviour
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
     }
+    private void Start()
+    {
+        SetupTraitAudio();
+    }
+
+    private void SetupTraitAudio()
+    {
+        traitAudioSource = GetComponent<AudioSource>();
+        if (traitAudioSource == null)
+        {
+            traitAudioSource = gameObject.AddComponent<AudioSource>();
+        }
+
+        traitAudioSource.playOnAwake = false;
+        traitAudioSource.spatialBlend = 0.5f; // Balanced 2D/3D audio for trait effects
+        traitAudioSource.volume = slamAudioVolume;
+
+        Debug.Log("🔊 TraitManager audio system initialized");
+    }
+
+    // Public method for playing slam sound - can be called by EradicatorTrait
+    public void PlayEradicatorSlamSound()
+    {
+        if (eradicatorSlamSound != null && traitAudioSource != null)
+        {
+            traitAudioSource.PlayOneShot(eradicatorSlamSound, slamAudioVolume);
+            Debug.Log("🔊 TraitManager played Eradicator SLAM sound!");
+        }
+    }
 
     // ==============================
     // TRAIT SETTINGS (tweak in Inspector)
@@ -56,6 +85,16 @@ public class TraitManager : MonoBehaviour
     public float strikebyteMaxAS2 = 0.30f;
     public float strikebyteMaxAS3 = 0.40f;
     public float strikebyteMaxAS4 = 0.50f;
+    [Header("Eradicator Audio")]
+    [Tooltip("Sound played when the hydraulic press slams down")]
+    public AudioClip eradicatorSlamSound;
+
+    [Tooltip("Volume for eradicator slam audio")]
+    [Range(0f, 1f)]
+    public float slamAudioVolume = 1f;
+
+    // Audio system
+    private AudioSource traitAudioSource;
 
 
     // ==============================

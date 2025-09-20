@@ -376,7 +376,7 @@ MonoBehaviour:
   attackSpeedBuff: 1.5
   buffDuration: 4
   slamImpactDelay: 0.35
-  slamVFX: {fileID: 8378648546881499446, guid: 867c572a5be680d42a042d2349f10143, type: 3}
+  slamVFX: {fileID: 0}
   abilityStartSound: {fileID: 0}
   leapSound: {fileID: 0}
   slamImpactSound: {fileID: 8300000, guid: 2f8e4cafcaeb0e749a4bf610da0fa654, type: 3}

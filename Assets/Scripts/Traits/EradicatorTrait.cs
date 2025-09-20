@@ -138,6 +138,12 @@ public class EradicatorTrait : MonoBehaviour
             Destroy(fx, 2f);
         }
 
+        // ✅ PLAY SLAM SOUND via TraitManager
+        if (TraitManager.Instance != null)
+        {
+            TraitManager.Instance.PlayEradicatorSlamSound();
+        }
+
         // ALWAYS trigger camera shake
         StartCoroutine(CameraShake(cameraShakeIntensity, cameraShakeDuration));
 

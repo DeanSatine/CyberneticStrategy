@@ -10,7 +10,7 @@ public class UnitUI : MonoBehaviour
     private Transform target; // unit to follow
     private float maxHealth;
     private float maxMana;
-    private Vector3 offset = new Vector3(0, 2f, 0); // adjustable in inspector
+    private Vector3 offset = new Vector3(0, 2f, 0); // base offset for 1-star units
 
     public void Init(Transform followTarget, float maxHp, float maxMp)
     {
@@ -26,17 +26,35 @@ public class UnitUI : MonoBehaviour
     {
         if (target == null) return;
 
-        // follow above unit’s head
-        transform.position = target.position + offset;
+        // Get the unit's star level and adjust offset
+        Vector3 adjustedOffset = offset;
+        UnitAI unitAI = target.GetComponent<UnitAI>();
 
-        // face the camera
+        if (unitAI != null)
+        {
+            if (unitAI.starLevel == 2)
+            {
+                adjustedOffset.y += 0.4f; // Extra height for 2-star
+            }
+            else if (unitAI.starLevel == 3)
+            {
+                adjustedOffset.y += 0.8f; // Extra height for 3-star
+            }
+        }
+
+        // Follow above unit's head with adjusted offset
+        transform.position = target.position + adjustedOffset;
+
+        // Face the camera
         if (Camera.main != null)
             transform.rotation = Camera.main.transform.rotation;
     }
+
     public void SetMaxHealth(float newMaxHealth)
     {
         maxHealth = newMaxHealth;
     }
+
     public void UpdateHealth(float currentHealth)
     {
         if (healthFill != null)
