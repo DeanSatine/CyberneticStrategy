@@ -378,6 +378,11 @@ MonoBehaviour:
   - 0.15
   chestVFX: {fileID: 0}
   strikeVFX: {fileID: 0}
+  abilityStartSound: {fileID: 0}
+  chestPoundSound: {fileID: 0}
+  bonkStrikeSound: {fileID: 0}
+  healthBuffSound: {fileID: 8300000, guid: 2be68f27a621d3e4dbe08ea3b61f6c27, type: 3}
+  abilityAudioVolume: 1
 --- !u!114 &-6310200264870255643
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -439,7 +444,7 @@ MonoBehaviour:
     abilityEffect: {fileID: 0}
     abilityProjectile: {fileID: 0}
     abilityImpactEffect: {fileID: 0}
-    autoAttackSound: {fileID: 0}
+    autoAttackSound: {fileID: 8300000, guid: 8e142466aaabcb144a0cf034c31a5010, type: 3}
     abilitySound: {fileID: 0}
     volume: 0.7
   deathVFX: {fileID: 0}

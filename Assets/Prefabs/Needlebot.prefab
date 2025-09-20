@@ -507,8 +507,8 @@ MonoBehaviour:
       type: 3}
     abilityImpactEffect: {fileID: 5024009746357069194, guid: ec3f674830402cc45bce805cf6493db7,
       type: 3}
-    autoAttackSound: {fileID: 0}
-    abilitySound: {fileID: 0}
+    autoAttackSound: {fileID: 8300000, guid: d8535463815d3934ea2002ded5e82ead, type: 3}
+    abilitySound: {fileID: 8300000, guid: 2cb3e5f2cfb64384cacf9725b924abe7, type: 3}
     volume: 0.7
   deathVFX: {fileID: 0}
   levelUpVFX: {fileID: 0}

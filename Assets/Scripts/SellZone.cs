@@ -1,11 +1,12 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using static UnitAI;
 
-public class SellZone : MonoBehaviour
+public class SellZone : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     [Header("Sell Zone Settings")]
-    [SerializeField] private float sellPercentage = 0.6f; // Sell for 60% of original cost
+    [SerializeField] private float sellPercentage = 0.6f;
     [SerializeField] private Color normalColor = Color.red;
     [SerializeField] private Color highlightColor = Color.yellow;
 
@@ -13,20 +14,70 @@ public class SellZone : MonoBehaviour
     [SerializeField] private Image backgroundImage;
     [SerializeField] private TMPro.TMP_Text sellText;
 
-    [Header("Audio")]
+    [Header("🔊 Sell Zone Audio")]
+    [Tooltip("Audio played when successfully selling a unit")]
     [SerializeField] private AudioClip sellSound;
+
+    [Tooltip("Audio played when sell attempt fails")]
+    [SerializeField] private AudioClip sellFailSound;
+
+    [Tooltip("Audio played when hovering over sell zone with unit")]
+    [SerializeField] private AudioClip sellHoverSound;
+
+    [Tooltip("Volume for sell audio")]
+    [Range(0f, 1f)]
+    public float sellAudioVolume = 1f;
+
     private AudioSource audioSource;
 
     private void Awake()
     {
+        SetupAudio();
+        SetupUI();
+        SetupButton();
+    }
+
+    // ✅ Setup audio system
+    private void SetupAudio()
+    {
         audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+
+        audioSource.playOnAwake = false;
+        audioSource.spatialBlend = 0f; // 2D sound for UI
+        audioSource.volume = sellAudioVolume;
+
+        Debug.Log("🔊 Sell zone audio system initialized");
+    }
+
+    // ✅ Play sell audio
+    private void PlaySellAudio(AudioClip clip, string actionName = "")
+    {
+        if (clip != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(clip, sellAudioVolume);
+            Debug.Log($"🔊 Sell zone played {actionName} audio");
+        }
+        else if (actionName != "")
+        {
+            Debug.Log($"🔇 Sell zone missing {actionName} audio clip");
+        }
+    }
+
+    private void SetupUI()
+    {
         if (backgroundImage == null)
             backgroundImage = GetComponent<Image>();
 
         if (backgroundImage != null)
             backgroundImage.color = normalColor;
+    }
 
-        // Add button component for clicking
+    private void SetupButton()
+    {
         Button button = GetComponent<Button>();
         if (button == null)
             button = gameObject.AddComponent<Button>();
@@ -51,6 +102,8 @@ public class SellZone : MonoBehaviour
 
         if (heldUnit == null)
         {
+            // ✅ Play fail sound when no unit is held
+            PlaySellAudio(sellFailSound, "sell fail");
             Debug.Log("💡 Click while holding a unit to sell it");
             if (sellText != null)
             {
@@ -63,6 +116,7 @@ public class SellZone : MonoBehaviour
         UnitAI unit = heldUnit.GetComponent<UnitAI>();
         if (unit == null)
         {
+            PlaySellAudio(sellFailSound, "sell fail");
             Debug.Log("❌ Held object is not a sellable unit");
             return;
         }
@@ -70,6 +124,7 @@ public class SellZone : MonoBehaviour
         // Only allow selling player units
         if (unit.team != Team.Player)
         {
+            PlaySellAudio(sellFailSound, "sell fail");
             Debug.Log("❌ Cannot sell enemy units");
             return;
         }
@@ -79,6 +134,7 @@ public class SellZone : MonoBehaviour
             StageManager.Instance.currentPhase == StageManager.GamePhase.Combat &&
             unit.currentState != UnitState.Bench)
         {
+            PlaySellAudio(sellFailSound, "sell fail");
             Debug.Log("❌ Cannot sell units during combat (except benched units)");
             if (sellText != null)
             {
@@ -93,6 +149,7 @@ public class SellZone : MonoBehaviour
 
         if (sellPrice <= 0)
         {
+            PlaySellAudio(sellFailSound, "sell fail");
             Debug.Log("❌ This unit cannot be sold");
             return;
         }
@@ -103,30 +160,25 @@ public class SellZone : MonoBehaviour
 
     private int CalculateSellPrice(UnitAI unit)
     {
-        // Find the base cost
         int baseCost = GetUnitOriginalCost(unit);
         if (baseCost <= 0)
         {
-            baseCost = unit.starLevel; // fallback
+            baseCost = unit.starLevel;
         }
 
-        // Factor in star level (2★ = 3x cost, 3★ = 9x cost)
         int effectiveCost = baseCost;
         if (unit.starLevel == 2)
             effectiveCost = baseCost * 3;
         else if (unit.starLevel == 3)
             effectiveCost = baseCost * 9;
 
-        // Apply sell percentage
         int sellPrice = Mathf.RoundToInt(effectiveCost * sellPercentage);
 
         return Mathf.Max(1, sellPrice);
     }
 
-
     private int GetUnitOriginalCost(UnitAI unit)
     {
-        // Search all shop slots to find this unit's cost
         ShopSlotUI[] allShopSlots = FindObjectsOfType<ShopSlotUI>();
 
         foreach (var slot in allShopSlots)
@@ -138,13 +190,11 @@ public class SellZone : MonoBehaviour
             }
         }
 
-        // If not found in shop, try to determine cost by unit name or type
         return GetFallbackCost(unit);
     }
 
     private int GetFallbackCost(UnitAI unit)
     {
-        // Fallback cost determination based on unit name or properties
         string unitName = unit.unitName.ToLower();
 
         if (unitName.Contains("haymaker")) return 5;
@@ -153,7 +203,6 @@ public class SellZone : MonoBehaviour
         if (unitName.Contains("needlebot")) return 1;
         if (unitName.Contains("b.o.p")) return 2;
 
-        // Default based on star level
         return unit.starLevel;
     }
 
@@ -161,14 +210,17 @@ public class SellZone : MonoBehaviour
     {
         Debug.Log($"💰 Selling {unit.unitName} for {sellPrice} gold");
 
+        // ✅ Play sell success audio
+        PlaySellAudio(sellSound, "sell success");
+
         // Stop dragging
         draggable.isDragging = false;
-        Draggable.currentlyDragging = null; // ✅ Reset global reference
+        Draggable.currentlyDragging = null;
 
         // Add gold to player
         EconomyManager.Instance.AddGold(sellPrice);
 
-        // ✅ CRITICAL: Clear tile assignment PROPERLY
+        // Clear tile assignment properly
         if (unit.currentTile != null)
         {
             unit.currentTile.Free(unit);
@@ -180,12 +232,6 @@ public class SellZone : MonoBehaviour
         // Re-evaluate traits after unit removal
         TraitManager.Instance.EvaluateTraits(GameManager.Instance.playerUnits);
         TraitManager.Instance.ApplyTraits(GameManager.Instance.playerUnits);
-
-        // Play sell sound
-        if (sellSound != null && audioSource != null)
-        {
-            audioSource.PlayOneShot(sellSound);
-        }
 
         // Visual feedback
         if (backgroundImage != null)
@@ -205,56 +251,53 @@ public class SellZone : MonoBehaviour
         Destroy(unit.gameObject);
     }
 
-    private void Update()
+    // ✅ Hover detection for audio feedback
+    public void OnPointerEnter(PointerEventData eventData)
     {
+        // Check if holding a sellable unit
         Draggable[] allDraggables = FindObjectsOfType<Draggable>();
-        Draggable heldUnit = null;
-
         foreach (var draggable in allDraggables)
         {
             if (draggable.isDragging)
             {
-                heldUnit = draggable;
+                UnitAI unit = draggable.GetComponent<UnitAI>();
+                if (unit != null && unit.team == Team.Player)
+                {
+                    // ✅ Play hover sound when entering with valid unit
+                    PlaySellAudio(sellHoverSound, "sell hover");
+
+                    // Visual highlight
+                    if (backgroundImage != null)
+                        backgroundImage.color = highlightColor;
+
+                    // Show sell price preview
+                    int sellPrice = CalculateSellPrice(unit);
+                    if (sellText != null)
+                        sellText.text = $"Sell for {sellPrice}g";
+                }
                 break;
             }
         }
-
-        if (heldUnit != null)
-        {
-            UnitAI unit = heldUnit.GetComponent<UnitAI>();
-            if (unit != null && unit.team == Team.Player)
-            {
-                int previewSellPrice = CalculateSellPrice(unit);
-
-                // Highlight color + show preview
-                if (backgroundImage != null)
-                    backgroundImage.color = Color.Lerp(backgroundImage.color, highlightColor, Time.deltaTime * 5f);
-
-                if (sellText != null)
-                    sellText.text = $"Sell for {previewSellPrice}";
-            }
-        }
-        else
-        {
-            // Reset to normal appearance
-            if (backgroundImage != null)
-                backgroundImage.color = Color.Lerp(backgroundImage.color, normalColor, Time.deltaTime * 5f);
-
-            if (sellText != null)
-                sellText.text = "Sell Zone";
-        }
     }
 
-
-    private void ResetSellText()
+    public void OnPointerExit(PointerEventData eventData)
     {
-        if (sellText != null)
-            sellText.text = "Sell Zone";
+        // Reset visual state
+        if (backgroundImage != null)
+            backgroundImage.color = normalColor;
+
+        ResetSellText();
     }
 
     private void ResetColor()
     {
         if (backgroundImage != null)
             backgroundImage.color = normalColor;
+    }
+
+    private void ResetSellText()
+    {
+        if (sellText != null)
+            sellText.text = "Sell";
     }
 }

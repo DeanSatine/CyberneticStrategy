@@ -375,7 +375,14 @@ MonoBehaviour:
   maxLeapRange: 8
   attackSpeedBuff: 1.5
   buffDuration: 4
+  slamImpactDelay: 0.35
   slamVFX: {fileID: 8378648546881499446, guid: 867c572a5be680d42a042d2349f10143, type: 3}
+  abilityStartSound: {fileID: 0}
+  leapSound: {fileID: 0}
+  slamImpactSound: {fileID: 8300000, guid: 2f8e4cafcaeb0e749a4bf610da0fa654, type: 3}
+  landingSound: {fileID: 0}
+  attackSpeedBuffSound: {fileID: 0}
+  abilityAudioVolume: 1
 --- !u!65 &7128019543044565119
 BoxCollider:
   m_ObjectHideFlags: 0

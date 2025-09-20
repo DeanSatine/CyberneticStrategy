@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.7533103, g: 0.6854022, b: 0.37071282, a: 1}
+  m_IndirectSpecularColor: {r: 0.7530613, g: 0.6851395, b: 0.37036023, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -5548,7 +5548,10 @@ MonoBehaviour:
   highlightColor: {r: 0.990566, g: 0.94489604, b: 0.41740823, a: 0.5882353}
   backgroundImage: {fileID: 464929060}
   sellText: {fileID: 298230860}
-  sellSound: {fileID: 0}
+  sellSound: {fileID: 8300000, guid: 2e3dfb5d7fac273478643bd50e547566, type: 3}
+  sellFailSound: {fileID: 0}
+  sellHoverSound: {fileID: 0}
+  sellAudioVolume: 1
 --- !u!114 &101331255
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -43506,7 +43509,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -7.199707, y: 515.80005}
+  m_AnchoredPosition: {x: -7.199646, y: 515.80005}
   m_SizeDelta: {x: -1453.4569, y: -1023.69183}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &889124945
@@ -75910,7 +75913,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -9.600098, y: 464.59998}
+  m_AnchoredPosition: {x: -9.600037, y: 464.59998}
   m_SizeDelta: {x: -1720, y: -1029.941}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1719658412

@@ -413,6 +413,12 @@ MonoBehaviour:
   impactVFX: {fileID: 689667626583958020, guid: 1336648bc1d8baf46a4515860950c9d4,
     type: 3}
   splashVFX: {fileID: 0}
+  abilityStartSound: {fileID: 0}
+  bombLaunchSound: {fileID: 8300000, guid: ff2bd0ef740f7394a89a0491845fc4f0, type: 3}
+  bombExplosionSound: {fileID: 8300000, guid: 598d20696bf898547a059abb95dece97, type: 3}
+  attackSpeedGainSound: {fileID: 0}
+  recursiveBombSound: {fileID: 0}
+  abilityAudioVolume: 1
 --- !u!114 &8965447738997646369
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -436,7 +442,7 @@ MonoBehaviour:
       type: 3}
     abilityImpactEffect: {fileID: 1329845292236604, guid: 9bba9cf244c53c5439505dfc96fdd11c,
       type: 3}
-    autoAttackSound: {fileID: 0}
+    autoAttackSound: {fileID: 8300000, guid: ac6b78aa9e49aad40b044d895bdac430, type: 3}
     abilitySound: {fileID: 0}
     volume: 0.7
   deathVFX: {fileID: 0}

@@ -11,11 +11,14 @@ public class GameManager : MonoBehaviour
 
     [Header("Merge VFX")]
     public GameObject starUpVFXPrefab;
+    [Header("🔊 Star Up Audio")]
+    public AudioClip starUpSound;
 
     private void Awake()
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
+        if (GetComponent<AudioSource>() == null) gameObject.AddComponent<AudioSource>();
     }
 
     // --- Register / Unregister ---
@@ -123,6 +126,7 @@ public class GameManager : MonoBehaviour
                         var vfx = Instantiate(starUpVFXPrefab, upgradedUnit.transform.position, Quaternion.identity);
                         Destroy(vfx, 2f);
                     }
+                    if (starUpSound != null) GetComponent<AudioSource>().PlayOneShot(starUpSound);
 
                     // Remove and destroy the other two units
                     for (int i = 1; i < unitsToMerge.Count; i++)
