@@ -566,6 +566,8 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
             Destroy(endVFX, 2f);
         }
 
+        // In the FuryOfSlashes coroutine, replace the slashing loop section (around line 583-650) with this:
+
         // ✅ PHASE 2: Fury of Slashes (3 seconds)
         Debug.Log("⚔️ Phase 2: Unleashing Fury of Slashes!");
         if (unitAI.animator)
@@ -573,93 +575,194 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
             unitAI.animator.SetTrigger("AbilityTrigger");
             Debug.Log("[HaymakerAbility] Triggered ability animation for slashing phase");
         }
+
         // Apply massive armor for damage reduction
         int starIndex = Mathf.Clamp(unitAI.starLevel - 1, 0, temporaryArmor.Length - 1);
         unitAI.armor = temporaryArmor[starIndex];
         Debug.Log($"🛡️ Temporary armor active: {temporaryArmor[starIndex]} ({80 + (starIndex * 10)}% damage reduction)");
 
-        // Calculate number of slashes based on attack speed
-        float attackSpeed = unitAI.attackSpeed;
-        int totalSlashes = Mathf.RoundToInt(attackSpeed * slashesPerAttackSpeed * slashDuration);
-        float timeBetweenSlashes = slashDuration / totalSlashes;
-
-        Debug.Log($"🗡️ Will perform {totalSlashes} slashes over {slashDuration} seconds (1 every {timeBetweenSlashes:F2}s)");
-
-        // Much faster slashing animation
-        if (unitAI.animator)
+        // ✅ NEW: Special 3-star behavior - Massive slashes that sweep across the entire board
+        if (unitAI.starLevel == 3)
         {
-            unitAI.animator.speed = slashAnimationSpeedMultiplier;
-        }
+            Debug.Log("🌟 3-STAR HAYMAKER: Unleashing massive board-wide slashing waves!");
 
-        // Perform slashes
-        for (int i = 0; i < totalSlashes; i++)
-        {
-            // Check if ability should be interrupted
-            if (!isPerformingAbility || !unitAI.isAlive)
+            float slashDmg = slashDamage[Mathf.Clamp(unitAI.starLevel - 1, 0, slashDamage.Length - 1)];
+
+            // Much faster slashing animation for 3-star
+            if (unitAI.animator)
             {
-                Debug.Log("[HaymakerAbility] Ability interrupted, stopping slashes");
-                break;
+                unitAI.animator.speed = slashAnimationSpeedMultiplier * 1.5f;
             }
 
-            // Check phase during slashing too
-            if (StageManager.Instance != null && StageManager.Instance.currentPhase != StageManager.GamePhase.Combat)
-            {
-                Debug.Log("[HaymakerAbility] Phase changed during slashing, stopping ability");
-                break;
-            }
+            // Create 20 massive slashes that sweep across the entire board
+            int totalSlashes = 10;
+            float boardRadius = 3f; // Cover the entire board (8 unit radius)
 
-            // ✅ UPDATED: Find enemies within 3 hex radius (approximately 3 units)
-            List<UnitAI> slashTargets = FindEnemiesInRadius(3f, transform.position);
-
-            if (slashTargets.Count > 0)
+            for (int i = 0; i < totalSlashes; i++)
             {
-                // Only trigger attack animation every few slashes to avoid animation conflicts
-                if (i % 3 == 0 && unitAI.animator) // Every 3rd slash
+                // Check if ability should be interrupted
+                if (!isPerformingAbility || !unitAI.isAlive)
+                {
+                    Debug.Log("[HaymakerAbility] 3-star ability interrupted, stopping slashes");
+                    break;
+                }
+
+                // Check phase during slashing too
+                if (StageManager.Instance != null && StageManager.Instance.currentPhase != StageManager.GamePhase.Combat)
+                {
+                    Debug.Log("[HaymakerAbility] Phase changed during 3-star slashing, stopping ability");
+                    break;
+                }
+
+                // Calculate sweeping angle (18 degrees apart = 360/20)
+                float angle = i * 18f;
+                Vector3 slashDirection = new Vector3(
+                    Mathf.Cos(angle * Mathf.Deg2Rad),
+                    0f,
+                    Mathf.Sin(angle * Mathf.Deg2Rad)
+                );
+
+                // Create multiple slash positions along a line from center to edge of board
+                List<Vector3> slashPositions = new List<Vector3>();
+
+                // Create 5 slash points along the line from Haymaker to edge of board
+                for (int j = 0; j < 5; j++)
+                {
+                    float distance = (j + 1) * (boardRadius / 5f); // 1.6, 3.2, 4.8, 6.4, 8.0 units out
+                    Vector3 slashPos = transform.position + slashDirection * distance;
+                    slashPositions.Add(slashPos);
+                }
+
+                // Trigger attack animation every few slashes
+                if (i % 3 == 0 && unitAI.animator)
                 {
                     unitAI.animator.SetTrigger("AbilityTrigger");
                 }
 
-                // ✅ UPDATED: Apply damage to ALL enemies within 3 hex radius
-                float slashDmg = slashDamage[Mathf.Clamp(unitAI.starLevel - 1, 0, slashDamage.Length - 1)];
-
-                foreach (UnitAI target in slashTargets)
+                // Apply damage along the entire slash line
+                foreach (Vector3 slashPos in slashPositions)
                 {
-                    target.TakeDamage(slashDmg);
-                    Debug.Log($"💥 Slash {i + 1}/{totalSlashes}: {slashDmg} damage to {target.unitName}");
+                    // Large damage radius for each slash point (covers more area)
+                    List<UnitAI> slashTargets = FindEnemiesInRadius(2.5f, slashPos);
+
+                    foreach (UnitAI target in slashTargets)
+                    {
+                        target.TakeDamage(slashDmg);
+                        Debug.Log($"💥 Board Slash {i + 1}/{totalSlashes}: {slashDmg} damage to {target.unitName}");
+                    }
+
+                    // Spawn slash VFX at each position along the line
+                    if (slashVFX != null)
+                    {
+                        Vector3 vfxPos = slashPos + Vector3.up * 1f;
+                        Quaternion vfxRotation = Quaternion.LookRotation(slashDirection);
+
+                        var slashEffect = Instantiate(slashVFX, vfxPos, vfxRotation);
+
+                        // Make the slash VFX bigger for board-wide effect
+                        slashEffect.transform.localScale *= 2.5f;
+
+                        Destroy(slashEffect, 2f);
+                    }
                 }
 
-                // Spawn slash VFX around Haymaker's position
-                if (slashVFX != null)
-                {
-                    // Create VFX in a circle around Haymaker
-                    float angle = (float)i / totalSlashes * 360f; // Distribute around circle
-                    Vector3 offset = new Vector3(
-                        Mathf.Cos(angle * Mathf.Deg2Rad) * 1.5f, // ✅ Slightly larger radius for VFX
-                        1f, // Chest level
-                        Mathf.Sin(angle * Mathf.Deg2Rad) * 1.5f
-                    );
-                    Vector3 vfxPos = transform.position + offset;
+                Debug.Log($"⚔️ Board Slash {i + 1}/{totalSlashes}: Swept across {slashPositions.Count} positions");
 
-                    var slashEffect = Instantiate(slashVFX, vfxPos, Quaternion.LookRotation(offset));
-                    Destroy(slashEffect, 1f);
-                }
-
-                Debug.Log($"⚔️ Slash {i + 1}: Hit {slashTargets.Count} enemies within 3 hex radius");
-            }
-            else
-            {
-                Debug.Log($"⚔️ Slash {i + 1}: No enemies within 3 hex radius");
+                // Slightly longer delay between slashes to see the sweeping effect
+                yield return new WaitForSeconds(0.15f);
             }
 
-            yield return new WaitForSeconds(timeBetweenSlashes);
+            Debug.Log("🏆 3-STAR HAYMAKER: Board-wide devastation complete!");
         }
 
-        // Reset animation speed and armor
+
+        else
+        {
+            // ✅ ORIGINAL: Normal behavior for 1-star and 2-star Haymakers
+            // Calculate number of slashes based on attack speed
+            float attackSpeed = unitAI.attackSpeed;
+            int totalSlashes = Mathf.RoundToInt(attackSpeed * slashesPerAttackSpeed * slashDuration);
+            float timeBetweenSlashes = slashDuration / totalSlashes;
+
+            Debug.Log($"🗡️ Will perform {totalSlashes} slashes over {slashDuration} seconds (1 every {timeBetweenSlashes:F2}s)");
+
+            // Much faster slashing animation
+            if (unitAI.animator)
+            {
+                unitAI.animator.speed = slashAnimationSpeedMultiplier;
+            }
+
+            // Perform slashes (original behavior)
+            for (int i = 0; i < totalSlashes; i++)
+            {
+                // Check if ability should be interrupted
+                if (!isPerformingAbility || !unitAI.isAlive)
+                {
+                    Debug.Log("[HaymakerAbility] Ability interrupted, stopping slashes");
+                    break;
+                }
+
+                // Check phase during slashing too
+                if (StageManager.Instance != null && StageManager.Instance.currentPhase != StageManager.GamePhase.Combat)
+                {
+                    Debug.Log("[HaymakerAbility] Phase changed during slashing, stopping ability");
+                    break;
+                }
+
+                // ✅ UPDATED: Find enemies within 3 hex radius (approximately 3 units)
+                List<UnitAI> slashTargets = FindEnemiesInRadius(3f, transform.position);
+
+                if (slashTargets.Count > 0)
+                {
+                    // Only trigger attack animation every few slashes to avoid animation conflicts
+                    if (i % 3 == 0 && unitAI.animator) // Every 3rd slash
+                    {
+                        unitAI.animator.SetTrigger("AbilityTrigger");
+                    }
+
+                    // ✅ UPDATED: Apply damage to ALL enemies within 3 hex radius
+                    float slashDmg = slashDamage[Mathf.Clamp(unitAI.starLevel - 1, 0, slashDamage.Length - 1)];
+
+                    foreach (UnitAI target in slashTargets)
+                    {
+                        target.TakeDamage(slashDmg);
+                        Debug.Log($"💥 Slash {i + 1}/{totalSlashes}: {slashDmg} damage to {target.unitName}");
+                    }
+
+                    // Spawn slash VFX around Haymaker's position
+                    if (slashVFX != null)
+                    {
+                        // Create VFX in a circle around Haymaker
+                        float angle = (float)i / totalSlashes * 360f; // Distribute around circle
+                        Vector3 offset = new Vector3(
+                            Mathf.Cos(angle * Mathf.Deg2Rad) * 1.5f, // ✅ Slightly larger radius for VFX
+                            1f, // Chest level
+                            Mathf.Sin(angle * Mathf.Deg2Rad) * 1.5f
+                        );
+                        Vector3 vfxPos = transform.position + offset;
+
+                        var slashEffect = Instantiate(slashVFX, vfxPos, Quaternion.LookRotation(offset));
+                        Destroy(slashEffect, 1f);
+                    }
+
+                    Debug.Log($"⚔️ Slash {i + 1}: Hit {slashTargets.Count} enemies within 3 hex radius");
+                }
+                else
+                {
+                    Debug.Log($"⚔️ Slash {i + 1}: No enemies within 3 hex radius");
+                }
+
+                yield return new WaitForSeconds(timeBetweenSlashes);
+            }
+        }
+
+        // Reset animation speed and armor (same for both cases)
         if (unitAI.animator)
         {
             unitAI.animator.speed = 1f;
         }
         unitAI.armor = originalArmor;
+
 
         // ✅ PHASE 3: Clone slam (with clone death check)
         Debug.Log("💥 Phase 3: Clone slam!");
@@ -907,49 +1010,6 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         }
 
         transform.position = targetPosition;
-    }
-
-
-    private IEnumerator PerformCloneSlam(UnitAI target)
-    {
-        if (cloneInstance == null) yield break;
-
-        Vector3 cloneStartPos = cloneInstance.transform.position;
-        Vector3 slamPosition = target.transform.position;
-
-        // Clone jumps up and slams down
-        float slamDuration = 0.8f;
-        float jumpHeight = 3f;
-
-        float elapsed = 0f;
-        while (elapsed < slamDuration)
-        {
-            elapsed += Time.deltaTime;
-            float t = elapsed / slamDuration;
-
-            // Arc movement for clone
-            Vector3 pos = Vector3.Lerp(cloneStartPos, slamPosition, t);
-            pos.y += Mathf.Sin(t * Mathf.PI) * jumpHeight;
-            cloneInstance.transform.position = pos;
-
-            yield return null;
-        }
-
-        // Apply slam damage
-        float slamDmg = slamDamage[Mathf.Clamp(unitAI.starLevel - 1, 0, slamDamage.Length - 1)];
-        target.TakeDamage(slamDmg);
-
-        // Spawn slam VFX
-        if (slamVFX != null)
-        {
-            var slamEffect = Instantiate(slamVFX, slamPosition, Quaternion.identity);
-            Destroy(slamEffect, 2f);
-        }
-
-        Debug.Log($"🌪️ Clone slam: {slamDmg} damage to {target.unitName}");
-
-        // Return clone to original position
-        yield return StartCoroutine(MoveCloneToPosition(cloneStartPos));
     }
 
     private IEnumerator MoveCloneToPosition(Vector3 targetPos)
