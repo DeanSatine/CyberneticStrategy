@@ -37,6 +37,13 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
     private bool isInitialized = false;
     private string cloneInstanceID = ""; // Track clone by unique ID
     private static List<string> allActiveCloneIDs = new List<string>(); // Global tracking
+    [Header("Audio")]
+    public AudioClip autoAttackSound;
+    public AudioClip slashSound;
+    [Range(0f, 1f)] public float volume = 0.8f;
+
+    private AudioSource audioSource;
+
     private void Start()
     {
         // ✅ Delay initialization to avoid issues during scene loading
@@ -44,7 +51,19 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
 
         // ✅ Check if we already have any existing clones for this Haymaker
         ValidateExistingClones();
+
+        // ✅ NEW: Subscribe to attack events for auto attack sound
+        if (unitAI != null)
+        {
+            unitAI.OnAttackEvent += OnAutoAttack;
+        }
     }
+
+    private void OnAutoAttack(UnitAI target)
+    {
+        PlaySound(autoAttackSound);
+    }
+
 
     private void Awake()
     {
@@ -55,26 +74,49 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         // Store original armor
         originalArmor = unitAI.armor;
 
+        // ✅ ADD: Audio source setup
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+            audioSource.playOnAwake = false;
+            audioSource.spatialBlend = 0.8f; // 3D spatial sound
+        }
+
         // ✅ ADD THIS: Generate unique ID for tracking
         cloneInstanceID = $"{unitAI.unitName}_{GetInstanceID()}_{Time.time}";
         Debug.Log($"[HaymakerAbility] Initialized Haymaker with ID: {cloneInstanceID}");
     }
+
 
     private void OnDestroy()
     {
         unitAI.OnStateChanged -= HandleStateChanged;
         UnitAI.OnAnyUnitDeath -= OnUnitDeath;
 
-        // ✅ ADD THIS: Clean up clone tracking
+        // ✅ NEW: Unsubscribe from attack events
+        if (unitAI != null)
+        {
+            unitAI.OnAttackEvent -= OnAutoAttack;
+        }
+
+        // ✅ Clean up clone tracking
         if (!string.IsNullOrEmpty(cloneInstanceID))
         {
             allActiveCloneIDs.Remove(cloneInstanceID);
         }
 
-        // ✅ ADD THIS: Destroy our clone when Haymaker is destroyed
+        // ✅ Destroy our clone when Haymaker is destroyed
         if (cloneInstance != null)
         {
             DestroyClone();
+        }
+    }
+    private void PlaySound(AudioClip clip)
+    {
+        if (clip != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(clip, volume);
         }
     }
 
@@ -637,6 +679,7 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
                 if (i % 3 == 0 && unitAI.animator)
                 {
                     unitAI.animator.SetTrigger("AbilityTrigger");
+                    PlaySound(slashSound);
                 }
 
                 // Apply damage along the entire slash line
@@ -718,6 +761,7 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
                     if (i % 3 == 0 && unitAI.animator) // Every 3rd slash
                     {
                         unitAI.animator.SetTrigger("AbilityTrigger");
+                        PlaySound(slashSound);
                     }
 
                     // ✅ UPDATED: Apply damage to ALL enemies within 3 hex radius
