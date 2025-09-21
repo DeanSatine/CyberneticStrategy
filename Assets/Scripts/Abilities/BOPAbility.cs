@@ -83,7 +83,6 @@ public class BOPAbility : MonoBehaviour, IUnitAbility
 
         Debug.Log($"💪 {unitAI.unitName} starts BOP ability!");
     }
-
     // 👊 Animation Event: Chest Pound frame
     public void ApplyChestBuff()
     {
@@ -94,20 +93,26 @@ public class BOPAbility : MonoBehaviour, IUnitAbility
             Mathf.Clamp(unitAI.starLevel - 1, 0, chestBuffPercent.Length - 1)
         ];
 
+        Debug.Log($"🔍 [B.O.P DEBUG] Before buff - baseMaxHealth: {unitAI.baseMaxHealth}, bonusMaxHealth: {unitAI.bonusMaxHealth}, maxHealth: {unitAI.maxHealth}, currentHealth: {unitAI.currentHealth}");
+        Debug.Log($"🔍 [B.O.P DEBUG] Buff amount: {buffAmount} (star level: {unitAI.starLevel}, percentage: {chestBuffPercent[Mathf.Clamp(unitAI.starLevel - 1, 0, chestBuffPercent.Length - 1)]})");
+
         // store as a bonus so recalculations won't wipe it
         unitAI.bonusMaxHealth += buffAmount;
 
         // recompute effective max (updates unitAI.maxHealth and the unit UI)
         unitAI.RecalculateMaxHealth();
 
-        // heal current health by the same amount
+        Debug.Log($"🔍 [B.O.P DEBUG] After RecalculateMaxHealth - baseMaxHealth: {unitAI.baseMaxHealth}, bonusMaxHealth: {unitAI.bonusMaxHealth}, maxHealth: {unitAI.maxHealth}");
+
+        // ✅ FIXED: Allow health to exceed max health by removing the cap
         unitAI.currentHealth += buffAmount;
-        if (unitAI.currentHealth > unitAI.maxHealth) unitAI.currentHealth = unitAI.maxHealth;
+
+        Debug.Log($"🔍 [B.O.P DEBUG] After health buff - currentHealth: {unitAI.currentHealth}, maxHealth: {unitAI.maxHealth}");
 
         // ✅ Play health buff audio
         PlayAbilityAudio(healthBuffSound, "health buff");
 
-        // ensure UI shows the new current health
+        // ✅ FIXED: Update UI to handle overheal properly
         if (unitAI.ui != null)
             unitAI.ui.UpdateHealth(unitAI.currentHealth);
 
@@ -121,8 +126,10 @@ public class BOPAbility : MonoBehaviour, IUnitAbility
             Destroy(effect, 3f);
         }
 
-        Debug.Log($"💪 {unitAI.unitName} pounds chest! +{buffAmount:F1} max HP (now {unitAI.maxHealth:F1}).");
+        Debug.Log($"💪 {unitAI.unitName} pounds chest! +{buffAmount:F1} HP (now {unitAI.currentHealth:F1}/{unitAI.maxHealth:F1}).");
     }
+
+
 
     // 🔨 Animation Event: Bonk Strike frame
     public void DoBonkDamage()

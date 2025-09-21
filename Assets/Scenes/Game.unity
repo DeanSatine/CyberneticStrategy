@@ -23578,6 +23578,8 @@ MonoBehaviour:
   strikebyteMaxAS2: 0.3
   strikebyteMaxAS3: 0.5
   strikebyteMaxAS4: 0.5
+  eradicatorSlamSound: {fileID: 0}
+  slamAudioVolume: 1
 --- !u!4 &923416039
 Transform:
   m_ObjectHideFlags: 0
@@ -38307,7 +38309,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1583542995
 RectTransform:
   m_ObjectHideFlags: 0
@@ -44138,7 +44140,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: bc75c37d1ca5617499e7906e41388f68, type: 3}
+  m_Sprite: {fileID: 21300000, guid: db8713c32ed142f46bb1c067648805ab, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -47643,6 +47645,11 @@ MonoBehaviour:
   resumeButton: {fileID: 786638041}
   backToMenuButton: {fileID: 1419778040}
   mainMenuSceneName: Menu
+  animatedButtons: []
+  hoverScale: 1.15
+  animationDuration: 0.2
+  bounceAmount: 10
+  punchStrength: 1.2
 --- !u!1 &1950109012
 GameObject:
   m_ObjectHideFlags: 0

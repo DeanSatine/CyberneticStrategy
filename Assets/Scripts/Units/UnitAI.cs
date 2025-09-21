@@ -1133,8 +1133,8 @@ public class UnitAI : MonoBehaviour
         // effective max
         maxHealth = baseMaxHealth + bonusMaxHealth;
 
-        // don't let currentHealth exceed the new max (but we don't *force* downwards elsewhere)
-        if (currentHealth > maxHealth) currentHealth = maxHealth;
+        // ✅ REMOVED: Don't cap current health to allow overheal
+        // ❌ REMOVED: if (currentHealth > maxHealth) currentHealth = maxHealth;
 
         // immediately sync unit UI (if present)
         if (ui != null)

@@ -284,7 +284,6 @@ public class TraitManager : MonoBehaviour
                 // BULKHEAD
                 // =====================
                 case Trait.Bulkhead:
-
                     if (count >= bulkheadThreshold)
                     {
                         foreach (var unit in playerUnits)
@@ -298,8 +297,16 @@ public class TraitManager : MonoBehaviour
 
                                 ability.bonusHealthPercent = bulkheadBonusHealthPercent;
                                 ability.deathSharePercent = bulkheadDeathSharePercent;
+
+                                // ✅ Apply the bonus AFTER setting the values
+                                ability.ApplyBonusHealthPublic();
                             }
                         }
+                    }
+                    else
+                    {
+                        // ✅ Trait inactive → remove all Bulkhead bonuses
+                        BulkheadTrait.ResetAllBulkheads();
                     }
                     break;
 

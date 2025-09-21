@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class UnitUI : MonoBehaviour
@@ -58,8 +58,25 @@ public class UnitUI : MonoBehaviour
     public void UpdateHealth(float currentHealth)
     {
         if (healthFill != null)
-            healthFill.fillAmount = Mathf.Clamp01(currentHealth / maxHealth);
+        {
+            // ✅ Allow health bar to show overheal with different colors
+            float healthPercentage = currentHealth / maxHealth;
+
+            if (currentHealth > maxHealth)
+            {
+                // Show overheal - fill bar completely and change color
+                healthFill.fillAmount = 1f; // Fill the bar completely
+                healthFill.color = Color.yellow; // Golden color for overheal
+            }
+            else
+            {
+                // Normal health display
+                healthFill.fillAmount = Mathf.Clamp01(healthPercentage);
+                healthFill.color = Color.green; // Normal green color
+            }
+        }
     }
+
 
     public void UpdateMana(float currentMana)
     {
