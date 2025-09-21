@@ -148,7 +148,7 @@ public class BOPAbility : MonoBehaviour, IUnitAbility
             if (strikeVFX != null)
             {
                 GameObject effect = Instantiate(strikeVFX, target.transform.position, Quaternion.identity);
-                Destroy(effect, 3f);
+                Destroy(effect, 1f);
             }
 
             Debug.Log($"🔨 {unitAI.unitName} BONKS {target.unitName} for {damage} damage!");
