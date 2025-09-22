@@ -104,6 +104,7 @@ public class UnitAI : MonoBehaviour
     [Tooltip("Scale at 2-star (relative to base)")]
 
     public float twoStarScale = 1.10f;
+    [HideInInspector] public float traitBonusMaxHealth = 0f; // Persistent trait bonuses
 
     [Tooltip("Scale at 3-star (relative to base)")]
     // runtime baseline + modifiers so buffs persist
@@ -830,10 +831,9 @@ public class UnitAI : MonoBehaviour
     {
         gameObject.SetActive(true);
         isAlive = true;
-
-        // ✅ FIX: Reset health bonuses that shouldn't persist
-        bonusMaxHealth = 0f; // Clear temporary buffs like BOP's chest pound
-        RecalculateMaxHealth(); // Recalculate based on base values only
+        // ✅ FIX: Only reset temporary bonuses, preserve trait bonuses
+        float tempBonuses = bonusMaxHealth - traitBonusMaxHealth;
+        bonusMaxHealth = traitBonusMaxHealth; // Keep only trait bonuses
 
         currentHealth = maxHealth; // Full heal
         currentMana = 0f;
@@ -864,6 +864,7 @@ public class UnitAI : MonoBehaviour
 
         Debug.Log($"✅ {unitName} reset for new round - HP: {currentHealth}/{maxHealth}, Mana: {currentMana}/{maxMana}");
     }
+
 
     public void FullResetToPrep(HexTile tile)
     {

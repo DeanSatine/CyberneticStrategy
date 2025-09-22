@@ -5,7 +5,7 @@ using static UnitAI;
 
 public class HaymakerAbility : MonoBehaviour, IUnitAbility
 {
-    private UnitAI unitAI;
+    public UnitAI unitAI;
     private int soulCount = 0;
 
     [Header("Ability Stats")]
@@ -847,10 +847,17 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
                     // Update clone's star level to match
                     cloneAI.starLevel = unitAI.starLevel;
 
-                    // Recalculate clone stats based on new star level
-                    UpdateCloneStatsAfterUpgrade(cloneAI);
+                    // ✅ FIX: Don't recalculate stats, just update star level
+                    // The soul bonuses should remain intact
 
-                    Debug.Log($"✅ Clone maintained and updated for {unitAI.starLevel}★ {unitAI.unitName}");
+                    // ✅ FIX: Update clone's HaymakerClone component to point to this ability
+                    var cloneComponent = cloneInstance.GetComponent<HaymakerClone>();
+                    if (cloneComponent != null)
+                    {
+                        cloneComponent.masterHaymaker = this; // Add this reference
+                    }
+
+                    Debug.Log($"✅ Clone maintained for {unitAI.starLevel}★ {unitAI.unitName} with {soulCount} souls");
                     return;
                 }
             }
@@ -860,6 +867,7 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
             SpawnClone();
         }
     }
+
 
     // ✅ NEW: Update clone stats after star upgrade
     private void UpdateCloneStatsAfterUpgrade(UnitAI cloneAI)

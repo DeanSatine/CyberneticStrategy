@@ -12,6 +12,9 @@ public class HaymakerClone : MonoBehaviour
     [Header("Clone Stats Display")]
     public bool showInUI = true;
 
+    // ✅ FIX: Direct reference to master instead of FindObjectOfType
+    [HideInInspector] public HaymakerAbility masterHaymaker;
+
     private void Awake()
     {
         var unitAI = GetComponent<UnitAI>();
@@ -25,33 +28,52 @@ public class HaymakerClone : MonoBehaviour
                 unitAI.unitName = "Haymaker Clone";
             }
 
-            Debug.Log($"[HaymakerClone] Clone initialized with name: '{unitAI.unitName}'");
+            // ✅ FIX: Find the correct master Haymaker by proximity and team
+            if (masterHaymaker == null)
+            {
+                HaymakerAbility[] allHaymakers = FindObjectsOfType<HaymakerAbility>();
+                float closestDistance = float.MaxValue;
+
+                foreach (var haymaker in allHaymakers)
+                {
+                    var haymakerUnitAI = haymaker.GetComponent<UnitAI>();
+                    if (haymakerUnitAI != null && haymakerUnitAI.team == unitAI.team)
+                    {
+                        float distance = Vector3.Distance(transform.position, haymaker.transform.position);
+                        if (distance < closestDistance)
+                        {
+                            closestDistance = distance;
+                            masterHaymaker = haymaker;
+                        }
+                    }
+                }
+            }
+
+            Debug.Log($"[HaymakerClone] Clone initialized with master: {masterHaymaker?.unitAI.unitName}");
         }
     }
 
-    // ✅ Get slam damage for display purposes
+    // ✅ FIXED: Use masterHaymaker reference instead of FindObjectOfType
     public float GetSlamDamage()
     {
         var unitAI = GetComponent<UnitAI>();
         if (unitAI == null) return 0f;
 
-        var masterAbility = FindObjectOfType<HaymakerAbility>();
-        if (masterAbility != null)
+        if (masterHaymaker != null)
         {
-            int starIndex = Mathf.Clamp(unitAI.starLevel - 1, 0, masterAbility.slamDamage.Length - 1);
-            return masterAbility.slamDamage[starIndex];
+            int starIndex = Mathf.Clamp(unitAI.starLevel - 1, 0, masterHaymaker.slamDamage.Length - 1);
+            return masterHaymaker.slamDamage[starIndex];
         }
 
         return 0f;
     }
 
-    // ✅ ENHANCED: Real-time detailed soul status with progress tracking
+    // ✅ FIXED: Use masterHaymaker reference
     public string GetDetailedSoulStatus()
     {
-        var masterAbility = FindObjectOfType<HaymakerAbility>();
-        if (masterAbility != null)
+        if (masterHaymaker != null)
         {
-            int totalSouls = masterAbility.SoulCount;
+            int totalSouls = masterHaymaker.SoulCount;
             int empowerments = totalSouls / 5;
             int soulsToNext = 5 - (totalSouls % 5);
 
@@ -90,36 +112,34 @@ public class HaymakerClone : MonoBehaviour
         return bar;
     }
 
-    // ✅ Get current stat bonus percentage
+    // ✅ FIXED: Use masterHaymaker reference
     public float GetCurrentStatBonusPercent()
     {
-        var masterAbility = FindObjectOfType<HaymakerAbility>();
-        if (masterAbility != null)
+        if (masterHaymaker != null)
         {
-            int empowerments = masterAbility.SoulCount / 5;
+            int empowerments = masterHaymaker.SoulCount / 5;
             return empowerments * 1f; // 1% per empowerment, return as percentage
         }
         return 0f;
     }
 
-    // ✅ ENHANCED: Calculate actual HP and damage values including bonuses
+    // ✅ FIXED: Use masterHaymaker reference
     public (float currentHP, float currentDamage, float baseHP, float baseDamage) GetStatsWithBonuses()
     {
         var unitAI = GetComponent<UnitAI>();
         if (unitAI == null) return (0, 0, 0, 0);
 
-        var masterAbility = FindObjectOfType<HaymakerAbility>();
-        if (masterAbility != null)
+        if (masterHaymaker != null)
         {
             // Find base stats (25% of original Haymaker)
-            var masterUnitAI = masterAbility.GetComponent<UnitAI>();
+            var masterUnitAI = masterHaymaker.GetComponent<UnitAI>();
             if (masterUnitAI != null)
             {
                 float baseHP = masterUnitAI.maxHealth * 0.25f;
                 float baseDamage = masterUnitAI.attackDamage * 0.25f;
 
                 // Calculate bonus from souls
-                int empowerments = masterAbility.SoulCount / 5;
+                int empowerments = masterHaymaker.SoulCount / 5;
                 float bonusPercent = empowerments * 1f / 100f; // Convert to decimal
                 float currentHP = baseHP * (1f + bonusPercent);
                 float currentDamage = baseDamage * (1f + bonusPercent);
@@ -148,13 +168,12 @@ public class HaymakerClone : MonoBehaviour
         }
     }
 
-    // ✅ NEW: Get empowerment tier description
+    // ✅ FIXED: Use masterHaymaker reference
     public string GetEmpowermentTier()
     {
-        var masterAbility = FindObjectOfType<HaymakerAbility>();
-        if (masterAbility != null)
+        if (masterHaymaker != null)
         {
-            int empowerments = masterAbility.SoulCount / 5;
+            int empowerments = masterHaymaker.SoulCount / 5;
 
             if (empowerments == 0) return "🔹 Tier: Base Clone";
             else if (empowerments <= 5) return $"🔸 Tier: Awakened Clone (Level {empowerments})";
@@ -163,5 +182,21 @@ public class HaymakerClone : MonoBehaviour
             else return $"💀 Tier: Soul Reaper (Level {empowerments})";
         }
         return "❓ Tier: Unknown";
+    }
+
+    // ✅ NEW: Method to reassign master (useful when master gets upgraded)
+    public void ReassignMaster(HaymakerAbility newMaster)
+    {
+        if (newMaster != null)
+        {
+            masterHaymaker = newMaster;
+            Debug.Log($"[HaymakerClone] Master reassigned to: {newMaster.unitAI.unitName}");
+        }
+    }
+
+    // ✅ NEW: Validate master is still valid
+    public bool IsMasterValid()
+    {
+        return masterHaymaker != null && masterHaymaker.gameObject != null;
     }
 }

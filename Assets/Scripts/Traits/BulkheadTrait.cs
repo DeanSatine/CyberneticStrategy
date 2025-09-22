@@ -7,6 +7,7 @@ public class BulkheadTrait : MonoBehaviour
 
     private UnitAI unitAI;
     private bool applied = false;
+    private float appliedBonus = 0f; // Track the actual bonus applied
 
     private void Awake()
     {
@@ -15,17 +16,13 @@ public class BulkheadTrait : MonoBehaviour
 
     private void OnEnable()
     {
-        // ❌ REMOVED: Don't apply immediately, wait for TraitManager to set values
-        // ApplyBonusHealth();
         UnitAI.OnAnyUnitDeath += OnUnitDeath;
     }
 
-    // ✅ Public method for TraitManager to call after setting values
     public void ApplyBonusHealthPublic()
     {
         ApplyBonusHealth();
     }
-
 
     private void OnDisable()
     {
@@ -36,30 +33,28 @@ public class BulkheadTrait : MonoBehaviour
     {
         if (applied) return;
 
-        // 🔍 DEBUG: Add logging to see what values we have
         Debug.Log($"🔍 [BULKHEAD DEBUG] {unitAI.unitName} - bonusHealthPercent: {bonusHealthPercent}, baseMaxHealth: {unitAI.baseMaxHealth}");
 
-        // ✅ FIXED: Use the UnitAI's baseMaxHealth and bonusMaxHealth system
-        float bonus = unitAI.baseMaxHealth * bonusHealthPercent;
+        // ✅ FIX: Store the applied bonus amount
+        appliedBonus = unitAI.baseMaxHealth * bonusHealthPercent;
 
-        Debug.Log($"🔍 [BULKHEAD DEBUG] Calculated bonus: {bonus}");
+        Debug.Log($"🔍 [BULKHEAD DEBUG] Calculated bonus: {appliedBonus}");
 
-        unitAI.bonusMaxHealth += bonus;
+        // ✅ FIX: Add to both bonusMaxHealth and traitBonusMaxHealth
+        unitAI.bonusMaxHealth += appliedBonus;
+        unitAI.traitBonusMaxHealth += appliedBonus;
 
-        // ✅ Recalculate max health using the proper system
         unitAI.RecalculateMaxHealth();
+        unitAI.currentHealth += appliedBonus;
 
-        // ✅ Heal by the same amount (allows overheal)
-        unitAI.currentHealth += bonus;
-
-        // ✅ Update UI to show the new values
         if (unitAI.ui != null)
             unitAI.ui.UpdateHealth(unitAI.currentHealth);
 
         applied = true;
 
-        Debug.Log($"💪 {unitAI.unitName} Bulkhead activated! +{bonus:F1} max HP (now {unitAI.currentHealth:F1}/{unitAI.maxHealth:F1})");
+        Debug.Log($"💪 {unitAI.unitName} Bulkhead activated! +{appliedBonus:F1} max HP (now {unitAI.currentHealth:F1}/{unitAI.maxHealth:F1})");
     }
+
     public void RemoveBonusHealthPublic()
     {
         RemoveBonusHealth();
@@ -69,39 +64,41 @@ public class BulkheadTrait : MonoBehaviour
     {
         if (!applied) return;
 
-        // ✅ Calculate the bonus that was previously applied
-        float bonus = unitAI.baseMaxHealth * bonusHealthPercent;
+        Debug.Log($"🔍 [BULKHEAD REMOVE] Removing {appliedBonus:F1} bonus from {unitAI.unitName}");
 
-        // ✅ Remove the bonus from max health
-        unitAI.bonusMaxHealth -= bonus;
+        // ✅ FIX: Remove the exact bonus that was applied from both fields
+        unitAI.bonusMaxHealth -= appliedBonus;
+        unitAI.traitBonusMaxHealth -= appliedBonus;
 
-        // ✅ Recalculate max health
         unitAI.RecalculateMaxHealth();
 
-        // ✅ Adjust current health if it exceeds new max health
+        // ✅ FIX: Adjust current health if it exceeds new max health
         if (unitAI.currentHealth > unitAI.maxHealth)
         {
             unitAI.currentHealth = unitAI.maxHealth;
         }
 
-        // ✅ Update UI
         if (unitAI.ui != null)
             unitAI.ui.UpdateHealth(unitAI.currentHealth);
 
         applied = false;
+        appliedBonus = 0f;
 
-        Debug.Log($"💔 {unitAI.unitName} Bulkhead deactivated! -{bonus:F1} max HP (now {unitAI.currentHealth:F1}/{unitAI.maxHealth:F1})");
+        Debug.Log($"💔 {unitAI.unitName} Bulkhead deactivated! -{appliedBonus:F1} max HP (now {unitAI.currentHealth:F1}/{unitAI.maxHealth:F1})");
     }
 
-    // ✅ Static method to reset all Bulkhead traits
+    // ✅ ENHANCED: Static method to reset all Bulkhead traits with better logging
     public static void ResetAllBulkheads()
     {
         BulkheadTrait[] allBulkheads = FindObjectsOfType<BulkheadTrait>();
 
+        Debug.Log($"🔍 [BULKHEAD RESET] Found {allBulkheads.Length} Bulkhead components to reset");
+
         foreach (var bulkhead in allBulkheads)
         {
-            if (bulkhead != null)
+            if (bulkhead != null && bulkhead.unitAI != null)
             {
+                Debug.Log($"🔍 [BULKHEAD RESET] Resetting Bulkhead for {bulkhead.unitAI.unitName}");
                 bulkhead.RemoveBonusHealth();
                 Destroy(bulkhead); // Remove the component entirely
             }
@@ -109,7 +106,6 @@ public class BulkheadTrait : MonoBehaviour
 
         Debug.Log("🔄 All Bulkhead traits reset");
     }
-
 
     private void OnUnitDeath(UnitAI deadUnit)
     {

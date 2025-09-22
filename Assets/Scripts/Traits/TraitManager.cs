@@ -286,6 +286,8 @@ public class TraitManager : MonoBehaviour
                 case Trait.Bulkhead:
                     if (count >= bulkheadThreshold)
                     {
+                        Debug.Log($"🔍 [BULKHEAD ACTIVE] Applying Bulkhead to {count} units");
+
                         foreach (var unit in playerUnits)
                         {
                             if (unit.currentState == UnitAI.UnitState.Bench) continue;
@@ -293,22 +295,36 @@ public class TraitManager : MonoBehaviour
                             if (unit.traits.Contains(Trait.Bulkhead))
                             {
                                 var ability = unit.GetComponent<BulkheadTrait>();
-                                if (ability == null) ability = unit.gameObject.AddComponent<BulkheadTrait>();
 
-                                ability.bonusHealthPercent = bulkheadBonusHealthPercent;
-                                ability.deathSharePercent = bulkheadDeathSharePercent;
+                                // ✅ FIX: Only add if it doesn't exist
+                                if (ability == null)
+                                {
+                                    ability = unit.gameObject.AddComponent<BulkheadTrait>();
 
-                                // ✅ Apply the bonus AFTER setting the values
-                                ability.ApplyBonusHealthPublic();
+                                    ability.bonusHealthPercent = bulkheadBonusHealthPercent;
+                                    ability.deathSharePercent = bulkheadDeathSharePercent;
+
+                                    // ✅ Apply the bonus AFTER setting the values
+                                    ability.ApplyBonusHealthPublic();
+
+                                    Debug.Log($"✅ [BULKHEAD] Applied to {unit.unitName}");
+                                }
+                                else
+                                {
+                                    Debug.Log($"🔍 [BULKHEAD] Already active on {unit.unitName}");
+                                }
                             }
                         }
                     }
                     else
                     {
+                        Debug.Log($"🔍 [BULKHEAD INACTIVE] Resetting all Bulkhead traits (count: {count}/{bulkheadThreshold})");
+
                         // ✅ Trait inactive → remove all Bulkhead bonuses
                         BulkheadTrait.ResetAllBulkheads();
                     }
                     break;
+
 
                 // =====================
                 // CLOBBERTRON
