@@ -11,6 +11,10 @@ public class EnemyWaveManager : MonoBehaviour
     public int minUnits = 2;
     public int maxUnits = 5;
 
+    [Header("Health Scaling Settings")]
+    [Tooltip("Bonus health per round after maxing out enemy count")]
+    public float healthBonusPerRound = 100f;
+
     [Header("Unit Pool (same as Shop)")]
     public List<ShopUnit> allUnits; // reference your shop units list
 
@@ -26,17 +30,23 @@ public class EnemyWaveManager : MonoBehaviour
         ClearEnemies();
 
         // ✅ Base enemy count starts at 2
-        int enemyCount = 2 + ((stage - 1) * 3) + (round - 1);
+        int baseEnemyCount = 2 + ((stage - 1) * 3) + (round - 1);
+        int actualEnemyCount = Mathf.Min(baseEnemyCount, 9);
 
-        // ✅ Cap at 9 enemies
-        enemyCount = Mathf.Min(enemyCount, 9);
+        // ✅ NEW: Calculate health bonus for rounds beyond max enemy count
+        float healthBonus = CalculateHealthBonus(stage, round, baseEnemyCount);
 
-        Debug.Log($"🌊 Spawning {enemyCount} enemies for Stage {stage} Round {round}");
+        Debug.Log($"🌊 Spawning {actualEnemyCount} enemies for Stage {stage} Round {round}");
+
+        if (healthBonus > 0)
+        {
+            Debug.Log($"💪 Enemy health bonus: +{healthBonus} HP (maxed enemy count)");
+        }
 
         // ✅ Track used tiles to prevent overlaps
         HashSet<HexTile> usedTiles = new HashSet<HexTile>();
 
-        for (int i = 0; i < enemyCount; i++)
+        for (int i = 0; i < actualEnemyCount; i++)
         {
             ShopUnit chosenUnit = GetRandomUnitByStage(stage);
 
@@ -44,7 +54,7 @@ public class EnemyWaveManager : MonoBehaviour
             HexTile freeTile = GetNextAvailableEnemyTile(usedTiles);
             if (freeTile == null)
             {
-                Debug.LogWarning($"⚠️ No more free enemy tiles available! Spawned {i}/{enemyCount} enemies.");
+                Debug.LogWarning($"⚠️ No more free enemy tiles available! Spawned {i}/{actualEnemyCount} enemies.");
                 break;
             }
 
@@ -81,11 +91,72 @@ public class EnemyWaveManager : MonoBehaviour
             GameManager.Instance.RegisterUnit(enemyAI, false);
         }
 
+        // ✅ FIXED: Apply health bonuses AFTER all enemies are spawned and initialized
+        if (healthBonus > 0)
+        {
+            // Wait one frame to ensure all Start() methods have been called
+            StartCoroutine(ApplyHealthBonusesDelayed(healthBonus));
+        }
+
         Debug.Log($"✅ Successfully spawned {activeEnemies.Count} enemies for Stage {stage} Round {round}");
 
         // ✅ Debug check for overlaps
         VerifyNoOverlaps();
     }
+
+    // ✅ NEW: Apply health bonuses after a delay to ensure proper initialization
+    private System.Collections.IEnumerator ApplyHealthBonusesDelayed(float healthBonus)
+    {
+        // Wait one frame to ensure all Start() methods have been called
+        yield return null;
+
+        foreach (var enemy in activeEnemies)
+        {
+            if (enemy != null)
+            {
+                ApplyHealthBonus(enemy, healthBonus);
+            }
+        }
+
+        Debug.Log($"✅ Applied +{healthBonus} HP bonus to {activeEnemies.Count} enemies");
+    }
+
+    // ✅ FIXED: Apply health bonus to an enemy unit
+    private void ApplyHealthBonus(UnitAI enemy, float healthBonus)
+    {
+        // Store original values for debugging
+        float originalMaxHealth = enemy.maxHealth;
+
+        // ✅ FIX: Add to bonus health (should be properly initialized by now)
+        enemy.bonusMaxHealth += healthBonus;
+        enemy.RecalculateMaxHealth();
+
+        // ✅ FIX: Set current health to the new max health (full heal)
+        enemy.currentHealth = enemy.maxHealth;
+
+        // Update UI if it exists
+        if (enemy.ui != null)
+        {
+            enemy.ui.UpdateHealth(enemy.currentHealth);
+        }
+
+        Debug.Log($"💪 {enemy.unitName} health: {originalMaxHealth} → {enemy.maxHealth} (+{healthBonus} bonus)");
+    }
+
+
+    // ✅ NEW: Calculate health bonus for rounds beyond max enemy count
+    private float CalculateHealthBonus(int stage, int round, int baseEnemyCount)
+    {
+        // If enemy count is capped (baseEnemyCount > 9), calculate bonus
+        if (baseEnemyCount > 9)
+        {
+            int excessRounds = baseEnemyCount - 9;
+            return excessRounds * healthBonusPerRound;
+        }
+
+        return 0f;
+    }
+
 
     // ✅ NEW: Get the next available enemy tile that hasn't been used
     private HexTile GetNextAvailableEnemyTile(HashSet<HexTile> usedTiles)
@@ -168,11 +239,33 @@ public class EnemyWaveManager : MonoBehaviour
         Debug.Log("🧹 All enemies cleared and tiles freed");
     }
 
-    // ✅ REMOVED: Old GetFreeEnemyHex method since it was causing the issue
-
     public List<UnitAI> GetActiveEnemies()
     {
         return activeEnemies;
+    }
+
+    // ✅ NEW: Public method to get current health bonus for UI display
+    public float GetCurrentHealthBonus(int stage, int round)
+    {
+        int baseEnemyCount = 2 + ((stage - 1) * 3) + (round - 1);
+        return CalculateHealthBonus(stage, round, baseEnemyCount);
+    }
+
+    // ✅ NEW: Get information about enemy scaling for UI
+    public string GetEnemyScalingInfo(int stage, int round)
+    {
+        int baseEnemyCount = 2 + ((stage - 1) * 3) + (round - 1);
+        int actualCount = Mathf.Min(baseEnemyCount, 9);
+        float healthBonus = CalculateHealthBonus(stage, round, baseEnemyCount);
+
+        if (healthBonus > 0)
+        {
+            return $"Enemies: {actualCount} units (+{healthBonus} HP each)";
+        }
+        else
+        {
+            return $"Enemies: {actualCount} units";
+        }
     }
 
     private ShopUnit GetRandomUnitByStage(int stage)
