@@ -4,8 +4,12 @@ using UnityEngine.UI;
 public class UnitUI : MonoBehaviour
 {
     [Header("Bars")]
-    public Image healthFill;
+    public Image healthFill; // Keep for backwards compatibility
     public Image manaFill;
+
+    [Header("Segmented Health Bar")]
+    public SegmentedHealthBar segmentedHealthBar;
+    public bool useSegmentedHealthBar = true;
 
     private Transform target; // unit to follow
     private float maxHealth;
@@ -18,7 +22,16 @@ public class UnitUI : MonoBehaviour
         maxHealth = maxHp;
         maxMana = maxMp;
 
-        UpdateHealth(maxHp);
+        // Initialize segmented health bar if enabled
+        if (useSegmentedHealthBar && segmentedHealthBar != null)
+        {
+            segmentedHealthBar.Init(maxHp);
+        }
+        else
+        {
+            UpdateHealth(maxHp);
+        }
+
         UpdateMana(0f);
     }
 
@@ -53,30 +66,38 @@ public class UnitUI : MonoBehaviour
     public void SetMaxHealth(float newMaxHealth)
     {
         maxHealth = newMaxHealth;
+
+        if (useSegmentedHealthBar && segmentedHealthBar != null)
+        {
+            segmentedHealthBar.UpdateHealth(target.GetComponent<UnitAI>().currentHealth, newMaxHealth);
+        }
     }
 
     public void UpdateHealth(float currentHealth)
     {
-        if (healthFill != null)
+        if (useSegmentedHealthBar && segmentedHealthBar != null)
         {
-            // ✅ Allow health bar to show overheal with different colors
+            segmentedHealthBar.UpdateHealth(currentHealth, maxHealth);
+        }
+        else if (healthFill != null)
+        {
+            // Fallback to old system
             float healthPercentage = currentHealth / maxHealth;
 
             if (currentHealth > maxHealth)
             {
                 // Show overheal - fill bar completely and change color
-                healthFill.fillAmount = 1f; // Fill the bar completely
-                healthFill.color = Color.yellow; // Golden color for overheal
+                healthFill.fillAmount = 1f;
+                healthFill.color = Color.yellow;
             }
             else
             {
                 // Normal health display
                 healthFill.fillAmount = Mathf.Clamp01(healthPercentage);
-                healthFill.color = Color.green; // Normal green color
+                healthFill.color = Color.green;
             }
         }
     }
-
 
     public void UpdateMana(float currentMana)
     {

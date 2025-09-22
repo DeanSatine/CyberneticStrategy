@@ -1,5 +1,41 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &712673856980772015
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2215232593869710113}
+  m_Layer: 5
+  m_Name: SegmentedHealthBarContaineer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &2215232593869710113
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 712673856980772015}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1402747001074076006}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -0.0007261857, y: 127.00878}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &4754565178376921463
 GameObject:
   m_ObjectHideFlags: 0
@@ -165,6 +201,7 @@ GameObject:
   - component: {fileID: 9066694996246746492}
   - component: {fileID: 3178064694516056286}
   - component: {fileID: -5611506540924862930}
+  - component: {fileID: 3656726611350268806}
   m_Layer: 5
   m_Name: UnitUI
   m_TagString: Untagged
@@ -188,6 +225,7 @@ RectTransform:
   - {fileID: 6127100648545865594}
   - {fileID: 8885430401802112372}
   - {fileID: 7610746380243684191}
+  - {fileID: 2215232593869710113}
   m_Father: {fileID: 0}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -241,7 +279,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 1
+  m_PresetInfoIsWorld: 0
 --- !u!114 &3178064694516056286
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -273,6 +311,29 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   healthFill: {fileID: 5976127117004917262}
   manaFill: {fileID: 9070823717021504632}
+  segmentedHealthBar: {fileID: 3656726611350268806}
+  useSegmentedHealthBar: 1
+--- !u!114 &3656726611350268806
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6939982145822855837}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95af53588c050674a8edc7f499bb95d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  healthFillImage: {fileID: 5976127117004917262}
+  segmentDividerContainer: {fileID: 2215232593869710113}
+  segmentDividerPrefab: {fileID: 6801759871271005902, guid: 6a2c88f6f7211954a9f5d87f25dcd279,
+    type: 3}
+  healthPerSegment: 200
+  fullHealthColor: {r: 0, g: 0.74509805, b: 0.14117648, a: 1}
+  mediumHealthColor: {r: 0, g: 0.74509805, b: 0.14117648, a: 1}
+  lowHealthColor: {r: 0, g: 0.74509805, b: 0.14117648, a: 1}
+  overhealColor: {r: 0, g: 1, b: 1, a: 1}
 --- !u!1 &7500614704609115148
 GameObject:
   m_ObjectHideFlags: 0
