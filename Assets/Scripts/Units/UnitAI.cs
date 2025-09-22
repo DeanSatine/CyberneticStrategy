@@ -135,14 +135,41 @@ public class UnitAI : MonoBehaviour
     {
         if (currentState != newState)
         {
+            UnitState oldState = currentState;
             currentState = newState;
             OnStateChanged?.Invoke(newState);
 
-            if (newState == UnitState.Combat)
+            // ✅ FIX: Ensure proper state transition for movement/attack
+            if (newState == UnitState.BoardIdle)
             {
-                // 🔹 Force fresh target at combat start
+                // Reset movement and attack capabilities when placed on board
+                canMove = true;
+                canAttack = true;
+                attackCooldown = 0f;
+
+                Debug.Log($"✅ {unitName} transitioned {oldState} → {newState} - movement and attack enabled");
+            }
+            else if (newState == UnitState.Combat)
+            {
+                // Force fresh target and reset cooldowns at combat start
                 currentTarget = FindNearestEnemy();
                 attackCooldown = 0f;
+                canMove = true;
+                canAttack = true;
+
+                Debug.Log($"⚔️ {unitName} entered combat - fresh targeting and abilities enabled");
+            }
+            else if (newState == UnitState.Bench)
+            {
+                // Clear target and stop actions when benched
+                currentTarget = null;
+                canMove = false;
+                canAttack = false;
+
+                if (animator)
+                {
+                    animator.SetBool("IsRunning", false);
+                }
             }
         }
     }
@@ -799,54 +826,16 @@ public class UnitAI : MonoBehaviour
             transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 10f);
         }
     }
-    public void FullResetToPrep(HexTile tile)
-    {
-        // restore stats
-        currentHealth = maxHealth;
-        currentMana = 0;
-        isAlive = true;
-        isCastingAbility = false;
-
-        // snap back to tile
-        AssignToTile(tile);
-
-        // reset state/animation
-        SetState(UnitState.BoardIdle);
-        currentTarget = null;
-
-        if (animator != null)
-        {
-            animator.SetBool("IsRunning", false);
-            animator.ResetTrigger("AttackTrigger");
-            animator.ResetTrigger("AbilityTrigger");
-
-            // ✅ Hard reset animator to prevent frozen states
-            animator.Rebind();
-            animator.Update(0f);
-        }
-
-        // reset UI bars
-        if (ui != null)
-        {
-            ui.UpdateHealth(currentHealth);
-            ui.UpdateMana(currentMana);
-            ui.gameObject.SetActive(true);
-        }
-
-        // re-enable this script
-        this.enabled = true;
-
-        // re-enable collider
-        Collider col = GetComponent<Collider>();
-        if (col != null) col.enabled = true;
-        CleanupProjectiles();
-    }
-
     public void ResetAfterCombat()
     {
-        gameObject.SetActive(true);   // 🔹 revive unit if it was hidden
+        gameObject.SetActive(true);
         isAlive = true;
-        currentHealth = maxHealth;
+
+        // ✅ FIX: Reset health bonuses that shouldn't persist
+        bonusMaxHealth = 0f; // Clear temporary buffs like BOP's chest pound
+        RecalculateMaxHealth(); // Recalculate based on base values only
+
+        currentHealth = maxHealth; // Full heal
         currentMana = 0f;
 
         SetState(UnitState.BoardIdle);
@@ -875,6 +864,44 @@ public class UnitAI : MonoBehaviour
 
         Debug.Log($"✅ {unitName} reset for new round - HP: {currentHealth}/{maxHealth}, Mana: {currentMana}/{maxMana}");
     }
+
+    public void FullResetToPrep(HexTile tile)
+    {
+        // ✅ FIX: Also clear bonuses in full reset
+        bonusMaxHealth = 0f;
+        RecalculateMaxHealth();
+
+        currentHealth = maxHealth;
+        currentMana = 0;
+        isAlive = true;
+        isCastingAbility = false;
+
+        AssignToTile(tile);
+        SetState(UnitState.BoardIdle);
+        currentTarget = null;
+
+        if (animator != null)
+        {
+            animator.SetBool("IsRunning", false);
+            animator.ResetTrigger("AttackTrigger");
+            animator.ResetTrigger("AbilityTrigger");
+            animator.Rebind();
+            animator.Update(0f);
+        }
+
+        if (ui != null)
+        {
+            ui.UpdateHealth(currentHealth);
+            ui.UpdateMana(currentMana);
+            ui.gameObject.SetActive(true);
+        }
+
+        this.enabled = true;
+        Collider col = GetComponent<Collider>();
+        if (col != null) col.enabled = true;
+        CleanupProjectiles();
+    }
+
 
     private void OnMouseOver()
     {

@@ -120,70 +120,6 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         }
     }
 
-    private void HandleStateChanged(UnitState state)
-    {
-        if (!isInitialized)
-        {
-            Debug.Log($"[HaymakerAbility] State change before initialization, ignoring: {state}");
-            return;
-        }
-
-        Debug.Log($"[HaymakerAbility] {unitAI.unitName} state → {state} (shouldHaveClone: {shouldHaveClone}, hasClone: {cloneInstance != null})");
-
-        if (state == UnitState.BoardIdle)
-        {
-            // ✅ ENHANCED: Always ensure clone exists when entering BoardIdle
-            if (!shouldHaveClone || cloneInstance == null)
-            {
-                if (ShouldSpawnClone())
-                {
-                    shouldHaveClone = true;
-                    SpawnClone();
-                }
-                else if (shouldHaveClone && cloneInstance == null && HasLostClone())
-                {
-                    Debug.Log("[HaymakerAbility] Clone missing but should exist, respawning...");
-                    SpawnClone();
-                }
-            }
-            else
-            {
-                // ✅ NEW: Validate existing clone is still good
-                var cloneAI = cloneInstance?.GetComponent<UnitAI>();
-                if (cloneAI == null || !cloneAI.isAlive)
-                {
-                    Debug.Log("[HaymakerAbility] Existing clone invalid, respawning...");
-                    cloneInstance = null;
-                    SpawnClone();
-                }
-            }
-        }
-        else if (state == UnitState.Bench || !unitAI.isAlive)
-        {
-            // ✅ Clear clone requirement when benched or dead
-            shouldHaveClone = false;
-
-            if (cloneInstance != null)
-                DestroyClone();
-
-            // Stop any ongoing ability when state changes
-            if (isPerformingAbility)
-            {
-                StopAllCoroutines();
-                ResetAbilityState();
-            }
-        }
-        else if (state == UnitState.Combat)
-        {
-            // ✅ Should still have clone during combat
-            if (shouldHaveClone && cloneInstance == null && HasLostClone())
-            {
-                Debug.Log("[HaymakerAbility] Clone missing during combat, respawning...");
-                SpawnClone();
-            }
-        }
-    }
-
     private void Update()
     {
         if (!isInitialized) return;
@@ -245,30 +181,79 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         Debug.Log($"[HaymakerAbility] No existing clone found for {unitAI.unitName}");
     }
 
-    // ✅ NEW: Comprehensive check if we should spawn a clone
     private bool ShouldSpawnClone()
     {
-        if (shouldHaveClone)
+        // ✅ FIX: More strict duplicate prevention
+        if (shouldHaveClone && cloneInstance != null)
         {
-            Debug.Log("[HaymakerAbility] Already should have clone, not spawning");
+            Debug.Log("[HaymakerAbility] Already have clone, not spawning");
             return false;
         }
 
-        if (cloneInstance != null)
+        // ✅ FIX: Check for any existing clones belonging to this unit
+        HaymakerClone[] existingClones = FindObjectsOfType<HaymakerClone>();
+        foreach (var clone in existingClones)
         {
-            Debug.Log("[HaymakerAbility] Already have clone instance, not spawning");
-            return false;
+            var cloneUnitAI = clone.GetComponent<UnitAI>();
+            if (cloneUnitAI != null && cloneUnitAI.team == unitAI.team)
+            {
+                // Check proximity to determine if this clone belongs to us
+                float distance = Vector3.Distance(clone.transform.position, transform.position);
+                if (distance < 8f) // Same general area
+                {
+                    Debug.Log($"[HaymakerAbility] Found existing nearby clone at distance {distance:F1}, not spawning");
+                    cloneInstance = clone.gameObject; // Adopt this clone
+                    shouldHaveClone = true;
+                    return false;
+                }
+            }
         }
 
         if (GetTotalClonesForTeam() >= GetMaxAllowedClonesForTeam())
         {
-            Debug.LogWarning($"[HaymakerAbility] Too many clones already exist for team {unitAI.team}, not spawning");
+            Debug.LogWarning($"[HaymakerAbility] Clone limit reached ({GetTotalClonesForTeam()}/{GetMaxAllowedClonesForTeam()}), not spawning");
             return false;
         }
 
         Debug.Log("[HaymakerAbility] All checks passed, should spawn clone");
         return true;
     }
+
+    // ✅ FIX: Only reset abilities during prep phase, not on every state change
+    private void HandleStateChanged(UnitState state)
+    {
+        if (!isInitialized) return;
+
+        Debug.Log($"[HaymakerAbility] {unitAI.unitName} state → {state}");
+
+        if (state == UnitState.BoardIdle)
+        {
+            // Only spawn clone if we don't have one AND we should have one
+            if (!shouldHaveClone && ShouldSpawnClone())
+            {
+                shouldHaveClone = true;
+                SpawnClone();
+            }
+            else if (shouldHaveClone && cloneInstance == null)
+            {
+                // Try to recover lost clone
+                SpawnClone();
+            }
+        }
+        else if (state == UnitState.Bench || !unitAI.isAlive)
+        {
+            shouldHaveClone = false;
+            if (cloneInstance != null)
+                DestroyClone();
+
+            if (isPerformingAbility)
+            {
+                StopAllCoroutines();
+                ResetAbilityState();
+            }
+        }
+    }
+
 
     // ✅ NEW: Check if we legitimately lost our clone
     private bool HasLostClone()

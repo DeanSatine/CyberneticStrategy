@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class SegmentedHealthBar : MonoBehaviour
@@ -85,11 +85,7 @@ public class SegmentedHealthBar : MonoBehaviour
     {
         if (healthFillImage == null) return;
 
-        // Calculate ideal segment size that divides evenly into max health
-        int idealSegments = Mathf.Max(1, Mathf.RoundToInt(maxHealth / healthPerSegment));
-        float adjustedSegmentSize = maxHealth / idealSegments;
-
-        // Calculate fill amount using adjusted segments
+        // ✅ FIX: Always calculate fill based on actual health percentage
         float fillAmount = Mathf.Clamp01(health / maxHealth);
 
         healthFillImage.fillAmount = fillAmount;
@@ -97,6 +93,12 @@ public class SegmentedHealthBar : MonoBehaviour
         // Set color based on health
         bool isOverhealing = health > maxHealth;
         healthFillImage.color = GetHealthColor(health, isOverhealing);
+
+        // Debug for high HP units
+        if (maxHealth > 800)
+        {
+            Debug.Log($"🔧 High HP Unit: {health:F0}/{maxHealth:F0} = {fillAmount:F3} fill amount");
+        }
     }
 
 

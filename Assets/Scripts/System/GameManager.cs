@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using static UnitAI;
 
 public class GameManager : MonoBehaviour
 {
@@ -102,29 +103,27 @@ public class GameManager : MonoBehaviour
         // Check for merges at each star level (1->2, then 2->3)
         for (int starLevel = 1; starLevel <= 2; starLevel++)
         {
-            // Group units by name and star level
+            // ✅ FIX: Less strict filtering - include all alive units regardless of state
             var unitGroups = playerUnits
-                .Where(u => u != null && u.isAlive)
+                .Where(u => u != null && u.isAlive && u.currentState != UnitState.Combat) // Only exclude combat units
                 .GroupBy(u => new { u.unitName, u.starLevel })
                 .Where(g => g.Key.starLevel == starLevel && g.Count() >= 3)
                 .ToList();
 
             foreach (var group in unitGroups)
             {
-                // Process all possible merges for this group (e.g., 6 units = 2 merges)
                 var availableUnits = group.ToList();
 
                 while (availableUnits.Count >= 3)
                 {
                     var unitsToMerge = availableUnits.Take(3).ToList();
 
-                    // Determine what we're upgrading to
+                    // ✅ FIX: Don't skip merging based on tile occupancy
                     int newStarLevel = starLevel + 1;
                     string mergeType = newStarLevel == 2 ? "⭐⭐" : "⭐⭐⭐";
 
                     Debug.Log($"🌟 Merging 3x {group.Key.unitName} ({starLevel}★) → 1x {group.Key.unitName} ({newStarLevel}★) {mergeType}");
 
-                    // Keep the first unit and upgrade it
                     UnitAI upgradedUnit = unitsToMerge[0];
                     upgradedUnit.UpgradeStarLevel();
 
@@ -153,13 +152,11 @@ public class GameManager : MonoBehaviour
                         Destroy(unitToRemove.gameObject);
                     }
 
-                    // Remove the upgraded unit from available units to prevent processing it again
                     availableUnits.Remove(upgradedUnit);
                     anyMergesThisPass = true;
 
                     Debug.Log($"✅ {upgradedUnit.unitName} upgraded to {upgradedUnit.starLevel} stars!");
 
-                    // Special message for 3-star units
                     if (upgradedUnit.starLevel == 3)
                     {
                         Debug.Log($"🏆 LEGENDARY! {upgradedUnit.unitName} reached maximum power (3★)!");
@@ -170,6 +167,7 @@ public class GameManager : MonoBehaviour
 
         return anyMergesThisPass;
     }
+
 
     // --- Helper method to get merge progress for UI ---
     public string GetMergeProgress(string unitName)
