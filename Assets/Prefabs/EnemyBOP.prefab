@@ -378,7 +378,8 @@ MonoBehaviour:
   - 0.05
   - 0.05
   chestVFX: {fileID: 0}
-  strikeVFX: {fileID: 0}
+  strikeVFX: {fileID: 8974203713140315807, guid: 5176b361fc428d1409a5c4d9b06221d9,
+    type: 3}
   abilityStartSound: {fileID: 0}
   chestPoundSound: {fileID: 8300000, guid: 2be68f27a621d3e4dbe08ea3b61f6c27, type: 3}
   bonkStrikeSound: {fileID: 0}

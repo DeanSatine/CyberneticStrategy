@@ -446,7 +446,7 @@ MonoBehaviour:
   firePoint: {fileID: 0}
   projectileSpeed: 15
   portraitSprite: {fileID: 0}
-  unitUIPrefab: {fileID: 6939982145822855837, guid: 0d0baadb193668a45b3ecee8d0333513,
+  unitUIPrefab: {fileID: 6939982145822855837, guid: 2777da46598371d44953b2246c830b19,
     type: 3}
   ui: {fileID: 0}
   animator: {fileID: 0}

@@ -85,29 +85,20 @@ public class SegmentedHealthBar : MonoBehaviour
     {
         if (healthFillImage == null) return;
 
-        int totalSegments = Mathf.CeilToInt(maxHealth / healthPerSegment);
+        // Calculate ideal segment size that divides evenly into max health
+        int idealSegments = Mathf.Max(1, Mathf.RoundToInt(maxHealth / healthPerSegment));
+        float adjustedSegmentSize = maxHealth / idealSegments;
 
-        // Calculate fill amount with segment snapping
-        int filledSegments = Mathf.FloorToInt(health / healthPerSegment);
-        float segmentProgress = (health % healthPerSegment) / healthPerSegment;
+        // Calculate fill amount using adjusted segments
+        float fillAmount = Mathf.Clamp01(health / maxHealth);
 
-        // Snap to discrete segments (optional - remove for smooth filling)
-        float fillAmount;
-        if (segmentProgress > 0.05f) // Small threshold to avoid tiny slivers
-        {
-            fillAmount = (filledSegments + segmentProgress) / totalSegments;
-        }
-        else
-        {
-            fillAmount = (float)filledSegments / totalSegments;
-        }
-
-        healthFillImage.fillAmount = Mathf.Clamp01(fillAmount);
+        healthFillImage.fillAmount = fillAmount;
 
         // Set color based on health
         bool isOverhealing = health > maxHealth;
         healthFillImage.color = GetHealthColor(health, isOverhealing);
     }
+
 
     private Color GetHealthColor(float health, bool isOverhealing)
     {
