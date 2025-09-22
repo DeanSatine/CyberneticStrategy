@@ -95,7 +95,6 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // --- Process all possible merges in one pass ---
     private bool ProcessAllPossibleMerges()
     {
         bool anyMergesThisPass = false;
@@ -103,16 +102,56 @@ public class GameManager : MonoBehaviour
         // Check for merges at each star level (1->2, then 2->3)
         for (int starLevel = 1; starLevel <= 2; starLevel++)
         {
-            // ✅ FIX: Less strict filtering - include all alive units regardless of state
-            var unitGroups = playerUnits
-                .Where(u => u != null && u.isAlive && u.currentState != UnitState.Combat) // Only exclude combat units
+            // ✅ FIX: Include both registered player units AND bench units
+            List<UnitAI> allPlayerUnits = new List<UnitAI>(playerUnits);
+
+            // Add bench units that aren't already in playerUnits
+            HexTile[] allTiles = FindObjectsOfType<HexTile>();
+            foreach (var tile in allTiles)
+            {
+                if (tile.tileType == TileType.Bench && tile.occupyingUnit != null)
+                {
+                    var benchUnit = tile.occupyingUnit;
+                    if (benchUnit.team == Team.Player && !allPlayerUnits.Contains(benchUnit))
+                    {
+                        allPlayerUnits.Add(benchUnit);
+                    }
+                }
+            }
+
+            // ✅ ENHANCED: Better debugging for merge detection
+            var eligibleUnits = allPlayerUnits
+                .Where(u => u != null && u.isAlive && u.currentState != UnitState.Combat)
+                .ToList();
+
+            Debug.Log($"🔍 Checking {starLevel}★ merges. Total player units: {allPlayerUnits.Count}, Eligible: {eligibleUnits.Count}");
+
+            // Debug: Show what units are being considered
+            foreach (var unit in eligibleUnits)
+            {
+                string location = unit.currentTile ? $"{unit.currentTile.tileType} at {unit.currentTile.gridPosition}" : "no tile";
+                Debug.Log($"  📋 {unit.unitName} ({unit.starLevel}★) - {unit.currentState} on {location}");
+            }
+
+            var unitGroups = eligibleUnits
                 .GroupBy(u => new { u.unitName, u.starLevel })
                 .Where(g => g.Key.starLevel == starLevel && g.Count() >= 3)
                 .ToList();
 
+            Debug.Log($"🔍 Found {unitGroups.Count} groups of {starLevel}★ units with 3+ copies");
+
             foreach (var group in unitGroups)
             {
                 var availableUnits = group.ToList();
+
+                Debug.Log($"🔍 Group: {group.Key.unitName} ({starLevel}★) - {availableUnits.Count} units available");
+
+                // List the units and their states/positions for debugging
+                foreach (var unit in availableUnits)
+                {
+                    string location = unit.currentTile ? $"{unit.currentTile.tileType} at {unit.currentTile.gridPosition}" : "no tile";
+                    Debug.Log($"  - {unit.unitName} on {location}, state: {unit.currentState}");
+                }
 
                 while (availableUnits.Count >= 3)
                 {
@@ -140,33 +179,42 @@ public class GameManager : MonoBehaviour
                     {
                         UnitAI unitToRemove = unitsToMerge[i];
 
-                        // Free the tile properly
+                        Debug.Log($"🗑️ Removing {unitToRemove.unitName} from {(unitToRemove.currentTile ? unitToRemove.currentTile.tileType.ToString() : "no tile")}");
+
+                        // ✅ ENHANCED: Proper cleanup before destroying
                         if (unitToRemove.currentTile != null)
                         {
                             unitToRemove.currentTile.Free(unitToRemove);
                         }
 
-                        // Unregister and destroy
+                        // Unregister from GameManager
                         UnregisterUnit(unitToRemove);
+
+                        // Remove from available units list for this merge cycle
                         availableUnits.Remove(unitToRemove);
+
+                        // Destroy the GameObject
                         Destroy(unitToRemove.gameObject);
                     }
 
-                    availableUnits.Remove(upgradedUnit);
                     anyMergesThisPass = true;
-
-                    Debug.Log($"✅ {upgradedUnit.unitName} upgraded to {upgradedUnit.starLevel} stars!");
-
-                    if (upgradedUnit.starLevel == 3)
-                    {
-                        Debug.Log($"🏆 LEGENDARY! {upgradedUnit.unitName} reached maximum power (3★)!");
-                    }
+                    Debug.Log($"✅ Merge completed! {upgradedUnit.unitName} is now {newStarLevel}★ on {(upgradedUnit.currentTile ? upgradedUnit.currentTile.tileType.ToString() : "no tile")}");
                 }
             }
         }
 
+        if (anyMergesThisPass)
+        {
+            Debug.Log("🎉 Merge pass completed with changes!");
+        }
+        else
+        {
+            Debug.Log("🔍 No merges found this pass.");
+        }
+
         return anyMergesThisPass;
     }
+
 
 
     // --- Helper method to get merge progress for UI ---

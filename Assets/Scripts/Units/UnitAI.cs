@@ -1018,7 +1018,7 @@ public class UnitAI : MonoBehaviour
                         string soulStatus = cloneComponent.GetDetailedSoulStatus();
                         string statsComparison = cloneComponent.GetStatsComparison();
 
-                        return $"Passive: {statsComparison}. Gains +1% health & damage for every 5 enemy souls absorbed by Haymaker.\n\n" +
+                        return $"Passive: Gains +1% health & damage for every 5 enemy souls absorbed by Haymaker.\n\n" +
                                $"Soul Status: {soulStatus}\n\n" +
                                $"Active: Slams down at the last hit target when Haymaker finishes casting, dealing {slamDmg} damage.";
                     }
