@@ -322,6 +322,12 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
     {
         isPerformingAbility = false;
 
+        // ✅ Stop any playing audio when ability is reset/interrupted
+        if (audioSource != null && audioSource.isPlaying)
+        {
+            audioSource.Stop();
+        }
+
         // Reset animation speed
         if (unitAI.animator)
         {
@@ -333,6 +339,7 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
 
         Debug.Log("[HaymakerAbility] Ability state reset");
     }
+
 
     // ✅ ENHANCED: Better clone spawning with HaymakerClone component
     private void SpawnClone()
@@ -827,6 +834,13 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         }
 
         isPerformingAbility = false;
+
+        // ✅ Stop any playing audio when ability finishes
+        if (audioSource != null && audioSource.isPlaying)
+        {
+            audioSource.Stop();
+        }
+
         Debug.Log("✅ Fury of Slashes complete!");
     }
 

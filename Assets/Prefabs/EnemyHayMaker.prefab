@@ -466,6 +466,7 @@ MonoBehaviour:
   twoStarMultiplier: 1.8
   threeStarMultiplier: 2.5
   twoStarScale: 1.1
+  traitBonusMaxHealth: 0
   baseMaxHealth: 0
   bonusMaxHealth: 0
   threeStarScale: 1.25
@@ -481,6 +482,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb9efea354552134eb730edcdf5b25cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  unitAI: {fileID: 0}
   slashDamage:
   - 30
   - 40
@@ -504,6 +506,9 @@ MonoBehaviour:
   slamVFX: {fileID: 1025285306637258, guid: 74ef6f19b89150f4180f64229deebb38, type: 3}
   dashStartVFX: {fileID: 0}
   dashEndVFX: {fileID: 0}
+  autoAttackSound: {fileID: 0}
+  slashSound: {fileID: 8300000, guid: ea78efca1c67a274a9b3042f7fe1592e, type: 3}
+  volume: 0.8
 --- !u!65 &1499806241345368472
 BoxCollider:
   m_ObjectHideFlags: 0
