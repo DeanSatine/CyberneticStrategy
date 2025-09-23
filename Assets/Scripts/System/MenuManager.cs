@@ -192,13 +192,30 @@ public class MenuManager : MonoBehaviour
 
     public void PlayGame()
     {
+        Debug.Log("🎮 Loading game scene...");
+
+        // ✅ NEW: Reset game state before scene transition
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.ResetGameState();
+        }
+
         SceneManager.LoadScene(gameSceneName);
     }
 
     public void LoadTestScene()
     {
+        Debug.Log("🧪 Loading test scene...");
+
+        // ✅ NEW: Reset game state before scene transition
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.ResetGameState();
+        }
+
         SceneManager.LoadScene("Test");
     }
+
 
     public void ShowCredits()
     {

@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.7533103, g: 0.6854022, b: 0.37071282, a: 1}
+  m_IndirectSpecularColor: {r: 0.7530613, g: 0.6851395, b: 0.37036023, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -508,7 +508,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -1235.1, y: 5.107605}
+  m_AnchoredPosition: {x: -1235.1, y: 3}
   m_SizeDelta: {x: 160.00012, y: 30.05896}
   m_Pivot: {x: 1, y: 1}
 --- !u!114 &9134840
@@ -29791,6 +29791,7 @@ MonoBehaviour:
   enemyHexes: []
   minUnits: 2
   maxUnits: 9
+  healthBonusPerRound: 100
   allUnits:
   - unitName: Needlebot
     prefab: {fileID: 8772506818969043707, guid: 6a388368b433d664ea6a6e2ba76adbad,
@@ -40077,7 +40078,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: eb4d044fb28568a46a7dfc2c27cc175e, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 3d40a8f9c6b27ff46a0c9db8e1b9af56, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

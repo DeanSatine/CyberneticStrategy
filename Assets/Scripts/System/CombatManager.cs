@@ -66,10 +66,45 @@ public class CombatManager : MonoBehaviour
         }
     }
 
+    // Update CombatManager.cs Awake method
     private void Awake()
     {
-        Instance = this;
+        // ✅ FIXED: Proper singleton reset for scene transitions
+        if (Instance == null)
+        {
+            Instance = this;
+            Debug.Log("✅ CombatManager initialized");
+        }
+        else if (Instance != this)
+        {
+            Debug.Log("🗑️ Destroying duplicate CombatManager");
+            Destroy(gameObject);
+            return;
+        }
+
+        // ✅ NEW: Reset combat state for new scenes
+        ResetCombatState();
     }
+
+    // ✅ NEW: Reset combat tracking variables
+    private void ResetCombatState()
+    {
+        Debug.Log("🔄 Resetting CombatManager state");
+
+        // Clear all tracking lists
+        preCombatPlayerSnapshots.Clear();
+        unitsDeadThisCombat.Clear();
+
+        // Reset flags
+        combatSnapshotTaken = false;
+
+        // Unsubscribe from any existing events
+        UnitAI.OnAnyUnitDeath -= HandleUnitDeath;
+        UnitAI.OnAnyUnitDeath -= TrackCombatDeath;
+
+        Debug.Log("✅ CombatManager state reset complete");
+    }
+
 
     public Dictionary<UnitAI, HexTile> savedPlayerPositions = new Dictionary<UnitAI, HexTile>();
     private bool isCheckingForRoundEnd = false;
@@ -314,12 +349,13 @@ public class CombatManager : MonoBehaviour
             unit.animator.Update(0f);
         }
 
-        // Update UI
         if (unit.ui != null)
         {
-            unit.ui.UpdateHealth(unit.currentHealth);
+            unit.ui.SetMaxHealth(unit.maxHealth);     // ✅ First update max health
+            unit.ui.UpdateHealth(unit.currentHealth); // ✅ Then update current health
             unit.ui.gameObject.SetActive(true);
         }
+
     }
     // ✅ NEW: Track units that died during this combat round
     private List<UnitAI> unitsDeadThisCombat = new List<UnitAI>();

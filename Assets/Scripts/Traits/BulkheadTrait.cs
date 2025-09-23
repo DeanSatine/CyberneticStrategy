@@ -13,7 +13,28 @@ public class BulkheadTrait : MonoBehaviour
     {
         unitAI = GetComponent<UnitAI>();
     }
+    private void Update()
+    {
+        // ✅ CRITICAL: Deactivate trait if unit is benched
+        if (unitAI != null && unitAI.currentState == UnitAI.UnitState.Bench)
+        {
+            if (applied)
+            {
+                Debug.Log($"🏟️ {unitAI.unitName} moved to bench - removing Bulkhead bonus");
+                RemoveBonusHealth();
+            }
 
+            // ✅ Destroy the component when benched
+            Destroy(this);
+            return;
+        }
+
+        // ✅ NEW: Auto-apply if unit is on board but trait isn't applied yet
+        if (unitAI != null && unitAI.currentState == UnitAI.UnitState.BoardIdle && !applied)
+        {
+            ApplyBonusHealth();
+        }
+    }
     private void OnEnable()
     {
         UnitAI.OnAnyUnitDeath += OnUnitDeath;
@@ -109,15 +130,15 @@ public class BulkheadTrait : MonoBehaviour
 
     private void OnUnitDeath(UnitAI deadUnit)
     {
-        if (deadUnit == unitAI) // this Bulkhead died
+        // ✅ ENHANCED: Only share health if this unit is on the board
+        if (deadUnit == unitAI && unitAI.currentState == UnitAI.UnitState.BoardIdle)
         {
             UnitAI nearest = FindNearestAlly();
             if (nearest != null)
             {
                 float healthShare = unitAI.maxHealth * deathSharePercent;
-                nearest.currentHealth += healthShare; // ✅ allows overheal!
+                nearest.currentHealth += healthShare;
 
-                // ✅ Update UI to show the health change
                 if (nearest.ui != null)
                     nearest.ui.UpdateHealth(nearest.currentHealth);
 
@@ -137,9 +158,11 @@ public class BulkheadTrait : MonoBehaviour
             if (ally == unitAI || !ally.isAlive) continue;
             if (ally.team != unitAI.team) continue;
 
+            // ✅ CRITICAL: Only consider allies that are on the board
+            if (ally.currentState != UnitAI.UnitState.BoardIdle) continue;
+
             float dist = Vector3.Distance(unitAI.transform.position, ally.transform.position);
 
-            // ✅ Prioritize Bulkheads, then fallback to anyone
             bool allyIsBulkhead = ally.traits.Contains(Trait.Bulkhead);
             bool nearestIsBulkhead = nearest != null && nearest.traits.Contains(Trait.Bulkhead);
 

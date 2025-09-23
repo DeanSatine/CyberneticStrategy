@@ -174,6 +174,17 @@ public class UnitAI : MonoBehaviour
             }
         }
     }
+    public static void ResetStaticEvents()
+    {
+        Debug.Log("🧹 Resetting static events in UnitAI");
+        OnAnyUnitDeath = null; // Clear all subscribers
+    }
+
+    // Also add this to help debug event issues
+    public static int GetEventSubscriberCount()
+    {
+        return OnAnyUnitDeath?.GetInvocationList()?.Length ?? 0;
+    }
 
     private void Awake()
     {
@@ -473,16 +484,31 @@ public class UnitAI : MonoBehaviour
 
     private void Die()
     {
+        Debug.Log($"💀 {unitName} attempting to die - isAlive: {isAlive}, isBeingRestored: {isBeingRestored}");
+        Debug.Log($"🔍 OnAnyUnitDeath subscribers: {GetEventSubscriberCount()}");
+
         // ✅ Enhanced guards: prevent multiple death calls and restoration interference
         if (!isAlive || isBeingRestored)
         {
             if (isBeingRestored) Debug.Log($"🚫 {unitName} death blocked - unit is being restored");
+            else Debug.Log($"🚫 {unitName} death blocked - already dead");
             return;
         }
 
         CleanupProjectiles();
         isAlive = false;
         OnAnyUnitDeath?.Invoke(this);
+
+        // ✅ FIXED: Ensure event actually fires
+        if (OnAnyUnitDeath != null)
+        {
+            Debug.Log($"🔥 Firing OnAnyUnitDeath event for {unitName} to {GetEventSubscriberCount()} subscribers");
+            OnAnyUnitDeath.Invoke(this);
+        }
+        else
+        {
+            Debug.LogError($"❌ OnAnyUnitDeath is null! Cannot fire death event for {unitName}");
+        }
 
         // ✅ TFT-STYLE: Don't destroy or unregister player units during combat
         // They will be restored from snapshots after combat ends
@@ -1002,8 +1028,8 @@ public class UnitAI : MonoBehaviour
 
                         return $"Passive: Summon a clone of Haymaker with 25% health and damage. The clone does not benefit from traits.\n\n" +
                                $"When units on the board die, Haymaker absorbs their soul. The clone gains 1% health and damage for every 5 souls absorbed.\n\n" +
-                               $"Active: Dash to the center clump of enemies and unleash a fury of slashes within 3 hexes (1 slash for every 0.10 attack speed) that each do {slashDmg} damage for 3 seconds.\n\n" +
-                               $"Then, the clone will slam onto the final target, dealing {slamDmg} damage. While slashing take {damageReductionPercent}% reduced damage. Then dash back to original position.";
+                               $"Active: Dash to the center clump of enemies and unleash a fury of slashes within 3 hexes that each do {slashDmg} damage for 3 seconds. While slashing take {damageReductionPercent}% reduced damage. Then dash back to original position.\n\n" +
+                               $"Then, the clone will slam onto the final target, dealing {slamDmg} damage. ";
                     }
                     return "Haymaker ability missing.";
                 }

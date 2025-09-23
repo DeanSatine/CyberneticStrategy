@@ -16,12 +16,47 @@ public class GameManager : MonoBehaviour
     public AudioClip starUpSound;
     [Header("🔊 Purchase Audio")]
     public AudioClip purchaseSound;
+    // Update GameManager.cs Awake method
     private void Awake()
     {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
-        if (GetComponent<AudioSource>() == null) gameObject.AddComponent<AudioSource>();
+        // ✅ FIXED: Proper singleton management for scene transitions
+        if (Instance == null)
+        {
+            Instance = this;
+
+            // ✅ NEW: Reset static events when GameManager is created
+            UnitAI.ResetStaticEvents();
+
+            Debug.Log("✅ GameManager initialized with clean state");
+        }
+        else if (Instance != this)
+        {
+            Debug.Log("🗑️ Destroying duplicate GameManager");
+            Destroy(gameObject);
+            return;
+        }
+
+        // ✅ NEW: Clear any stale unit lists
+        playerUnits.Clear();
+
+        if (GetComponent<AudioSource>() == null)
+            gameObject.AddComponent<AudioSource>();
     }
+
+    // ✅ NEW: Add method to completely reset GameManager state
+    public void ResetGameState()
+    {
+        Debug.Log("🔄 Resetting GameManager state for new scene");
+
+        // Clear all unit lists
+        playerUnits.Clear();
+
+        // Reset static events
+        UnitAI.ResetStaticEvents();
+
+        Debug.Log("✅ GameManager state reset complete");
+    }
+
 
     // --- Register / Unregister ---
     public void RegisterUnit(UnitAI unit, bool isPlayer)
