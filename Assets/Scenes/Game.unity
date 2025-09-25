@@ -13348,7 +13348,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -16.900002, y: 5.4296465}
+  m_AnchoredPosition: {x: -14.33, y: 5.4296465}
   m_SizeDelta: {x: 22.0915, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &508034895
@@ -13371,7 +13371,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Bulkhead
+  m_text: Clobbertron
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: d81d8f46036ab584c8e06335cec4edcf, type: 2}
   m_sharedMaterial: {fileID: -3898540586883707513, guid: d81d8f46036ab584c8e06335cec4edcf,
@@ -23578,7 +23578,7 @@ MonoBehaviour:
   strikebyteMaxAS2: 0.3
   strikebyteMaxAS3: 0.5
   strikebyteMaxAS4: 0.5
-  eradicatorSlamSound: {fileID: 0}
+  eradicatorSlamSound: {fileID: 8300000, guid: 2f8e4cafcaeb0e749a4bf610da0fa654, type: 3}
   slamAudioVolume: 1
 --- !u!4 &923416039
 Transform:
@@ -37706,7 +37706,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -14.31, y: 0.67}
+  m_AnchoredPosition: {x: -15.65, y: 0.67}
   m_SizeDelta: {x: 22.0915, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1570896446
@@ -37729,7 +37729,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Clobbertron
+  m_text: 'strikebyte
+
+'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: d81d8f46036ab584c8e06335cec4edcf, type: 2}
   m_sharedMaterial: {fileID: -3898540586883707513, guid: d81d8f46036ab584c8e06335cec4edcf,
