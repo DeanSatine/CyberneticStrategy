@@ -386,6 +386,7 @@ MonoBehaviour:
   twoStarMultiplier: 1.8
   threeStarMultiplier: 2.5
   twoStarScale: 1.1
+  traitBonusMaxHealth: 0
   baseMaxHealth: 0
   bonusMaxHealth: 0
   threeStarScale: 1.25
@@ -499,7 +500,7 @@ MonoBehaviour:
     abilityEffect: {fileID: 0}
     abilityProjectile: {fileID: 6341886006476312110, guid: 40a8fdb31d45b3043aaa6af3365e8615,
       type: 3}
-    abilityImpactEffect: {fileID: 1329845292236604, guid: 88e6b468d16dd0146b46d32721338502,
+    abilityImpactEffect: {fileID: 1329845292236604, guid: b86873c7f3378f74e80cbf367d50f02c,
       type: 3}
     autoAttackSound: {fileID: 0}
     abilitySound: {fileID: 0}

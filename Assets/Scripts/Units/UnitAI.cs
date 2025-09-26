@@ -979,8 +979,8 @@ public class UnitAI : MonoBehaviour
                         int bonusNeedles = ability.needlesPerCast - ability.baseNeedleCount;
                         string bonusText = bonusNeedles > 0 ? $" (+{bonusNeedles})" : "";
 
-                        return $"Active: Rapidly throw {ability.needlesPerCast}{bonusText} needles split between the nearest 2 enemies, each dealing {dmg + ad} damage.\n\n" +
-                               $"Every 10 needles thrown, increase the needle count by 1 permanently.\n\n" +
+                        return $"Active: Rapidly shoot {ability.needlesPerCast}{bonusText} needles split between the nearest 2 enemies within 2 hexes, each dealing {dmg + ad} damage.\n\n" +
+                               $"Every 10 needles shot, increase the needle count by 1 permanently.\n\n" +
                                $"Bonus Needle Count: {bonusNeedles}";
                     }
                     return "Needlebot ability missing.";
