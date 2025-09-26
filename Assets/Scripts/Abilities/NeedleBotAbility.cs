@@ -10,21 +10,49 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
 
     [Header("Ability Stats")]
     public int baseNeedleCount = 4;
-    public int needlesPerCast;
+    [SerializeField] public int needlesPerCast; // ✅ FIXED: Made private, controlled by logic
     public float[] damagePerStar = { 100f, 150f, 175f };
 
-   public int totalNeedlesThrown = 0;
+    // ✅ FIXED: This should be persistent across rounds
+    [Header("Needle Stacking Progress")]
+    [SerializeField] private int totalNeedlesThrown = 0; // Persistent needle counter
+    [SerializeField] private int stackingThreshold = 10;  // How many needles needed per stack
+
+    [Header("Audio")]
+    public AudioClip needleThrowSound;
+    [Range(0f, 1f)] public float volume = 0.7f;
+    private AudioSource audioSource;
 
     [Header("Timings")]
     public float startDelay = 0.25f;
     public float throwInterval = 0.1f;
-    public float abilityDuration = 1.5f;
+    public float abilityDuration = 1.5f; // NOTE: Actual duration is now dynamic
 
     private void Awake()
     {
         unitAI = GetComponent<UnitAI>();
         vfxManager = GetComponent<CyberneticVFX>();
-        needlesPerCast = baseNeedleCount;
+
+        // ✅ FIXED: Calculate needles based on current stacking progress
+        CalculateNeedleCount();
+
+        // ✅ Setup audio source for individual needle sounds
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+            audioSource.playOnAwake = false;
+            audioSource.spatialBlend = 0.8f; // 3D spatial sound
+        }
+    }
+
+    // ✅ NEW: Calculate current needle count based on stacking progress
+    private void CalculateNeedleCount()
+    {
+        int bonusNeedles = totalNeedlesThrown / stackingThreshold;
+        needlesPerCast = baseNeedleCount + bonusNeedles;
+
+        Debug.Log($"🎯 {unitAI.unitName} calculated needles: {needlesPerCast} (base: {baseNeedleCount} + bonus: {bonusNeedles} from {totalNeedlesThrown} total thrown)");
     }
 
     public void Cast(UnitAI target)
@@ -38,8 +66,9 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
             unitAI.animator.SetTrigger("AbilityTrigger");
         if (target != null && target.currentState == UnitAI.UnitState.Bench)
             return;
-        if (vfxManager != null)
-            vfxManager.PlayNeedlebotRapidThrow();
+
+        // ✅ REMOVED: Don't call hardcoded VFX method
+        // ✅ REMOVED: vfxManager.PlayNeedlebotRapidThrow();
 
         StartCoroutine(FireNeedlesRoutine());
     }
@@ -48,7 +77,9 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
     {
         yield return new WaitForSeconds(startDelay);
 
-        // ✅ NEW TARGETING: Current target + closest enemy to that target
+        // ✅ Recalculate needles right before firing (in case of mid-combat stacking)
+        CalculateNeedleCount();
+
         List<UnitAI> targets = FindSmartTargets();
         if (targets.Count == 0)
         {
@@ -57,39 +88,45 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
             yield break;
         }
 
-        int needlesPerTarget = Mathf.Max(1, needlesPerCast / targets.Count);
         float damage = damagePerStar[Mathf.Clamp(unitAI.starLevel - 1, 0, damagePerStar.Length - 1)];
 
-        Debug.Log($"🎯 {unitAI.unitName} targeting: {string.Join(", ", targets.ConvertAll(t => t.unitName))}");
+        Debug.Log($"🎯 {unitAI.unitName} firing {needlesPerCast} needles at targets: {string.Join(", ", targets.ConvertAll(t => t.unitName))}");
 
-        // ✅ Fire needles as actual projectiles
+        // ✅ FIXED: Fire ALL accumulated needles with proper audio and VFX per needle
         for (int needleIndex = 0; needleIndex < needlesPerCast; needleIndex++)
         {
             UnitAI target = targets[needleIndex % targets.Count]; // Alternate between targets
 
             if (target != null && target.isAlive && target.currentState != UnitState.Bench)
             {
-                if (unitAI.projectilePrefab != null)
-                {
-                    Vector3 spawnPos = unitAI.firePoint != null ?
-                        unitAI.firePoint.position :
-                        transform.position + Vector3.up * 1.5f;
+                // ✅ Play individual needle sound
+                PlayNeedleSound();
 
-                    StartCoroutine(FireNeedleProjectile(spawnPos, target, damage));
-                }
-                else
+                // ✅ Add muzzle flash for each needle
+                Vector3 spawnPos = unitAI.firePoint != null ?
+                    unitAI.firePoint.position :
+                    transform.position + Vector3.up * 1.5f;
+
+                if (vfxManager != null && vfxManager.vfxConfig.autoAttackMuzzleFlash != null)
                 {
-                    target.TakeDamage(damage + unitAI.attackDamage);
+                    GameObject muzzleFlash = Instantiate(vfxManager.vfxConfig.autoAttackMuzzleFlash, spawnPos, Quaternion.identity);
+                    Destroy(muzzleFlash, 0.5f);
                 }
 
+                // ✅ Fire projectile (uses VFX system's projectile as fallback)
+                StartCoroutine(FireNeedleProjectile(spawnPos, target, damage));
+
+                // ✅ FIXED: Increment counter AFTER successful needle fire
                 totalNeedlesThrown++;
-                if (totalNeedlesThrown % 10 == 0)
+
+                // ✅ Check if we unlocked another needle for NEXT cast
+                if (totalNeedlesThrown % stackingThreshold == 0)
                 {
-                    needlesPerCast++;
-                    Debug.Log($"{unitAI.unitName} permanently increased needle count! Now: {needlesPerCast}");
+                    Debug.Log($"🎯 {unitAI.unitName} unlocked bonus needle! Next cast will have {baseNeedleCount + (totalNeedlesThrown / stackingThreshold)} needles (total thrown: {totalNeedlesThrown})");
                 }
             }
 
+            // ✅ Wait between each needle for sequential firing
             yield return new WaitForSeconds(throwInterval);
         }
 
@@ -97,51 +134,118 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
         EndCast();
     }
 
-    // ✅ NEW: Smart targeting system
+    // ✅ NEW: Play sound for individual needle throw
+    private void PlayNeedleSound()
+    {
+        if (needleThrowSound != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(needleThrowSound, volume);
+        }
+        else if (vfxManager != null && vfxManager.vfxConfig.autoAttackSound != null)
+        {
+            // Fallback to auto attack sound
+            audioSource.PlayOneShot(vfxManager.vfxConfig.autoAttackSound, volume);
+        }
+    }
+
+    // ✅ IMPROVED: Fire individual needle projectile with better fallback
+    private IEnumerator FireNeedleProjectile(Vector3 startPos, UnitAI target, float damage)
+    {
+        if (target == null) yield break;
+
+        // ✅ Try to get projectile from VFX system first, then unitAI
+        GameObject projectilePrefab = null;
+
+        if (vfxManager != null && vfxManager.vfxConfig.autoAttackProjectile != null)
+        {
+            projectilePrefab = vfxManager.vfxConfig.autoAttackProjectile;
+        }
+        else if (unitAI.projectilePrefab != null)
+        {
+            projectilePrefab = unitAI.projectilePrefab;
+        }
+        else
+        {
+            // Fallback: Apply damage directly if no projectile available
+            Debug.LogWarning($"No projectile prefab found for {unitAI.unitName}, applying damage directly");
+            target.TakeDamage(damage + unitAI.attackDamage);
+            yield break;
+        }
+
+        GameObject needle = Instantiate(projectilePrefab, startPos, Quaternion.identity);
+        float speed = 20f;
+
+        while (needle != null && target != null && target.isAlive && target.currentState != UnitState.Bench)
+        {
+            Vector3 targetPos = target.transform.position + Vector3.up * 1.2f;
+            Vector3 direction = (targetPos - needle.transform.position).normalized;
+
+            needle.transform.position += direction * speed * Time.deltaTime;
+            needle.transform.rotation = Quaternion.LookRotation(direction);
+
+            if (Vector3.Distance(needle.transform.position, targetPos) < 0.3f)
+            {
+                target.TakeDamage(damage + unitAI.attackDamage);
+
+                // Spawn hit effect
+                if (vfxManager != null && vfxManager.vfxConfig.autoAttackHitEffect != null)
+                {
+                    GameObject hitEffect = Instantiate(vfxManager.vfxConfig.autoAttackHitEffect, targetPos, Quaternion.identity);
+                    Destroy(hitEffect, 1f);
+                }
+
+                Debug.Log($"🎯 {unitAI.unitName} needle hit {target.unitName} for {damage + unitAI.attackDamage} dmg!");
+                Destroy(needle);
+                yield break;
+            }
+
+            yield return null;
+        }
+
+        if (needle != null) Destroy(needle);
+    }
+
+    // ✅ NEW: Public methods for debugging/UI
+    public int GetCurrentNeedleCount() => needlesPerCast;
+    public int GetTotalNeedlesThrown() => totalNeedlesThrown;
+    public int GetNextStackAt() => ((totalNeedlesThrown / stackingThreshold) + 1) * stackingThreshold;
+
+    // Rest of the methods remain the same...
     private List<UnitAI> FindSmartTargets()
     {
         List<UnitAI> targets = new List<UnitAI>();
 
-        // ✅ Priority 1: Current target (the enemy this unit is actively attacking)
         UnitAI currentTarget = unitAI.GetCurrentTarget();
         if (currentTarget != null && currentTarget.isAlive && currentTarget.team != unitAI.team)
         {
             targets.Add(currentTarget);
-            Debug.Log($"🎯 Primary target: {currentTarget.unitName}");
         }
 
-        // ✅ Priority 2: Find closest enemy to the current target
         if (currentTarget != null)
         {
             UnitAI secondaryTarget = FindClosestEnemyTo(currentTarget);
             if (secondaryTarget != null && secondaryTarget != currentTarget)
             {
                 targets.Add(secondaryTarget);
-                Debug.Log($"🎯 Secondary target: {secondaryTarget.unitName} (closest to {currentTarget.unitName})");
             }
         }
 
-        // ✅ Fallback: If no current target, find 2 nearest enemies to Needlebot
         if (targets.Count == 0)
         {
-            Debug.Log("⚠️ No current target found, falling back to nearest enemies");
             targets = FindNearestEnemies(2);
         }
-        // ✅ If only 1 target found, add the nearest enemy to Needlebot as backup
         else if (targets.Count == 1)
         {
             UnitAI nearestToSelf = FindNearestEnemyToSelf(targets[0]);
             if (nearestToSelf != null)
             {
                 targets.Add(nearestToSelf);
-                Debug.Log($"🎯 Added backup target: {nearestToSelf.unitName}");
             }
         }
 
         return targets;
     }
 
-    // ✅ Find the closest enemy to a specific unit
     private UnitAI FindClosestEnemyTo(UnitAI referenceUnit)
     {
         if (referenceUnit == null) return null;
@@ -152,7 +256,6 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
 
         foreach (var unit in allUnits)
         {
-            // Skip if it's the reference unit, dead, or on same team as Needlebot
             if (unit == referenceUnit || !unit.isAlive || unit.team == unitAI.team)
                 continue;
 
@@ -167,7 +270,6 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
         return closest;
     }
 
-    // ✅ Find nearest enemy to Needlebot (excluding specified unit)
     private UnitAI FindNearestEnemyToSelf(UnitAI excludeUnit)
     {
         UnitAI[] allUnits = FindObjectsOfType<UnitAI>();
@@ -190,43 +292,6 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
         return closest;
     }
 
-    // ✅ Fire individual needle projectile
-    private IEnumerator FireNeedleProjectile(Vector3 startPos, UnitAI target, float damage)
-    {
-        if (unitAI.projectilePrefab == null || target == null) yield break;
-
-        GameObject needle = Instantiate(unitAI.projectilePrefab, startPos, Quaternion.identity);
-        float speed = 20f;
-
-        while (needle != null && target != null && target.isAlive && target.currentState != UnitState.Bench)
-        {
-            Vector3 targetPos = target.transform.position + Vector3.up * 1.2f;
-            Vector3 direction = (targetPos - needle.transform.position).normalized;
-
-            needle.transform.position += direction * speed * Time.deltaTime;
-            needle.transform.rotation = Quaternion.LookRotation(direction);
-
-            if (Vector3.Distance(needle.transform.position, targetPos) < 0.3f)
-            {
-                target.TakeDamage(damage + unitAI.attackDamage);
-
-                if (vfxManager != null && vfxManager.vfxConfig.autoAttackHitEffect != null)
-                {
-                    GameObject hitEffect = Instantiate(vfxManager.vfxConfig.autoAttackHitEffect, targetPos, Quaternion.identity);
-                    Destroy(hitEffect, 1f);
-                }
-
-                Debug.Log($"{unitAI.unitName} needle hit {target.unitName} for {damage + unitAI.attackDamage} dmg!");
-                Destroy(needle);
-                yield break;
-            }
-
-            yield return null;
-        }
-
-        if (needle != null) Destroy(needle);
-    }
-
     private void EndCast()
     {
         unitAI.currentMana = 0f;
@@ -237,7 +302,6 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
         unitAI.canMove = true;
     }
 
-    // ✅ Keep original method as fallback
     private List<UnitAI> FindNearestEnemies(int count)
     {
         UnitAI[] allUnits = FindObjectsOfType<UnitAI>();
