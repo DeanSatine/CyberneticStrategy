@@ -75,6 +75,8 @@ public class StageManager : MonoBehaviour
 
         GameManager.Instance.ResetPlayerUnits();  // snap players back
         EnemyWaveManager.Instance.SpawnEnemyWave(currentStage, roundInStage);
+        // Call this when a round ends or starts
+        HaymakerAbility.CleanupAllDuplicateClones();
 
         // ✅ UPDATED: Use the new visibility logic instead of always showing
         if (UIManager.Instance != null)
@@ -104,6 +106,8 @@ public class StageManager : MonoBehaviour
 
         // ✅ NEW: Restore player units from pre-combat snapshots (TFT-style)
         CombatManager.Instance.RestorePlayerUnitsFromSnapshots();
+        // Call this when a round ends or starts
+        HaymakerAbility.CleanupAllDuplicateClones();
 
         // ✅ OLD METHOD: Keep as fallback for any units not in snapshots
         foreach (var kvp in CombatManager.Instance.GetSavedPlayerPositions())
