@@ -9,6 +9,8 @@ public class Draggable : MonoBehaviour
     private Vector3 oldPosition;
     private UnitAI unitAI;
     public static Draggable currentlyDragging;
+    private HexTile originalTile;
+
     private void Awake()
     {
         unitAI = GetComponent<UnitAI>();
@@ -42,6 +44,9 @@ public class Draggable : MonoBehaviour
             isDragging = true;
             currentlyDragging = this;
             oldPosition = transform.position;
+
+            // ✅ STORE original tile before clearing it
+            originalTile = unitAI.currentTile;
 
             // Free its previously occupied tile immediately
             if (unitAI != null && unitAI.currentTile != null)
@@ -244,11 +249,41 @@ public class Draggable : MonoBehaviour
             Debug.Log($"✅ {unitAI.unitName} placed successfully at {targetTile.gridPosition}");
             return;
         }
-
-
         // No valid tile found → snap back
         Debug.Log($"❌ No valid placement found for {unitAI.unitName}. Returning to original position.");
         transform.position = oldPosition;
+
+        // ✅ CRITICAL: Restore original tile reference to fix movement bug
+        if (originalTile != null)
+        {
+            Debug.Log($"🔄 Restoring {unitAI.unitName} to original tile: {originalTile.gridPosition}");
+
+            // Reclaim the original tile
+            if (originalTile.TryClaim(unitAI))
+            {
+                // Restore proper state based on tile type
+                if (originalTile.tileType == TileType.Board)
+                {
+                    unitAI.currentState = UnitState.BoardIdle;
+                    GameManager.Instance.RegisterUnit(unitAI, unitAI.team == Team.Player);
+                }
+                else if (originalTile.tileType == TileType.Bench)
+                {
+                    unitAI.currentState = UnitState.Bench;
+                    GameManager.Instance.UnregisterUnit(unitAI);
+                }
+
+                Debug.Log($"✅ {unitAI.unitName} successfully restored to {originalTile.gridPosition} with state {unitAI.currentState}");
+            }
+            else
+            {
+                Debug.LogWarning($"⚠️ Could not reclaim original tile {originalTile.gridPosition}, unit may be in invalid state!");
+            }
+        }
+
+        // ✅ Clear the stored reference
+        originalTile = null;
+        return;
     }
 
     private Vector3 GetMouseWorldPos()
