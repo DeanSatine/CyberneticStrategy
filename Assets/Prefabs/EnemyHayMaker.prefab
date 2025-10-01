@@ -421,7 +421,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3d9904e7b0c0e740bfea16738494774, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  unitName: HayMaker
+  unitName: Haymaker
   starLevel: 1
   team: 1
   maxHealth: 1100

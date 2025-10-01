@@ -51,7 +51,24 @@ public class KillSwitchAbility : MonoBehaviour, IUnitAbility
 
     // Audio system
     private AudioSource abilityAudioSource;
+    private void Start()
+    {
+        // ✅ CRITICAL: Subscribe to attack events for passive ability
+        if (unitAI != null)
+        {
+            unitAI.OnAttackEvent += OnAttack;
+            Debug.Log($"🗡️ {unitAI.unitName} KillSwitch passive ability activated!");
+        }
+    }
 
+    private void OnDestroy()
+    {
+        // ✅ Clean up event subscriptions
+        if (unitAI != null)
+        {
+            unitAI.OnAttackEvent -= OnAttack;
+        }
+    }
     private void Awake()
     {
         unitAI = GetComponent<UnitAI>();
@@ -102,6 +119,18 @@ public class KillSwitchAbility : MonoBehaviour, IUnitAbility
 
         // ✅ Play ability start audio
         PlayAbilityAudio(abilityStartSound, "ability start");
+        // ✅ ABILITY HEAL: KillSwitch heals when casting ability
+        float abilityHeal = healOnTargetSwap = 200; // Half the swap heal amount
+        float oldHealth = unitAI.currentHealth;
+        unitAI.currentHealth = Mathf.Min(unitAI.maxHealth, unitAI.currentHealth + abilityHeal);
+
+        Debug.Log($"🌟 {unitAI.unitName} ABILITY HEAL: {oldHealth} → {unitAI.currentHealth} (+{abilityHeal})");
+
+        // ✅ Update UI immediately
+        if (unitAI.ui != null)
+        {
+            unitAI.ui.UpdateHealth(unitAI.currentHealth);
+        }
 
         Debug.Log($"🦘 {unitAI.unitName} leaping to FARTHEST enemy: {target.unitName}");
         StartCoroutine(LeapAndSlam(target));
@@ -273,20 +302,40 @@ public class KillSwitchAbility : MonoBehaviour, IUnitAbility
     public void OnAttack(UnitAI target)
     {
         attackCounter++;
+        Debug.Log($"🗡️ {unitAI.unitName} attack #{attackCounter} vs {target?.unitName}");
 
+        // ✅ ARMOR SHRED: Every other attack (2nd, 4th, 6th, etc.)
         if (attackCounter % 2 == 0 && target != null)
         {
+            float oldArmor = target.armor;
             target.armor = Mathf.Max(0, target.armor - armorShred);
-            Debug.Log($"{unitAI.unitName} shredded {target.unitName}'s armor! Now {target.armor}");
+
+            Debug.Log($"⚔️ {unitAI.unitName} ARMOR SHRED! {target.unitName}: {oldArmor} → {target.armor} (-{armorShred})");
+
+            // ✅ TODO: Add armor UI update if you have armor display
+            // if (target.ui != null) target.ui.UpdateArmor(target.armor);
         }
 
-        if (lastTarget != null && lastTarget != target)
+        // ✅ TARGET SWAP PASSIVE: Heal + slam previous target
+        if (lastTarget != null && lastTarget != target && lastTarget.isAlive)
         {
-            float dmg = passiveSlamDamage + unitAI.attackDamage;
-            lastTarget.TakeDamage(dmg);
+            // Deal damage to previous target
+            float slamDamage = passiveSlamDamage + unitAI.attackDamage;
+            lastTarget.TakeDamage(slamDamage);
+
+            // Heal KillSwitch
+            float oldHealth = unitAI.currentHealth;
             unitAI.currentHealth = Mathf.Min(unitAI.maxHealth, unitAI.currentHealth + healOnTargetSwap);
 
-            Debug.Log($"{unitAI.unitName} slammed {lastTarget.unitName} on target swap for {dmg} dmg + healed {healOnTargetSwap} HP!");
+            Debug.Log($"🔄 {unitAI.unitName} TARGET SWAP!");
+            Debug.Log($"💥 Slammed {lastTarget.unitName} for {slamDamage} damage");
+            Debug.Log($"💚 {unitAI.unitName} healed: {oldHealth} → {unitAI.currentHealth} (+{healOnTargetSwap})");
+
+            // ✅ CRITICAL: Update UI to show healing
+            if (unitAI.ui != null)
+            {
+                unitAI.ui.UpdateHealth(unitAI.currentHealth);
+            }
         }
 
         lastTarget = target;

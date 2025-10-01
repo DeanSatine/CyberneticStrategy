@@ -260,6 +260,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 542645363885373531}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 503884b0a8b3f7548acbd486859d7efb,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -7224006314842472254}
   m_SourcePrefab: {fileID: 100100000, guid: 503884b0a8b3f7548acbd486859d7efb, type: 3}
 --- !u!1 &27990592220160999 stripped
 GameObject:
@@ -344,6 +348,7 @@ MonoBehaviour:
   twoStarMultiplier: 1.8
   threeStarMultiplier: 2.5
   twoStarScale: 1.1
+  traitBonusMaxHealth: 0
   baseMaxHealth: 0
   bonusMaxHealth: 0
   threeStarScale: 1.25
@@ -376,7 +381,7 @@ MonoBehaviour:
   slamVFX: {fileID: 0}
   abilityStartSound: {fileID: 0}
   leapSound: {fileID: 0}
-  slamImpactSound: {fileID: 8300000, guid: 2f8e4cafcaeb0e749a4bf610da0fa654, type: 3}
+  slamImpactSound: {fileID: 8300000, guid: 1a57ad46d3d7b294399a4ceac0103c81, type: 3}
   landingSound: {fileID: 0}
   attackSpeedBuffSound: {fileID: 0}
   abilityAudioVolume: 1
@@ -441,3 +446,33 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isDragging: 0
+--- !u!114 &-7224006314842472254
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 27990592220160999}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7771fb580d6217a4da3ee7324885b101, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  vfxConfig:
+    autoAttackProjectile: {fileID: 8548050680436672203, guid: 535ef7817c5bc78489aa45e25295e778,
+      type: 3}
+    autoAttackMuzzleFlash: {fileID: 0}
+    autoAttackHitEffect: {fileID: 8293869836834216953, guid: e9c409c0ecf3f1f4a936abb01b527ad6,
+      type: 3}
+    abilityEffect: {fileID: 0}
+    abilityProjectile: {fileID: 0}
+    abilityImpactEffect: {fileID: 0}
+    autoAttackSound: {fileID: 8300000, guid: 8f1ab97634c192845b762607bb48353e, type: 3}
+    abilitySound: {fileID: 0}
+    volume: 0.7
+  deathVFX: {fileID: 0}
+  levelUpVFX: {fileID: 0}
+  damageNumbersPrefab: {fileID: 0}
+  firePoint: {fileID: 0}
+  chestPoint: {fileID: 0}
+  weaponPoint: {fileID: 0}

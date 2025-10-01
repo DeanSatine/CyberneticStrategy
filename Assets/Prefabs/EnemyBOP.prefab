@@ -309,7 +309,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3d9904e7b0c0e740bfea16738494774, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  unitName: B.O.P
+  unitName: BOP
   starLevel: 1
   team: 1
   maxHealth: 900
@@ -354,6 +354,7 @@ MonoBehaviour:
   twoStarMultiplier: 1.8
   threeStarMultiplier: 2.5
   twoStarScale: 1.1
+  traitBonusMaxHealth: 0
   baseMaxHealth: 0
   bonusMaxHealth: 0
   threeStarScale: 1.25

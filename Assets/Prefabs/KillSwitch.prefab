@@ -347,6 +347,7 @@ MonoBehaviour:
   twoStarMultiplier: 1.8
   threeStarMultiplier: 2.5
   twoStarScale: 1.1
+  traitBonusMaxHealth: 0
   baseMaxHealth: 0
   bonusMaxHealth: 0
   threeStarScale: 1.12
@@ -379,7 +380,7 @@ MonoBehaviour:
   slamVFX: {fileID: 0}
   abilityStartSound: {fileID: 0}
   leapSound: {fileID: 0}
-  slamImpactSound: {fileID: 8300000, guid: 2f8e4cafcaeb0e749a4bf610da0fa654, type: 3}
+  slamImpactSound: {fileID: 8300000, guid: 1a57ad46d3d7b294399a4ceac0103c81, type: 3}
   landingSound: {fileID: 0}
   attackSpeedBuffSound: {fileID: 0}
   abilityAudioVolume: 1
@@ -465,7 +466,7 @@ MonoBehaviour:
     abilityEffect: {fileID: 0}
     abilityProjectile: {fileID: 0}
     abilityImpactEffect: {fileID: 0}
-    autoAttackSound: {fileID: 0}
+    autoAttackSound: {fileID: 8300000, guid: 8f1ab97634c192845b762607bb48353e, type: 3}
     abilitySound: {fileID: 0}
     volume: 0.7
   deathVFX: {fileID: 0}

@@ -312,7 +312,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3d9904e7b0c0e740bfea16738494774, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  unitName: NeedleBot
+  unitName: Needlebot
   starLevel: 1
   team: 1
   maxHealth: 400
@@ -357,6 +357,7 @@ MonoBehaviour:
   twoStarMultiplier: 1.8
   threeStarMultiplier: 2.5
   twoStarScale: 1.1
+  traitBonusMaxHealth: 0
   baseMaxHealth: 0
   bonusMaxHealth: 0
   threeStarScale: 1.25
@@ -392,9 +393,13 @@ MonoBehaviour:
   - 65
   - 95
   totalNeedlesThrown: 0
+  stackingThreshold: 10
+  needleThrowSound: {fileID: 0}
+  volume: 0.7
   startDelay: 0.25
   throwInterval: 0.1
   abilityDuration: 1.5
+  maxHexRange: 6
 --- !u!65 &715305022984521276
 BoxCollider:
   m_ObjectHideFlags: 0

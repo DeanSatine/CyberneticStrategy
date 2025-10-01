@@ -469,6 +469,7 @@ MonoBehaviour:
   twoStarMultiplier: 1.8
   threeStarMultiplier: 2.5
   twoStarScale: 1.1
+  traitBonusMaxHealth: 0
   baseMaxHealth: 0
   bonusMaxHealth: 0
   threeStarScale: 1.25
@@ -540,7 +541,7 @@ MonoBehaviour:
     abilityEffect: {fileID: 0}
     abilityProjectile: {fileID: 0}
     abilityImpactEffect: {fileID: 0}
-    autoAttackSound: {fileID: 0}
+    autoAttackSound: {fileID: 8300000, guid: 674c5761d711d6044bf48b31e8ee803b, type: 3}
     abilitySound: {fileID: 0}
     volume: 0.7
   deathVFX: {fileID: 0}
@@ -564,3 +565,4 @@ MonoBehaviour:
   originalUnitName: 
   canBeSold: 0
   showInUI: 1
+  masterHaymaker: {fileID: 0}
