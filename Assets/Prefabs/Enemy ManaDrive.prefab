@@ -403,9 +403,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damagePerStar:
-  - 40
-  - 60
-  - 80
+  - 350
+  - 500
+  - 950
   range: 4
   splashRadius: 2
   attackSpeedGain: 0.3

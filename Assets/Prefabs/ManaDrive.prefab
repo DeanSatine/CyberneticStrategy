@@ -386,6 +386,7 @@ MonoBehaviour:
   twoStarMultiplier: 1.8
   threeStarMultiplier: 2.5
   twoStarScale: 1.1
+  traitBonusMaxHealth: 0
   baseMaxHealth: 0
   bonusMaxHealth: 0
   threeStarScale: 1.12
@@ -402,9 +403,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damagePerStar:
-  - 200
-  - 300
-  - 540
+  - 350
+  - 500
+  - 950
   range: 4
   splashRadius: 3
   attackSpeedGain: 0.3
