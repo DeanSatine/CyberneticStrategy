@@ -16,6 +16,7 @@ public class BOPAbility : MonoBehaviour, IUnitAbility
     [Header("🔊 BOP Ability Audio")]
     [Tooltip("Audio played when ability is activated")]
     public AudioClip abilityStartSound;
+    public AudioClip voiceLine;
 
     [Tooltip("Audio played during chest pound moment")]
     public AudioClip chestPoundSound;
@@ -74,6 +75,8 @@ public class BOPAbility : MonoBehaviour, IUnitAbility
     // Called by UnitAI when mana is full
     public void Cast(UnitAI target)
     {
+        PlayAbilityAudio(voiceLine, "voice line");
+
         // ✅ Play ability start audio
         PlayAbilityAudio(abilityStartSound, "ability start");
 

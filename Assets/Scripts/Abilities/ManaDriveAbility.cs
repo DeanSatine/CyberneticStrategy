@@ -23,6 +23,7 @@ public class ManaDriveAbility : MonoBehaviour, IUnitAbility
     [Header("🔊 ManaDrive Ability Audio")]
     [Tooltip("Audio played when ability is activated")]
     public AudioClip abilityStartSound;
+    public AudioClip voiceLine;
 
     [Tooltip("Audio played when bomb is launched")]
     public AudioClip bombLaunchSound;
@@ -84,8 +85,10 @@ public class ManaDriveAbility : MonoBehaviour, IUnitAbility
 
     public void Cast(UnitAI target)
     {
+
         // ✅ Play ability start audio
         PlayAbilityAudio(abilityStartSound, "ability start");
+        PlayAbilityAudio(voiceLine, "voice line");
 
         if (unitAI.animator != null)
             unitAI.animator.SetTrigger("AbilityTrigger");
@@ -196,6 +199,8 @@ public class ManaDriveAbility : MonoBehaviour, IUnitAbility
         // If bomb killed a target, gain attack speed and cast again
         if (killedTarget)
         {
+            PlayAbilityAudio(voiceLine, "voice line");
+
             // ✅ Play attack speed gain audio
             PlayAbilityAudio(attackSpeedGainSound, "attack speed gain");
 
