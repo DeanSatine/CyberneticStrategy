@@ -85,15 +85,24 @@ public class ManaDriveAbility : MonoBehaviour, IUnitAbility
 
     public void Cast(UnitAI target)
     {
+        // ✅ CRITICAL: Validate enemies exist before casting
+        Vector3 targetPosition = FindLargestEnemyGroup();
 
-        // ✅ Play ability start audio
-        PlayAbilityAudio(abilityStartSound, "ability start");
+        if (targetPosition == Vector3.zero)
+        {
+            Debug.Log($"❌ {unitAI.unitName} ManaDrive: No valid enemies found, ability fizzled!");
+
+            // ✅ Reset mana since ability failed to cast
+            unitAI.currentMana = 0;
+            return;
+        }
+
+        // ✅ Play voice line and audio
         PlayAbilityAudio(voiceLine, "voice line");
+        PlayAbilityAudio(abilityStartSound, "ability start");
 
         if (unitAI.animator != null)
             unitAI.animator.SetTrigger("AbilityTrigger");
-
-        Vector3 targetPosition = FindLargestEnemyGroup();
 
         if (castVFX != null)
         {
@@ -101,10 +110,11 @@ public class ManaDriveAbility : MonoBehaviour, IUnitAbility
             Destroy(castEffect, 2f);
         }
 
-        Debug.Log($"💣 {unitAI.unitName} starts ManaDrive bombing sequence!");
+        Debug.Log($"💣 {unitAI.unitName} starts ManaDrive bombing sequence at {targetPosition}!");
 
         StartCoroutine(FireMassiveBomb(targetPosition, 1.0f));
     }
+
 
     private IEnumerator FireMassiveBomb(Vector3 targetPosition, float damageMultiplier)
     {
@@ -222,8 +232,6 @@ public class ManaDriveAbility : MonoBehaviour, IUnitAbility
         // Reset mana after cast
         unitAI.currentMana = 0;
     }
-
-    // Find position with most enemies clustered together
     private Vector3 FindLargestEnemyGroup()
     {
         UnitAI[] allUnits = FindObjectsOfType<UnitAI>();
@@ -235,7 +243,12 @@ public class ManaDriveAbility : MonoBehaviour, IUnitAbility
                 enemies.Add(unit);
         }
 
-        if (enemies.Count == 0) return Vector3.zero;
+        // ✅ CRITICAL: Return Vector3.zero if no enemies
+        if (enemies.Count == 0)
+        {
+            Debug.Log($"❌ {unitAI.unitName} ManaDrive: No living enemies found!");
+            return Vector3.zero;
+        }
 
         Vector3 bestPosition = enemies[0].transform.position;
         int maxEnemiesInRange = 0;
@@ -259,6 +272,8 @@ public class ManaDriveAbility : MonoBehaviour, IUnitAbility
             }
         }
 
+        Debug.Log($"🎯 {unitAI.unitName} ManaDrive targeting position with {maxEnemiesInRange} enemies");
         return bestPosition;
     }
+
 }

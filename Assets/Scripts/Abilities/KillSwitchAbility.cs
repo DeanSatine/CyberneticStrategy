@@ -48,7 +48,8 @@ public class KillSwitchAbility : MonoBehaviour, IUnitAbility
     [Tooltip("Volume for ability audio")]
     [Range(0f, 1f)]
     public float abilityAudioVolume = 1f;
-
+    private Coroutine attackSpeedBuffCoroutine;
+    private float originalAttackSpeed;
     // Audio system
     private AudioSource abilityAudioSource;
     private void Start()
@@ -67,12 +68,14 @@ public class KillSwitchAbility : MonoBehaviour, IUnitAbility
         if (unitAI != null)
         {
             unitAI.OnAttackEvent -= OnAttack;
+            CleanupAttackSpeedBuff();
         }
     }
     private void Awake()
     {
         unitAI = GetComponent<UnitAI>();
         SetupAbilityAudio();
+        originalAttackSpeed = unitAI.attackSpeed;
     }
 
     // Setup ability audio
@@ -106,6 +109,35 @@ public class KillSwitchAbility : MonoBehaviour, IUnitAbility
     {
         return abilityStartSound;
     }
+
+    // ✅ NEW: Proper attack speed cleanup
+    public void CleanupAttackSpeedBuff()
+    {
+        if (attackSpeedBuffCoroutine != null)
+        {
+            StopCoroutine(attackSpeedBuffCoroutine);
+            attackSpeedBuffCoroutine = null;
+        }
+
+        // ✅ Reset to original attack speed
+        if (unitAI != null)
+        {
+            unitAI.attackSpeed = originalAttackSpeed;
+            Debug.Log($"🔄 {unitAI.unitName} attack speed reset to {originalAttackSpeed}");
+        }
+    }
+
+    // ✅ NEW: Round cleanup method
+    public void OnRoundEnd()
+    {
+        Debug.Log($"[KillSwitchAbility] Round ended, cleaning up {unitAI.unitName}");
+        CleanupAttackSpeedBuff();
+
+        // Reset passive state
+        attackCounter = 0;
+        lastTarget = null;
+    }
+
 
     public void Cast(UnitAI _ignored)
     {
@@ -296,7 +328,7 @@ public class KillSwitchAbility : MonoBehaviour, IUnitAbility
         // ✅ Play attack speed buff audio
         PlayAbilityAudio(attackSpeedBuffSound, "attack speed buff");
 
-        StartCoroutine(TemporaryAttackSpeedBuff(attackSpeedBuff, buffDuration));
+        attackSpeedBuffCoroutine = StartCoroutine(TemporaryAttackSpeedBuff(attackSpeedBuff, buffDuration));
     }
 
     public void OnAttack(UnitAI target)
@@ -343,15 +375,27 @@ public class KillSwitchAbility : MonoBehaviour, IUnitAbility
 
     private IEnumerator TemporaryAttackSpeedBuff(float multiplier, float duration)
     {
-        float original = unitAI.attackSpeed;
-        unitAI.attackSpeed *= multiplier;
+        // ✅ Stop any existing buff first
+        if (attackSpeedBuffCoroutine != null)
+        {
+            StopCoroutine(attackSpeedBuffCoroutine);
+        }
 
-        Debug.Log($"⚡ {unitAI.unitName} gained {(multiplier - 1f) * 100:F0}% attack speed for {duration} seconds!");
+        float buffedSpeed = originalAttackSpeed * multiplier;
+        unitAI.attackSpeed = buffedSpeed;
+
+        Debug.Log($"⚡ {unitAI.unitName} gained attack speed: {originalAttackSpeed} → {buffedSpeed} for {duration}s");
 
         yield return new WaitForSeconds(duration);
 
-        unitAI.attackSpeed = original;
-        Debug.Log($"⏰ {unitAI.unitName} attack speed buff expired");
+        // ✅ Only reset if unit is still alive
+        if (unitAI != null && unitAI.isAlive)
+        {
+            unitAI.attackSpeed = originalAttackSpeed;
+            Debug.Log($"⏰ {unitAI.unitName} attack speed buff expired, reset to {originalAttackSpeed}");
+        }
+
+        attackSpeedBuffCoroutine = null;
     }
 
     private UnitAI FindFarthestEnemyInRange(float range)

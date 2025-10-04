@@ -119,7 +119,30 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
             audioSource.PlayOneShot(clip, volume);
         }
     }
+    public void OnRoundEnd()
+    {
+        Debug.Log($"[HaymakerAbility] Round ended, cleaning up for {unitAI.unitName}");
 
+        // Stop any ongoing abilities
+        if (isPerformingAbility)
+        {
+            StopAllCoroutines();
+            ResetAbilityState();
+        }
+
+        // Reset soul count for new round (optional - remove if you want souls to persist)
+        soulCount = 0;
+
+        // Ensure clone state is properly managed
+        if (unitAI.currentState == UnitState.Bench)
+        {
+            shouldHaveClone = false;
+            if (cloneInstance != null)
+            {
+                DestroyClone();
+            }
+        }
+    }
     private void Update()
     {
         if (!isInitialized) return;
@@ -185,30 +208,26 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
     {
         lock (cloneLock)
         {
-            // ✅ Check if we already have a clone
-            if (shouldHaveClone && cloneInstance != null)
+            // ✅ CRITICAL: Only one clone per team, ever
+            HaymakerClone[] allClones = FindObjectsOfType<HaymakerClone>();
+            foreach (var clone in allClones)
             {
-                Debug.Log("[HaymakerAbility] Already have clone, not spawning");
-                return false;
+                var cloneAI = clone.GetComponent<UnitAI>();
+                if (cloneAI != null && cloneAI.team == unitAI.team && cloneAI.isAlive)
+                {
+                    Debug.Log($"[HaymakerAbility] Team {unitAI.team} already has living clone: {clone.name}");
+                    return false;
+                }
             }
 
-            // ✅ CRITICAL: Check if team already has ANY clone
-            if (globalActiveClones.ContainsKey(unitAI.team))
+            // ✅ Check if we already have a clone reference
+            if (shouldHaveClone && cloneInstance != null)
             {
-                GameObject existingClone = globalActiveClones[unitAI.team];
-                if (existingClone != null)
+                var cloneAI = cloneInstance.GetComponent<UnitAI>();
+                if (cloneAI != null && cloneAI.isAlive)
                 {
-                    var cloneAI = existingClone.GetComponent<UnitAI>();
-                    if (cloneAI != null && cloneAI.isAlive)
-                    {
-                        Debug.Log($"[HaymakerAbility] Team {unitAI.team} already has a living clone, cannot spawn another");
-                        return false;
-                    }
-                    else
-                    {
-                        // Remove dead clone from tracking
-                        globalActiveClones.Remove(unitAI.team);
-                    }
+                    Debug.Log("[HaymakerAbility] Already have living clone, not spawning");
+                    return false;
                 }
             }
 
@@ -469,6 +488,32 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
                     globalActiveClones[teamClones.Key] = teamClones.Value[0];
                 }
             }
+        }
+    }
+    public static void CleanupAllClonesForNewRound()
+    {
+        lock (cloneLock)
+        {
+            Debug.Log("[HaymakerAbility] Cleaning up all clones for new round");
+
+            // Clear global tracking
+            globalActiveClones.Clear();
+            allActiveCloneIDs.Clear();
+
+            // Find and properly clean up all existing clones
+            HaymakerClone[] existingClones = FindObjectsOfType<HaymakerClone>();
+            foreach (var clone in existingClones)
+            {
+                var cloneAI = clone.GetComponent<UnitAI>();
+                if (cloneAI != null)
+                {
+                    cloneAI.ClearTile();
+                    GameManager.Instance.UnregisterUnit(cloneAI);
+                }
+                Destroy(clone.gameObject);
+            }
+
+            Debug.Log($"[HaymakerAbility] Cleaned up {existingClones.Length} clones");
         }
     }
 
@@ -1257,11 +1302,6 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
 
         return closest;
     }
-
-    // ✅ UPDATED: Remove this method since we're now using FindEnemiesInRadius directly
-    // The old FindClosestEnemy method is replaced by using FindEnemiesInRadius with 3f radius
-
-    // Keep the existing FindEnemiesInRadius method as-is since it's working correctly
     private List<UnitAI> FindEnemiesInRadius(float radius, Vector3? center = null)
     {
         if (center == null) center = transform.position;
