@@ -23,13 +23,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7524547029888048723}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0.107, y: 1.067, z: 0.026}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 7839343507607208034}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &8466588804815962026
 PrefabInstance:
@@ -337,6 +337,7 @@ Animation:
   - {fileID: 7400000, guid: 6bb9c1799f3255e468b3212e9b5c2b0b, type: 2}
   - {fileID: -203655887218126122, guid: 366e0be309326b64186a6206fc7c9fe0, type: 3}
   - {fileID: -203655887218126122, guid: c7970482d08dcdf449cf26a367e0cd88, type: 3}
+  - {fileID: -203655887218126122, guid: e94950076b68ec640b9de833ea525fc9, type: 3}
   m_WrapMode: 0
   m_PlayAutomatically: 0
   m_AnimatePhysics: 0
@@ -397,6 +398,7 @@ MonoBehaviour:
   twoStarMultiplier: 1.8
   threeStarMultiplier: 2.5
   twoStarScale: 1.1
+  traitBonusMaxHealth: 0
   baseMaxHealth: 0
   bonusMaxHealth: 0
   threeStarScale: 1.12
@@ -432,9 +434,13 @@ MonoBehaviour:
   - 65
   - 95
   totalNeedlesThrown: 0
+  stackingThreshold: 10
+  needleThrowSound: {fileID: 0}
+  volume: 0.7
   startDelay: 0.25
   throwInterval: 0.1
   abilityDuration: 1.5
+  maxHexRange: 6
 --- !u!65 &715305022984521276
 BoxCollider:
   m_ObjectHideFlags: 0

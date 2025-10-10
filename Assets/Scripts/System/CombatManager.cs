@@ -533,6 +533,13 @@ public class CombatManager : MonoBehaviour
                 unit.canMove = false;
             }
         }
+        if (playerWon && VictoryDanceManager.Instance != null)
+        {
+            VictoryDanceManager.Instance.StartVictoryDance();
+
+            // Wait a bit longer for the dance to show
+            yield return new WaitForSeconds(1.0f);
+        }
 
         // ✅ Show win/lose UI (handles the 2-second delay)
         if (UIManager.Instance != null)
