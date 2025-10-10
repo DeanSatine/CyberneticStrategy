@@ -1,7 +1,8 @@
-﻿using TMPro;
+﻿using System.Collections;
+using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using System.Collections;
 
 public class UIManager : MonoBehaviour
 {
@@ -21,6 +22,8 @@ public class UIManager : MonoBehaviour
     [Header("Win/Lose UI")]
     public GameObject winLosePanel;    // Simple panel with text
     public TMP_Text winLoseText;
+    [Header("Augment UI")]
+    [SerializeField] private AugmentSelectionUI augmentSelectionUI;
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -44,7 +47,25 @@ public class UIManager : MonoBehaviour
         if (livesText != null)
             livesText.text = $"{lives}";
     }
+    public void ShowAugmentSelection(List<BaseAugment> choices, int currentStage)
+    {
+        if (augmentSelectionUI != null)
+        {
+            augmentSelectionUI.ShowAugmentSelection(choices, currentStage);
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ AugmentSelectionUI not assigned in UIManager!");
+        }
+    }
 
+    public void AddActiveAugment(BaseAugment augment)
+    {
+        if (augmentSelectionUI != null)
+        {
+            augmentSelectionUI.AddActiveAugmentIcon(augment);
+        }
+    }
     public void UpdateStageUI(int stage, int round, int roundsPerStage)
     {
         if (stageText != null)

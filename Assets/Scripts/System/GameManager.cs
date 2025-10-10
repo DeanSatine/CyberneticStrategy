@@ -77,6 +77,10 @@ public class GameManager : MonoBehaviour
         {
             UIManager.Instance.UpdateFightButtonVisibility();
         }
+        if (isPlayer && AugmentManager.Instance != null)
+        {
+            AugmentManager.Instance.OnUnitSpawned(unit);
+        }
     }
 
     public void UnregisterUnit(UnitAI unit)

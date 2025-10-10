@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class StageManager : MonoBehaviour
 {
@@ -63,11 +64,29 @@ public class StageManager : MonoBehaviour
             EconomyManager.Instance.AddGold(1);
             Debug.Log("💰 Player earned 1 gold for participation!");
         }
-
+        if (playerWon && roundInStage == 1) // First round of a new stage
+        {
+            CheckForAugmentSelection();
+        }
         ResetToPrepPhase();
         NextRound();
     }
+    private void CheckForAugmentSelection()
+    {
+        if (AugmentManager.Instance != null && AugmentManager.Instance.ShouldOfferAugment(currentStage))
+        {
+            Debug.Log($"🎯 Offering augment selection for stage {currentStage}");
 
+            // Get augment choices
+            List<BaseAugment> choices = AugmentManager.Instance.GetRandomAugmentChoices();
+
+            // Show augment selection UI
+            if (UIManager.Instance != null)
+            {
+                UIManager.Instance.ShowAugmentSelection(choices, currentStage);
+            }
+        }
+    }
     public void EnterPrepPhase()
     {
         Debug.Log("🔄 Entering Prep Phase");
@@ -89,7 +108,10 @@ public class StageManager : MonoBehaviour
     {
         Debug.Log("⚔️ Entering Combat Phase");
         currentPhase = GamePhase.Combat;
-
+        if (AugmentManager.Instance != null)
+        {
+            AugmentManager.Instance.OnCombatStart();
+        }
         CombatManager.Instance.ClearProjectiles();
 
         UIManager.Instance.ShowFightButton(false);
@@ -121,7 +143,10 @@ public class StageManager : MonoBehaviour
                 unit.AssignToTile(tile);
             }
         }
-
+        if (AugmentManager.Instance != null)
+        {
+            AugmentManager.Instance.OnCombatEnd();
+        }
         // ✅ Reapply traits after all units are reset
         TraitManager.Instance.EvaluateTraits(GameManager.Instance.playerUnits);
         TraitManager.Instance.ApplyTraits(GameManager.Instance.playerUnits);

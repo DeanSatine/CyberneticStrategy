@@ -1005,8 +1005,8 @@ public class UnitAI : MonoBehaviour
                     if (ability != null)
                     {
                         float slamDmg = ability.slamDamagePerStar[Mathf.Clamp(star - 1, 0, ability.slamDamagePerStar.Length - 1)];
-                        return $"Passive: Every other attack lowers the target's armour by {ability.armorShred}. When changing targets, slam the target dealing {ability.passiveSlamDamage + ad} damage and restoring {ability.healOnTargetSwap} hp.\n\n" +
-                               $"Active: Leap to the farthest enemy within 4 hexes and slam them for {slamDmg + ad} damage. Grant KillSwitch 50% attack speed for 4 seconds.";
+                        return $"Passive: Every other attack lowers the target's armour by {ability.armorShred}.\n\n" +
+                               $"Active: Leap to the farthest enemy within 4 hexes, heal {ability.healOnTargetSwap} hp and slam them for {slamDmg + ad} damage. Grant KillSwitch 50% attack speed for 4 seconds.";
                     }
                     return "KillSwitch ability missing.";
                 }
