@@ -1312,7 +1312,7 @@ public class UnitAI : MonoBehaviour
         if (GameManager.Instance != null && GameManager.Instance.starUpVFXPrefab != null)
         {
             var vfx = Instantiate(GameManager.Instance.starUpVFXPrefab, transform.position + Vector3.up * 1.2f, Quaternion.identity);
-            Destroy(vfx, 1f);
+            Destroy(vfx, 0.8f);
         }
 
         // after this line:
