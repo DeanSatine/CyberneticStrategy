@@ -1,5 +1,4 @@
-﻿// /Assets/Scripts/Augments/ClobbertronJumpBehavior.cs
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 
 public class ClobbertronJumpBehaviour : MonoBehaviour

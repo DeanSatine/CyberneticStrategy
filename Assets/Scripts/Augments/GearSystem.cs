@@ -1,4 +1,4 @@
-﻿// /Assets/Scripts/Augments/GearSystem.cs
+﻿// Updated /Assets/Scripts/Augments/GearSystem.cs
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
@@ -15,11 +15,18 @@ public class GearSystem : MonoBehaviour
 
     [Header("Gear Visual Settings")]
     public GameObject gearPrefab;
-    public float gearScale = 0.5f;
+    public float gearScale = 80f;
     public float flySpeed = 8f;
     public float flyHeight = 2f;
 
     private bool hasSubscribedToAttack = false;
+
+    // NEW: Method to set gear prefab from augment configuration
+    public void SetGearPrefab(GameObject prefab)
+    {
+        gearPrefab = prefab;
+        Debug.Log($"⚙️ GearSystem gear prefab set to: {(prefab != null ? prefab.name : "null")}");
+    }
 
     public void Initialize(SupportTheRevolutionAugment augment, int gearCount, float radius, float speed)
     {
@@ -30,10 +37,15 @@ public class GearSystem : MonoBehaviour
 
         unitAI = GetComponent<UnitAI>();
 
-        // Load gear prefab if not assigned
+        // Use provided gear prefab or create default
         if (gearPrefab == null)
         {
             gearPrefab = CreateDefaultGear();
+            Debug.Log("⚙️ No gear prefab configured, using default cylinder");
+        }
+        else
+        {
+            Debug.Log($"⚙️ Using configured gear prefab: {gearPrefab.name}");
         }
 
         // Subscribe to attack events
@@ -92,16 +104,20 @@ public class GearSystem : MonoBehaviour
         // Clear existing gears
         ClearGears();
 
-        // Create new gears
+        // Create new gears using the configured prefab
         for (int i = 0; i < maxGears; i++)
         {
             GameObject gear = Instantiate(gearPrefab);
             gear.transform.SetParent(transform);
             gear.name = $"Gear_{i}";
+
+            // Scale the gear appropriately
+            gear.transform.localScale = Vector3.one * gearScale;
+
             gears.Add(gear);
         }
 
-        Debug.Log($"⚙️ Created {gears.Count} gears for {unitAI.unitName}");
+        Debug.Log($"⚙️ Created {gears.Count} gears using prefab: {gearPrefab.name} for {unitAI.unitName}");
     }
 
     private void Update()

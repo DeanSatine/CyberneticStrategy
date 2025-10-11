@@ -64,29 +64,11 @@ public class StageManager : MonoBehaviour
             EconomyManager.Instance.AddGold(1);
             Debug.Log("💰 Player earned 1 gold for participation!");
         }
-        if (playerWon && roundInStage == 1) // First round of a new stage
-        {
-            CheckForAugmentSelection();
-        }
+
         ResetToPrepPhase();
         NextRound();
     }
-    private void CheckForAugmentSelection()
-    {
-        if (AugmentManager.Instance != null && AugmentManager.Instance.ShouldOfferAugment(currentStage))
-        {
-            Debug.Log($"🎯 Offering augment selection for stage {currentStage}");
 
-            // Get augment choices
-            List<BaseAugment> choices = AugmentManager.Instance.GetRandomAugmentChoices();
-
-            // Show augment selection UI
-            if (UIManager.Instance != null)
-            {
-                UIManager.Instance.ShowAugmentSelection(choices, currentStage);
-            }
-        }
-    }
     public void EnterPrepPhase()
     {
         Debug.Log("🔄 Entering Prep Phase");
@@ -162,6 +144,21 @@ public class StageManager : MonoBehaviour
     }
 
 
+    // Add this method to your StageManager.cs
+    private void CheckForAugmentSelection()
+    {
+        if (AugmentManager.Instance != null && AugmentManager.Instance.ShouldOfferAugment(currentStage))
+        {
+            Debug.Log($"🎯 Offering augment selection for stage {currentStage}");
+
+            if (UIManager.Instance != null)
+            {
+                UIManager.Instance.ShowStaticAugmentSelection(currentStage);
+            }
+        }
+    }
+
+    // Update your existing NextRound() method to include this line:
     private void NextRound()
     {
         roundInStage++;
@@ -169,8 +166,12 @@ public class StageManager : MonoBehaviour
         {
             roundInStage = 1;
             currentStage++;
+
+            // NEW: Check for augment selection when advancing to a new stage
+            CheckForAugmentSelection();
         }
 
         UIManager.Instance.UpdateStageUI(currentStage, roundInStage, roundsPerStage);
     }
+
 }

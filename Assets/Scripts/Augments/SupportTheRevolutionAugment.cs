@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿// Updated /Assets/Scripts/Augments/SupportTheRevolutionAugment.cs
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,8 +33,40 @@ public class SupportTheRevolutionAugment : BaseAugment
     {
         Debug.Log($"⚙️ Applying {augmentName}");
 
+        // Get configured gear prefab from AugmentManager
+        LoadConfiguredSettings();
+
         // Apply to all existing player units
         ApplyToAllPlayerUnits();
+    }
+
+    private void LoadConfiguredSettings()
+    {
+        // Find the configuration for this augment
+        AugmentConfiguration[] configs = Object.FindObjectsOfType<AugmentConfiguration>();
+        AugmentConfiguration supportConfig = System.Array.Find(configs,
+            c => c != null && c.AugmentId == "SupportRevolution");
+
+        if (supportConfig != null)
+        {
+            // Load configured values
+            if (supportConfig.GetGearPrefab() != null)
+            {
+                gearPrefab = supportConfig.GetGearPrefab();
+                Debug.Log($"⚙️ Using configured gear prefab: {gearPrefab.name}");
+            }
+
+            gearsPerUnit = supportConfig.GetGearsPerUnit();
+            gearOrbitRadius = supportConfig.GetGearOrbitRadius();
+            gearOrbitSpeed = supportConfig.GetGearOrbitSpeed();
+            baseHealAmount = supportConfig.GetBaseHealAmount();
+
+            Debug.Log($"⚙️ Loaded configuration: {gearsPerUnit} gears, {gearOrbitRadius} radius, {baseHealAmount} heal");
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ No Support Revolution configuration found, using defaults");
+        }
     }
 
     private void ApplyToAllPlayerUnits()
@@ -51,11 +84,14 @@ public class SupportTheRevolutionAugment : BaseAugment
         if (unitGearSystems.ContainsKey(unit)) return;
 
         GearSystem gearSystem = unit.gameObject.AddComponent<GearSystem>();
+
+        // Pass the configured gear prefab to the GearSystem
+        gearSystem.SetGearPrefab(gearPrefab);
         gearSystem.Initialize(this, gearsPerUnit, gearOrbitRadius, gearOrbitSpeed);
 
         unitGearSystems[unit] = gearSystem;
 
-        Debug.Log($"⚙️ Added gear system to {unit.unitName}");
+        Debug.Log($"⚙️ Added gear system to {unit.unitName} with prefab: {(gearPrefab != null ? gearPrefab.name : "default")}");
     }
 
     public float GetCurrentHealAmount()
