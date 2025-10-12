@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Linq;
 
 public class ClobbertronJumpBehaviour : MonoBehaviour
 {
@@ -12,49 +13,235 @@ public class ClobbertronJumpBehaviour : MonoBehaviour
     public GameObject jumpVFXPrefab;
 
     private UnitAI unitAI;
-    private bool hasLowHealthJumped = false;
+    private ClobbertronTrait clobbertronTrait;
+    private bool hasLowHealthJumped = false;  // 10% HP jump
+    private bool hasMidHealthJumped = false;  // 50% HP jump (NEW)
     private bool isJumping = false;
+    private bool hasCombatStartJumped = false;
+    private UnitAI.UnitState lastKnownState = UnitAI.UnitState.BoardIdle;
 
     private void Awake()
     {
         unitAI = GetComponent<UnitAI>();
+        clobbertronTrait = GetComponent<ClobbertronTrait>();
+
+        if (unitAI == null)
+        {
+            Debug.LogError($"❌ ClobbertronJumpBehaviour on {gameObject.name} has no UnitAI component!");
+        }
     }
 
     private void Update()
     {
         if (unitAI == null || !unitAI.isAlive || isJumping) return;
 
-        // Check for low health jump (10% HP threshold)
-        float healthPercent = (float)unitAI.currentHealth / unitAI.maxHealth;
-        if (!hasLowHealthJumped && healthPercent <= lowHealthThreshold)
+        // FIX 1: Check if Clobbertron trait is active
+        if (!IsTraitActive()) return;
+
+        // Detect when unit enters combat state for the first time
+        if (lastKnownState != UnitAI.UnitState.Combat && unitAI.currentState == UnitAI.UnitState.Combat)
         {
+            Debug.Log($"🔨 {unitAI.unitName} detected combat start - preparing to jump");
+            lastKnownState = UnitAI.UnitState.Combat;
+
+            if (!hasCombatStartJumped)
+            {
+                StartCoroutine(DelayedCombatStartJump());
+            }
+        }
+
+        // Update last known state
+        lastKnownState = unitAI.currentState;
+
+        // Only check for health-based jumps during combat
+        if (unitAI.currentState != UnitAI.UnitState.Combat) return;
+
+        float healthPercent = (float)unitAI.currentHealth / unitAI.maxHealth;
+
+        // FIX 2: Check for 50% HP jump first (coordinate with ClobbertronTrait crash)
+        if (!hasMidHealthJumped && healthPercent <= 0.5f && healthPercent > lowHealthThreshold)
+        {
+            Debug.Log($"🔨 {unitAI.unitName} is at {healthPercent:P1} health - executing 50% health jump!");
+            hasMidHealthJumped = true;
+            JumpToTarget();
+        }
+        // Check for 10% HP jump (low health threshold)
+        else if (!hasLowHealthJumped && healthPercent <= lowHealthThreshold)
+        {
+            Debug.Log($"🔨 {unitAI.unitName} is at {healthPercent:P1} health - executing low health jump!");
             hasLowHealthJumped = true;
             JumpToTarget();
         }
     }
 
+    // FIX 1: Check if Clobbertron trait is actually active
+    private bool IsTraitActive()
+    {
+        return unitAI.traits.Contains(Trait.Clobbertron);
+    }
+
+    private IEnumerator DelayedCombatStartJump()
+    {
+        // Wait a short moment for combat to properly initialize and targets to be assigned
+        yield return new WaitForSeconds(0.2f);
+
+        if (unitAI != null && unitAI.isAlive && unitAI.currentState == UnitAI.UnitState.Combat)
+        {
+            Debug.Log($"🔨 {unitAI.unitName} executing combat start jump");
+            JumpToTarget();
+            hasCombatStartJumped = true;
+        }
+    }
+
     public void JumpToTarget()
     {
-        if (isJumping) return;
-
-        UnitAI target = null;
-
-        // Fix: Get UnitAI component from the currentTarget transform
-        if (unitAI.currentTarget != null)
+        if (isJumping)
         {
-            target = unitAI.currentTarget.GetComponent<UnitAI>();
+            Debug.Log($"🔨 {unitAI.unitName} is already jumping - skipping");
+            return;
         }
 
-        // If no valid target, find closest enemy
-        if (target == null || !target.isAlive)
-        {
-            target = FindClosestEnemy();
-        }
+        UnitAI target = GetValidTarget();
 
         if (target != null)
         {
-            StartCoroutine(JumpToPosition(target.transform.position));
+            // FIX 3: Get smart landing position near target
+            Vector3 landingPosition = GetSmartLandingPosition(target);
+            Debug.Log($"🔨 {unitAI.unitName} jumping to {target.unitName} (landing at {landingPosition})");
+            StartCoroutine(JumpToPosition(landingPosition));
         }
+        else
+        {
+            Debug.LogWarning($"⚠️ {unitAI.unitName} has no valid target to jump to!");
+        }
+    }
+
+    // FIX 3: Smart landing position that stays on board and avoids same hex
+    private Vector3 GetSmartLandingPosition(UnitAI target)
+    {
+        Vector3 targetPos = target.transform.position;
+        Vector3 myPos = transform.position;
+
+        // Calculate direction from me to target
+        Vector3 direction = (targetPos - myPos).normalized;
+
+        // Try different landing positions around the target
+        Vector3[] candidateOffsets = {
+            direction * 1.5f,                    // In front of target
+            direction * 2f,                      // Further in front
+            Vector3.Cross(direction, Vector3.up) * 1.5f,  // To the side
+            -Vector3.Cross(direction, Vector3.up) * 1.5f, // Other side
+            -direction * 1f,                     // Behind target
+        };
+
+        foreach (Vector3 offset in candidateOffsets)
+        {
+            Vector3 candidatePos = targetPos + offset;
+
+            // Check if this position is valid
+            if (IsValidLandingPosition(candidatePos))
+            {
+                return candidatePos;
+            }
+        }
+
+        // Fallback: Use closest valid board position
+        return GetClosestValidBoardPosition(targetPos);
+    }
+
+    private bool IsValidLandingPosition(Vector3 position)
+    {
+        // Check if position is on a valid board tile
+        HexTile nearestTile = GetNearestBoardTile(position);
+        if (nearestTile == null) return false;
+
+        // Check if tile is not occupied by another unit
+        if (nearestTile.occupyingUnit != null && nearestTile.occupyingUnit != unitAI) return false;
+
+        // Check if it's not the same tile I'm currently on
+        if (unitAI.currentTile != null && nearestTile == unitAI.currentTile) return false;
+
+        // Check distance from tile center (should be reasonably close)
+        float distanceFromTileCenter = Vector3.Distance(position, nearestTile.transform.position);
+        return distanceFromTileCenter <= 1f; // Allow some tolerance
+    }
+
+    private HexTile GetNearestBoardTile(Vector3 position)
+    {
+        if (BoardManager.Instance == null) return null;
+
+        var allTiles = BoardManager.Instance.GetAllTiles();
+        var boardTiles = allTiles.Where(t => t.tileType == TileType.Board).ToArray();
+
+        HexTile nearest = null;
+        float nearestDistance = float.MaxValue;
+
+        foreach (var tile in boardTiles)
+        {
+            float distance = Vector3.Distance(position, tile.transform.position);
+            if (distance < nearestDistance)
+            {
+                nearestDistance = distance;
+                nearest = tile;
+            }
+        }
+
+        return nearest;
+    }
+
+    private Vector3 GetClosestValidBoardPosition(Vector3 targetPosition)
+    {
+        if (BoardManager.Instance == null) return targetPosition;
+
+        var allTiles = BoardManager.Instance.GetAllTiles();
+        var boardTiles = allTiles.Where(t => t.tileType == TileType.Board &&
+                                            (t.occupyingUnit == null || t.occupyingUnit == unitAI) &&
+                                            t != unitAI.currentTile).ToArray();
+
+        if (boardTiles.Length == 0)
+        {
+            Debug.LogWarning($"⚠️ No valid board tiles found for {unitAI.unitName}!");
+            return targetPosition; // Fallback to original target position
+        }
+
+        // Find closest free board tile to target
+        HexTile bestTile = boardTiles.OrderBy(t => Vector3.Distance(t.transform.position, targetPosition)).First();
+        return bestTile.transform.position;
+    }
+
+    // Better target validation and acquisition
+    private UnitAI GetValidTarget()
+    {
+        UnitAI target = null;
+
+        // Method 1: Use unitAI.GetCurrentTarget() (proper API)
+        target = unitAI.GetCurrentTarget();
+        if (target != null && target.isAlive)
+        {
+            Debug.Log($"✅ Using current target: {target.unitName}");
+            return target;
+        }
+
+        // Method 2: Get UnitAI from currentTarget Transform (fallback)
+        if (unitAI.currentTarget != null)
+        {
+            target = unitAI.currentTarget.GetComponent<UnitAI>();
+            if (target != null && target.isAlive)
+            {
+                Debug.Log($"✅ Using target from Transform: {target.unitName}");
+                return target;
+            }
+        }
+
+        // Method 3: Find closest enemy manually (last resort)
+        target = FindClosestEnemy();
+        if (target != null)
+        {
+            Debug.Log($"✅ Using closest enemy: {target.unitName}");
+            return target;
+        }
+
+        return null;
     }
 
     private UnitAI FindClosestEnemy()
@@ -65,7 +252,8 @@ public class ClobbertronJumpBehaviour : MonoBehaviour
 
         foreach (var enemy in enemies)
         {
-            if (enemy.team != unitAI.team && enemy.isAlive)
+            // Must be alive, different team, and in combat
+            if (enemy.team != unitAI.team && enemy.isAlive && enemy.currentState == UnitAI.UnitState.Combat)
             {
                 float distance = Vector3.Distance(transform.position, enemy.transform.position);
                 if (distance < closestDistance)
@@ -85,8 +273,17 @@ public class ClobbertronJumpBehaviour : MonoBehaviour
 
         isJumping = true;
         Vector3 startPos = transform.position;
-        Vector3 endPos = targetPosition + Vector3.forward * 1.5f; // Land slightly in front of target
+        Vector3 endPos = targetPosition;
         Vector3 jumpPeakPos = Vector3.Lerp(startPos, endPos, 0.5f) + Vector3.up * jumpHeight;
+
+        // CLEAR MOVEMENT STATE BEFORE JUMPING
+        ClearMovementState();
+
+        // Update tile occupancy before jumping
+        if (unitAI.currentTile != null)
+        {
+            unitAI.currentTile.Free(unitAI);
+        }
 
         // Play jump VFX at start position
         if (jumpVFXPrefab != null)
@@ -95,11 +292,17 @@ public class ClobbertronJumpBehaviour : MonoBehaviour
             Destroy(startVFX, 2f);
         }
 
-        Debug.Log($"🔨 {unitAI.unitName} jumping to target!");
+        Debug.Log($"🔨 {unitAI.unitName} starting jump animation from {startPos} to {endPos}");
 
         // Disable unit movement during jump
         bool originalCanMove = unitAI.canMove;
         unitAI.canMove = false;
+
+        // Force unit to stop any current movement
+        if (unitAI.GetComponent<Rigidbody>() != null)
+        {
+            unitAI.GetComponent<Rigidbody>().velocity = Vector3.zero;
+        }
 
         // Jump up to peak (first half of jump)
         float halfJumpTime = jumpDuration * 0.5f;
@@ -134,6 +337,9 @@ public class ClobbertronJumpBehaviour : MonoBehaviour
 
         transform.position = endPos;
 
+        // FIX: COMPREHENSIVE LANDING STATE RESET
+        ResetMovementStateAfterLanding(endPos);
+
         // Play landing VFX
         if (jumpVFXPrefab != null)
         {
@@ -157,8 +363,58 @@ public class ClobbertronJumpBehaviour : MonoBehaviour
         unitAI.canMove = originalCanMove;
         isJumping = false;
 
-        Debug.Log($"🔨 {unitAI.unitName} completed jump landing!");
+        Debug.Log($"🔨 {unitAI.unitName} completed jump landing at {endPos}!");
     }
+
+    // NEW: Clear movement state before jumping
+    private void ClearMovementState()
+    {
+        // Use reflection or try to access private fields if possible
+        // Alternative: Add public methods to UnitAI to reset movement state
+        if (unitAI != null)
+        {
+            // Force stop any ongoing movement
+            if (unitAI.GetComponent<Rigidbody>() != null)
+            {
+                unitAI.GetComponent<Rigidbody>().velocity = Vector3.zero;
+            }
+
+            // Clear any ongoing movement animations
+            if (unitAI.animator != null)
+            {
+                unitAI.animator.SetBool("IsRunning", false);
+            }
+        }
+    }
+
+    // NEW: Comprehensive state reset after landing
+    private void ResetMovementStateAfterLanding(Vector3 landingPosition)
+    {
+        // Update tile occupancy after landing
+        HexTile landingTile = GetNearestBoardTile(landingPosition);
+        if (landingTile != null && landingTile.TryClaim(unitAI))
+        {
+            Debug.Log($"🔨 {unitAI.unitName} successfully claimed landing tile");
+        }
+
+        // FORCE RESET MOVEMENT STATE - Wait one frame then reset
+        StartCoroutine(DelayedMovementReset());
+    }
+    private System.Collections.IEnumerator DelayedMovementReset()
+    {
+        yield return null; // Wait one frame
+
+        if (unitAI != null)
+        {
+            // Use the new public methods to reset movement state
+            unitAI.ForceResetMovementState();
+            unitAI.ResetPathfinding();
+
+            Debug.Log($"🔨 {unitAI.unitName} movement state comprehensively reset after landing");
+        }
+    }
+
+
 
     private void DoLandingImpact(Vector3 impactPosition)
     {
@@ -166,18 +422,24 @@ public class ClobbertronJumpBehaviour : MonoBehaviour
         float impactDamage = unitAI.attackDamage * 0.5f; // 50% of attack damage as impact damage
 
         Collider[] hits = Physics.OverlapSphere(impactPosition, impactRadius);
+        int hitCount = 0;
+
         foreach (var hit in hits)
         {
             UnitAI enemy = hit.GetComponent<UnitAI>();
             if (enemy != null && enemy.team != unitAI.team && enemy.isAlive)
             {
                 enemy.TakeDamage((int)impactDamage);
+                hitCount++;
                 Debug.Log($"🔨 {unitAI.unitName} jump impact damaged {enemy.unitName} for {impactDamage}!");
             }
         }
 
-        // Optional: Add camera shake for impact
-        StartCoroutine(CameraShake(0.3f, 0.2f));
+        if (hitCount > 0)
+        {
+            Debug.Log($"🔨 {unitAI.unitName} jump impact hit {hitCount} enemies!");
+            StartCoroutine(CameraShake(0.3f, 0.2f));
+        }
     }
 
     private IEnumerator CameraShake(float intensity, float duration)
@@ -202,17 +464,54 @@ public class ClobbertronJumpBehaviour : MonoBehaviour
     public void ResetJumpBehavior()
     {
         hasLowHealthJumped = false;
+        hasMidHealthJumped = false;  // NEW: Reset 50% health jump
+        hasCombatStartJumped = false;
         isJumping = false;
+        lastKnownState = unitAI.currentState;
+        Debug.Log($"🔨 {unitAI.unitName} jump behavior reset for new combat");
     }
 
     private void OnDrawGizmosSelected()
     {
         // Draw jump arc preview in editor
-        if (unitAI != null && unitAI.currentTarget != null)
+        if (unitAI != null)
         {
             Gizmos.color = augmentColor;
             Gizmos.DrawWireSphere(transform.position, 0.5f);
-            Gizmos.DrawLine(transform.position, unitAI.currentTarget.position);
+
+            UnitAI target = GetValidTarget();
+            if (target != null)
+            {
+                Vector3 landingPos = GetSmartLandingPosition(target);
+                Gizmos.DrawLine(transform.position, landingPos);
+                Gizmos.DrawWireSphere(landingPos, 1f);
+            }
         }
+    }
+
+    // DEBUG METHODS
+    [ContextMenu("Force Jump Now")]
+    public void ForceJumpNow()
+    {
+        Debug.Log($"🔨 Force jumping {unitAI.unitName}");
+        JumpToTarget();
+    }
+
+    [ContextMenu("Debug Jump State")]
+    public void DebugJumpState()
+    {
+        UnitAI target = GetValidTarget();
+        Debug.Log($"🔨 {unitAI.unitName} Jump State:");
+        Debug.Log($"   - Trait Active: {IsTraitActive()}");
+        Debug.Log($"   - Is Jumping: {isJumping}");
+        Debug.Log($"   - Has Combat Start Jumped: {hasCombatStartJumped}");
+        Debug.Log($"   - Has Mid Health Jumped (50%): {hasMidHealthJumped}");
+        Debug.Log($"   - Has Low Health Jumped (10%): {hasLowHealthJumped}");
+        Debug.Log($"   - Current Health: {unitAI.currentHealth}/{unitAI.maxHealth} ({(float)unitAI.currentHealth / unitAI.maxHealth:P1})");
+        Debug.Log($"   - Current State: {unitAI.currentState}");
+        Debug.Log($"   - Last Known State: {lastKnownState}");
+        Debug.Log($"   - Current Target: {(target != null ? target.unitName : "None")}");
+        Debug.Log($"   - Can Move: {unitAI.canMove}");
+        Debug.Log($"   - Is Alive: {unitAI.isAlive}");
     }
 }

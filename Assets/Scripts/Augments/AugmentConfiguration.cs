@@ -19,12 +19,17 @@ public class AugmentConfiguration : MonoBehaviour
     [SerializeField] private float bonusAttackDamage = 10f;
     [SerializeField] private float bonusAttackSpeed = 0.1f; // 10%
     [SerializeField] private float healPercentage = 0.1f; // 10%
+    [SerializeField] private GameObject linkVFXPrefab;
+    [SerializeField] private GameObject healVFXPrefab;
+    [SerializeField] private GameObject linkedUnitVFXPrefab;
 
     [Header("Clobbering Time Settings")]
     [SerializeField] private GameObject bopPrefab;
     [SerializeField] private float attackDamageBonus = 20f;
     [SerializeField] private float lowHealthThreshold = 0.1f;
     [SerializeField] private float jumpDamage = 25f;
+    [SerializeField] private GameObject jumpVFXPrefab;
+    [SerializeField] private GameObject landingVFXPrefab;
 
     [Header("Support Revolution Settings")]
     [SerializeField] private GameObject gearPrefab;
@@ -32,6 +37,7 @@ public class AugmentConfiguration : MonoBehaviour
     [SerializeField] private float gearOrbitRadius = 2f;
     [SerializeField] private float gearOrbitSpeed = 90f;
     [SerializeField] private float baseHealAmount = 15f;
+    [SerializeField] private GameObject gearHealVFXPrefab;
 
     public string AugmentId
     {
@@ -55,6 +61,7 @@ public class AugmentConfiguration : MonoBehaviour
         {
             case ConfigurableAugmentType.EradicateTheWeak:
                 augment = new EradicateTheWeakAugment();
+
                 break;
             case ConfigurableAugmentType.ClobberingTime:
                 augment = new ItsClobberingTimeAugment();
@@ -71,6 +78,14 @@ public class AugmentConfiguration : MonoBehaviour
 
         return augment;
     }
+    public GameObject GetLinkVFXPrefab() => linkVFXPrefab;
+    public GameObject GetHealVFXPrefab() => healVFXPrefab;
+    public GameObject GetLinkedUnitVFXPrefab() => linkedUnitVFXPrefab;
+
+    public GameObject GetJumpVFXPrefab() => jumpVFXPrefab;
+    public GameObject GetLandingVFXPrefab() => landingVFXPrefab;
+
+    public GameObject GetGearHealVFXPrefab() => gearHealVFXPrefab;
 
     private void ConfigureBaseProperties(BaseAugment augment)
     {

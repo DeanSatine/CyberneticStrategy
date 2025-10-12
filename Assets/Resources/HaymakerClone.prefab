@@ -367,6 +367,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 1805166379768951602}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 4091e2ca91237fd4cb9e277c8685a4e6,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2028996617218194224}
   m_SourcePrefab: {fileID: 100100000, guid: 4091e2ca91237fd4cb9e277c8685a4e6, type: 3}
 --- !u!4 &2664505750195266861 stripped
 Transform:
@@ -433,8 +437,8 @@ MonoBehaviour:
   attackSpeed: 0.8
   armor: 45
   attackRange: 1.8
-  mana: 2
-  maxMana: 50
+  mana: 0
+  maxMana: 1000
   currentMana: 0
   traits: 
   canMove: 1
@@ -566,3 +570,15 @@ MonoBehaviour:
   canBeSold: 0
   showInUI: 1
   masterHaymaker: {fileID: 0}
+--- !u!114 &2028996617218194224
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3571069488247416756}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5bf8f4bce3d76a49bfd9cdd2a48c9a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

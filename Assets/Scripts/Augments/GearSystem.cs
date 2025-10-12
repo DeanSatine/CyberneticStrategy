@@ -177,9 +177,19 @@ public class GearSystem : MonoBehaviour
         StartCoroutine(FlyGearToTarget(gearToSend, target));
     }
 
+    // Replace the FlyGearToTarget method in GearSystem.cs:
+
     private IEnumerator FlyGearToTarget(GameObject gear, UnitAI target)
     {
         if (gear == null || target == null) yield break;
+
+        // ✅ CRITICAL: Validate target is still a player unit
+        if (target.team != Team.Player)
+        {
+            Debug.LogError($"🚫 CRITICAL: Gear was about to heal ENEMY {target.unitName}! Destroying gear instead.");
+            Destroy(gear);
+            yield break;
+        }
 
         Vector3 startPos = gear.transform.position;
         Vector3 targetPos = target.transform.position + Vector3.up * 1.5f;
@@ -188,33 +198,43 @@ public class GearSystem : MonoBehaviour
         float journeyTime = Vector3.Distance(startPos, targetPos) / flySpeed;
         float t = 0f;
 
-        while (t < 1f && gear != null && target != null && target.isAlive)
+        while (t < 1f && gear != null && target != null && target.isAlive && target.team == Team.Player)
         {
+            // ✅ CONTINUOUS VALIDATION: Check target is still player during flight
+            if (target.team != Team.Player)
+            {
+                Debug.LogError($"🚫 Target changed to enemy during flight! Destroying gear.");
+                Destroy(gear);
+                yield break;
+            }
+
             t += Time.deltaTime / journeyTime;
 
-            // Bezier curve for smooth arc
             Vector3 currentPos = CalculateBezierPoint(t, startPos, midPoint, targetPos);
             gear.transform.position = currentPos;
-
-            // Spin the gear while flying
             gear.transform.Rotate(Vector3.up, 360f * Time.deltaTime);
 
             yield return null;
         }
 
-        // Apply healing when gear reaches target
-        if (target != null && target.isAlive)
+        // ✅ FINAL VALIDATION before healing
+        if (target != null && target.isAlive && target.team == Team.Player)
         {
             float healAmount = augment.GetCurrentHealAmount();
             augment.OnGearHeal(target, healAmount);
+            Debug.Log($"✅ Gear successfully healed PLAYER {target.unitName}");
+        }
+        else
+        {
+            Debug.LogWarning($"⚠️ Gear reached invalid target, no healing applied");
         }
 
-        // Destroy the gear
         if (gear != null)
         {
             Destroy(gear);
         }
     }
+
 
     private Vector3 CalculateBezierPoint(float t, Vector3 p0, Vector3 p1, Vector3 p2)
     {

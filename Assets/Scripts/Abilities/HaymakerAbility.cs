@@ -17,7 +17,7 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
     public float slashDuration = 3f;                    // Total slashing time
     public float slashesPerAttackSpeed = 10f;           // 1 slash per 0.10 attack speed (10 = 1.0 AS)
     public float dashSpeed = 8f;                        // Speed of dash movement
-    public float slashAnimationSpeedMultiplier = 5f;    // ✅ INCREASED: Much faster slashing (was 3f)
+    public float slashAnimationSpeedMultiplier = 5f;    // Much faster slashing
 
     [Header("Passive Clone")]
     public GameObject clonePrefab;
@@ -35,25 +35,28 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
     private Vector3 originalPosition;
     private float originalArmor;
     private bool isInitialized = false;
-    private string cloneInstanceID = ""; // Track clone by unique ID
-    private static List<string> allActiveCloneIDs = new List<string>(); // Global tracking
+
     [Header("Audio")]
     public AudioClip autoAttackSound;
     public AudioClip slashSound;
     [Range(0f, 1f)] public float volume = 0.8f;
 
     private AudioSource audioSource;
+
+    // Simplified clone tracking - only use one system
     private static Dictionary<Team, GameObject> globalActiveClones = new Dictionary<Team, GameObject>();
     private static object cloneLock = new object();
+
+    // Performance optimization - cache expensive operations
+    private static HaymakerClone[] cachedClones;
+    private static float lastCloneCacheTime;
+    private const float CLONE_CACHE_DURATION = 0.1f;
+
     private void Start()
     {
-        // ✅ Delay initialization to avoid issues during scene loading
         isInitialized = true;
-
-        // ✅ Check if we already have any existing clones for this Haymaker
         ValidateExistingClones();
 
-        // ✅ NEW: Subscribe to attack events for auto attack sound
         if (unitAI != null)
         {
             unitAI.OnAttackEvent += OnAutoAttack;
@@ -65,7 +68,6 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         PlaySound(autoAttackSound);
     }
 
-
     private void Awake()
     {
         unitAI = GetComponent<UnitAI>();
@@ -75,7 +77,7 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         // Store original armor
         originalArmor = unitAI.armor;
 
-        // ✅ ADD: Audio source setup
+        // Audio source setup
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null)
         {
@@ -84,7 +86,6 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
             audioSource.spatialBlend = 0.8f; // 3D spatial sound
         }
     }
-
 
     private void OnDestroy()
     {
@@ -96,7 +97,6 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
             unitAI.OnAttackEvent -= OnAutoAttack;
         }
 
-        // ✅ ADD THIS LINE:
         // Clean up global tracking
         lock (cloneLock)
         {
@@ -119,6 +119,7 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
             audioSource.PlayOneShot(clip, volume);
         }
     }
+
     public void OnRoundEnd()
     {
         Debug.Log($"[HaymakerAbility] Round ended, cleaning up for {unitAI.unitName}");
@@ -143,20 +144,28 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
             }
         }
     }
+
     private void Update()
     {
         if (!isInitialized) return;
 
-        // ✅ Continuous clone health monitoring
+        // Safe clone health monitoring with comprehensive null checks
         if (cloneInstance != null)
         {
             var cloneAI = cloneInstance.GetComponent<UnitAI>();
-            if (cloneAI != null && !cloneAI.isAlive)
+            if (cloneAI == null)
+            {
+                Debug.LogWarning("[HaymakerAbility] Clone missing UnitAI component, cleaning up");
+                cloneInstance = null;
+                return;
+            }
+
+            if (!cloneAI.isAlive)
             {
                 Debug.Log("[HaymakerAbility] Clone died, cleaning up reference");
                 cloneInstance = null;
 
-                // ✅ Respawn clone if we should still have one
+                // Respawn clone if we should still have one
                 if (shouldHaveClone && unitAI.currentState == UnitState.BoardIdle)
                 {
                     Debug.Log("[HaymakerAbility] Respawning dead clone...");
@@ -164,8 +173,7 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
                 }
             }
         }
-
-        // ✅ NEW: Check if clone went missing during upgrades
+        // Check if clone went missing during upgrades
         else if (shouldHaveClone && unitAI.currentState == UnitState.BoardIdle && cloneInstance == null)
         {
             // Clone went missing, try to find it or respawn
@@ -177,17 +185,26 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         }
     }
 
+    // Performance optimized clone cache
+    private HaymakerClone[] GetCachedClones()
+    {
+        if (cachedClones == null || Time.time - lastCloneCacheTime > CLONE_CACHE_DURATION)
+        {
+            cachedClones = FindObjectsOfType<HaymakerClone>();
+            lastCloneCacheTime = Time.time;
+        }
+        return cachedClones;
+    }
 
-    // ✅ NEW: Validate existing clones to prevent duplicates
+    // Simplified clone validation
     private void ValidateExistingClones()
     {
-        // Find all existing Haymaker clones in the scene
-        HaymakerClone[] existingClones = FindObjectsOfType<HaymakerClone>();
+        HaymakerClone[] existingClones = GetCachedClones();
 
         foreach (var clone in existingClones)
         {
-            var cloneUnitAI = clone.GetComponent<UnitAI>();
-            if (cloneUnitAI != null && cloneUnitAI.team == unitAI.team)
+            var existingCloneAI = clone.GetComponent<UnitAI>();
+            if (existingCloneAI != null && existingCloneAI.team == unitAI.team)
             {
                 // Check if this clone belongs to us based on position proximity
                 if (Vector3.Distance(clone.transform.position, transform.position) < 10f)
@@ -195,7 +212,11 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
                     Debug.Log($"[HaymakerAbility] Found existing clone, adopting it: {clone.name}");
                     cloneInstance = clone.gameObject;
                     shouldHaveClone = true;
-                    allActiveCloneIDs.Add(cloneInstanceID);
+
+                    lock (cloneLock)
+                    {
+                        globalActiveClones[unitAI.team] = cloneInstance;
+                    }
                     return;
                 }
             }
@@ -208,19 +229,32 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
     {
         lock (cloneLock)
         {
-            // ✅ CRITICAL: Only one clone per team, ever
-            HaymakerClone[] allClones = FindObjectsOfType<HaymakerClone>();
-            foreach (var clone in allClones)
+            // Only one clone per team, ever
+            if (globalActiveClones.ContainsKey(unitAI.team))
             {
-                var cloneAI = clone.GetComponent<UnitAI>();
-                if (cloneAI != null && cloneAI.team == unitAI.team && cloneAI.isAlive)
+                var existingClone = globalActiveClones[unitAI.team];
+                if (existingClone != null)
                 {
-                    Debug.Log($"[HaymakerAbility] Team {unitAI.team} already has living clone: {clone.name}");
-                    return false;
+                    var existingCloneAI = existingClone.GetComponent<UnitAI>();
+                    if (existingCloneAI != null && existingCloneAI.isAlive)
+                    {
+                        Debug.Log($"[HaymakerAbility] Team {unitAI.team} already has living clone: {existingClone.name}");
+                        return false;
+                    }
+                    else
+                    {
+                        // Clone is dead, remove from tracking
+                        globalActiveClones.Remove(unitAI.team);
+                    }
+                }
+                else
+                {
+                    // Reference is null, remove from tracking
+                    globalActiveClones.Remove(unitAI.team);
                 }
             }
 
-            // ✅ Check if we already have a clone reference
+            // Check if we already have a clone reference
             if (shouldHaveClone && cloneInstance != null)
             {
                 var cloneAI = cloneInstance.GetComponent<UnitAI>();
@@ -236,7 +270,6 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         }
     }
 
-    // ✅ FIX: Only reset abilities during prep phase, not on every state change
     private void HandleStateChanged(UnitState state)
     {
         if (!isInitialized) return;
@@ -271,18 +304,16 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         }
     }
 
-
-    // ✅ NEW: Check if we legitimately lost our clone
     private bool HasLostClone()
     {
         if (cloneInstance == null && shouldHaveClone)
         {
             // Try to find our clone by name or proximity
-            HaymakerClone[] allClones = FindObjectsOfType<HaymakerClone>();
+            HaymakerClone[] allClones = GetCachedClones();
             foreach (var clone in allClones)
             {
-                var cloneUnitAI = clone.GetComponent<UnitAI>();
-                if (cloneUnitAI != null && cloneUnitAI.team == unitAI.team)
+                var lostCloneAI = clone.GetComponent<UnitAI>();
+                if (lostCloneAI != null && lostCloneAI.team == unitAI.team)
                 {
                     if (Vector3.Distance(clone.transform.position, transform.position) < 15f)
                     {
@@ -297,49 +328,11 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         return false;
     }
 
-    // ✅ NEW: Count total clones for our team
-    private int GetTotalClonesForTeam()
-    {
-        HaymakerClone[] allClones = FindObjectsOfType<HaymakerClone>();
-        int count = 0;
-
-        foreach (var clone in allClones)
-        {
-            var cloneUnitAI = clone.GetComponent<UnitAI>();
-            if (cloneUnitAI != null && cloneUnitAI.team == unitAI.team)
-            {
-                count++;
-            }
-        }
-
-        return count;
-    }
-
-    // ✅ NEW: Get max allowed clones for team
-    private int GetMaxAllowedClonesForTeam()
-    {
-        UnitAI[] allUnits = FindObjectsOfType<UnitAI>();
-        int haymakerCount = 0;
-
-        foreach (var unit in allUnits)
-        {
-            if (unit.team == unitAI.team && unit.unitName.Contains("Haymaker") && !unit.unitName.Contains("Clone"))
-            {
-                var haymakerAbility = unit.GetComponent<HaymakerAbility>();
-                if (haymakerAbility != null) haymakerCount++;
-            }
-        }
-
-        return haymakerCount; // 1 clone per Haymaker
-    }
-
-
-    // ✅ NEW: Reset ability state method
     private void ResetAbilityState()
     {
         isPerformingAbility = false;
 
-        // ✅ Stop any playing audio when ability is reset/interrupted
+        // Stop any playing audio when ability is reset/interrupted
         if (audioSource != null && audioSource.isPlaying)
         {
             audioSource.Stop();
@@ -357,93 +350,109 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         Debug.Log("[HaymakerAbility] Ability state reset");
     }
 
-
-    // ✅ ENHANCED: Better clone spawning with HaymakerClone component
     private void SpawnClone()
     {
-        // ✅ Double-check we don't already have a clone
-        if (cloneInstance != null)
-        {
-            Debug.LogWarning("[HaymakerAbility] Tried to spawn clone but one already exists!");
-            return;
-        }
-
-        if (GetTotalClonesForTeam() >= GetMaxAllowedClonesForTeam())
-        {
-            Debug.LogWarning($"[HaymakerAbility] Global clone limit reached ({GetTotalClonesForTeam()}/{GetMaxAllowedClonesForTeam()}), aborting spawn!");
-            shouldHaveClone = false;
-            return;
-        }
-
-        HexTile targetTile = FindClosestEmptyHexTile();
-        if (targetTile == null)
-        {
-            Debug.LogWarning("[HaymakerAbility] No empty hex tile found for clone!");
-            shouldHaveClone = false; // Can't spawn, don't keep trying
-            return;
-        }
-
-        Vector3 spawnPos = targetTile.transform.position;
-        spawnPos.y = 0.6f;
-
-        cloneInstance = Instantiate(clonePrefab, spawnPos, Quaternion.identity);
-        cloneInstance.transform.rotation = Quaternion.Euler(0f, -90f, 0f);
-        cloneInstance.name = $"{unitAI.unitName} Clone";
-
-        var cloneAI = cloneInstance.GetComponent<UnitAI>();
-        cloneAI.AssignToTile(targetTile);
-
-        // Scale stats
-        cloneAI.maxHealth = unitAI.maxHealth * 0.25f;
-        cloneAI.currentHealth = cloneAI.maxHealth;
-        cloneAI.attackDamage = unitAI.attackDamage * 0.25f;
-        cloneAI.starLevel = unitAI.starLevel;
-        cloneAI.team = unitAI.team;
-        cloneAI.teamID = unitAI.teamID;
-        cloneAI.currentMana = 0f;
-        cloneAI.isAlive = true;
-
-        // ✅ CRITICAL: Set the unit name to "Haymaker Clone" for ability description lookup
-        cloneAI.unitName = "Haymaker Clone";
-
-        cloneAI.SetState(UnitState.BoardIdle);
-
-        // ✅ IMPORTANT: Remove the original HaymakerAbility to prevent infinite cloning
-        var selfAbility = cloneInstance.GetComponent<HaymakerAbility>();
-        if (selfAbility) Destroy(selfAbility);
-
-        // ✅ NEW: Add HaymakerClone component for soul tracking and description
-        var cloneComponent = cloneInstance.GetComponent<HaymakerClone>();
-        if (cloneComponent == null)
-        {
-            cloneComponent = cloneInstance.AddComponent<HaymakerClone>();
-        }
-
-        // Set clone component properties
-        cloneComponent.originalUnitName = unitAI.unitName;
-        cloneComponent.canBeSold = false;
-        cloneComponent.showInUI = true;
-
-        // Disable traits
-        foreach (var mb in cloneInstance.GetComponents<MonoBehaviour>())
-        {
-            if (mb.GetType().Name.Contains("Trait"))
-                mb.enabled = false;
-        }
-
-        GameManager.Instance.RegisterUnit(cloneAI, cloneAI.team == Team.Player);
-
         lock (cloneLock)
         {
+            // Check for existing clones across the entire scene
+            HaymakerClone[] existingClones = GetCachedClones();
+            foreach (var existingClone in existingClones)
+            {
+                var existingCloneAI = existingClone.GetComponent<UnitAI>();
+                if (existingCloneAI != null && existingCloneAI.team == unitAI.team && existingCloneAI.isAlive)
+                {
+                    Debug.LogWarning($"🚫 Prevented duplicate clone spawn - {existingClone.name} already exists for team {unitAI.team}");
+                    shouldHaveClone = false;
+                    return;
+                }
+            }
+
+            // Double-check we don't already have a clone
+            if (cloneInstance != null)
+            {
+                Debug.LogWarning("[HaymakerAbility] Tried to spawn clone but one already exists!");
+                return;
+            }
+
+            HexTile targetTile = FindClosestEmptyHexTile();
+            if (targetTile == null)
+            {
+                Debug.LogWarning("[HaymakerAbility] No empty hex tile found for clone!");
+                shouldHaveClone = false;
+                return;
+            }
+
+            Vector3 spawnPos = targetTile.transform.position;
+            spawnPos.y = 0.6f;
+
+            cloneInstance = Instantiate(clonePrefab, spawnPos, Quaternion.identity);
+            cloneInstance.transform.rotation = Quaternion.Euler(0f, -90f, 0f);
+            cloneInstance.name = $"{unitAI.unitName} Clone {System.Guid.NewGuid().ToString().Substring(0, 8)}";
+
+            var cloneAI = cloneInstance.GetComponent<UnitAI>();
+            if (cloneAI == null)
+            {
+                Debug.LogError("[HaymakerAbility] Clone prefab missing UnitAI component!");
+                Destroy(cloneInstance);
+                cloneInstance = null;
+                return;
+            }
+
+            cloneAI.AssignToTile(targetTile);
+
+            // Scale stats
+            cloneAI.maxHealth = unitAI.maxHealth * 0.25f;
+            cloneAI.currentHealth = cloneAI.maxHealth;
+            cloneAI.attackDamage = unitAI.attackDamage * 0.25f;
+            cloneAI.starLevel = 1; // Always lock clones to 1 star
+            cloneAI.team = unitAI.team;
+            cloneAI.teamID = unitAI.teamID;
+            cloneAI.currentMana = 0f;
+            cloneAI.isAlive = true;
+            cloneAI.unitName = "Haymaker Clone";
+
+            cloneAI.SetState(UnitState.BoardIdle);
+
+            // Remove the original HaymakerAbility to prevent infinite cloning
+            var selfAbility = cloneInstance.GetComponent<HaymakerAbility>();
+            if (selfAbility) Destroy(selfAbility);
+
+            // Add star lock component to prevent upgrades
+            var starLock = cloneInstance.GetComponent<HaymakerCloneStarLock>();
+            if (starLock == null)
+            {
+                starLock = cloneInstance.AddComponent<HaymakerCloneStarLock>();
+            }
+
+            // Add HaymakerClone component for soul tracking and description
+            var cloneComponent = cloneInstance.GetComponent<HaymakerClone>();
+            if (cloneComponent == null)
+            {
+                cloneComponent = cloneInstance.AddComponent<HaymakerClone>();
+            }
+
+            cloneComponent.originalUnitName = unitAI.unitName;
+            cloneComponent.canBeSold = false;
+            cloneComponent.showInUI = true;
+            cloneComponent.masterHaymaker = this;
+
+            // Disable traits that could cause issues
+            foreach (var mb in cloneInstance.GetComponents<MonoBehaviour>())
+            {
+                if (mb.GetType().Name.Contains("Trait") && !(mb is HaymakerClone))
+                    mb.enabled = false;
+            }
+
+            // Update global tracking
             globalActiveClones[unitAI.team] = cloneInstance;
+
+            GameManager.Instance.RegisterUnit(cloneAI, cloneAI.team == Team.Player);
+            ApplySoulBonusesToClone(cloneAI);
+
+            Debug.Log($"[HaymakerAbility] Clone spawned with star lock at {targetTile.gridPosition}");
         }
-
-        ApplySoulBonusesToClone(cloneAI);
-        allActiveCloneIDs.Add(cloneInstanceID);
-
-        Debug.Log($"[HaymakerAbility] Clone spawned at {targetTile.gridPosition} with {soulCount} soul bonuses applied");
     }
-    // ✅ NEW: Emergency cleanup for duplicate clones
+
     public static void CleanupAllDuplicateClones()
     {
         lock (cloneLock)
@@ -490,6 +499,7 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
             }
         }
     }
+
     public static void CleanupAllClonesForNewRound()
     {
         lock (cloneLock)
@@ -498,7 +508,6 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
 
             // Clear global tracking
             globalActiveClones.Clear();
-            allActiveCloneIDs.Clear();
 
             // Find and properly clean up all existing clones
             HaymakerClone[] existingClones = FindObjectsOfType<HaymakerClone>();
@@ -517,7 +526,6 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         }
     }
 
-    // ✅ NEW: Apply accumulated soul bonuses to clone
     private void ApplySoulBonusesToClone(UnitAI cloneAI)
     {
         if (soulCount > 0)
@@ -549,7 +557,8 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
                 cloneAI.ClearTile();
                 GameManager.Instance.UnregisterUnit(cloneAI);
             }
-            // ✅ UPDATED: Clean up global tracking before destroying
+
+            // Clean up global tracking before destroying
             lock (cloneLock)
             {
                 if (globalActiveClones.ContainsKey(unitAI.team) && globalActiveClones[unitAI.team] == cloneInstance)
@@ -561,10 +570,7 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
             Destroy(cloneInstance);
             cloneInstance = null;
 
-            // ✅ ADD THIS: Remove from global tracking
-            allActiveCloneIDs.Remove(cloneInstanceID);
-
-            Debug.Log($"[HaymakerAbility] Clone destroyed. Remaining clones: {GetTotalClonesForTeam()}");
+            Debug.Log($"[HaymakerAbility] Clone destroyed");
         }
     }
 
@@ -603,7 +609,7 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
 
         Debug.Log($"💀 Haymaker gained soul! Total souls: {soulCount}");
 
-        // ✅ Apply bonus every 5 souls
+        // Apply bonus every 5 souls
         if (soulCount % 5 == 0 && cloneInstance != null)
         {
             var cloneAI = cloneInstance.GetComponent<UnitAI>();
@@ -615,7 +621,7 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
                 cloneAI.maxHealth *= 1.01f;
                 cloneAI.attackDamage *= 1.01f;
 
-                // ✅ Update UI immediately
+                // Update UI immediately
                 if (cloneAI.ui != null)
                 {
                     cloneAI.ui.UpdateHealth(cloneAI.currentHealth);
@@ -626,7 +632,6 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         }
     }
 
-    // ✅ ENHANCED: Public method to get soul count for external UI systems
     public string GetSoulCountDisplay()
     {
         return $"Souls: {soulCount}";
@@ -635,28 +640,28 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
     // Active ability
     public void Cast(UnitAI target)
     {
-        // ✅ FIX: Check if we're in the right phase and state
+        // Check if we're in the right phase and state
         if (isPerformingAbility)
         {
             Debug.Log("[HaymakerAbility] Already performing ability, ignoring cast");
             return;
         }
 
-        // ✅ FIX: Only allow ability during combat phase
+        // Only allow ability during combat phase
         if (StageManager.Instance != null && StageManager.Instance.currentPhase != StageManager.GamePhase.Combat)
         {
             Debug.Log("[HaymakerAbility] Cannot cast ability outside of combat phase");
             return;
         }
 
-        // ✅ FIX: Only allow ability when in combat state
+        // Only allow ability when in combat state
         if (unitAI.currentState != UnitState.Combat && unitAI.currentState != UnitState.BoardIdle)
         {
             Debug.Log($"[HaymakerAbility] Cannot cast ability in state: {unitAI.currentState}");
             return;
         }
 
-        // ✅ ADD THIS: Trigger ability animation at start of cast
+        // Trigger ability animation at start of cast
         if (unitAI.animator)
         {
             unitAI.animator.SetTrigger("AbilityTrigger");
@@ -673,7 +678,7 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
 
         Debug.Log($"⚡ [HaymakerAbility] Starting Fury of Slashes!");
 
-        // ✅ PHASE 1: Dash to enemy clump
+        // PHASE 1: Dash to enemy clump
         Vector3 targetClumpPosition = FindBestClumpPosition(6f);
         if (targetClumpPosition == Vector3.zero)
         {
@@ -702,9 +707,7 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
             Destroy(endVFX, 2f);
         }
 
-        // In the FuryOfSlashes coroutine, replace the slashing loop section (around line 583-650) with this:
-
-        // ✅ PHASE 2: Fury of Slashes (3 seconds)
+        // PHASE 2: Fury of Slashes (3 seconds)
         Debug.Log("⚔️ Phase 2: Unleashing Fury of Slashes!");
         if (unitAI.animator)
         {
@@ -717,7 +720,7 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         unitAI.armor = temporaryArmor[starIndex];
         Debug.Log($"🛡️ Temporary armor active: {temporaryArmor[starIndex]} ({80 + (starIndex * 10)}% damage reduction)");
 
-        // ✅ NEW: Special 3-star behavior - Massive slashes that sweep across the entire board
+        // Special 3-star behavior - Massive slashes that sweep across the entire board
         if (unitAI.starLevel == 3)
         {
             Debug.Log("🌟 3-STAR HAYMAKER: Unleashing massive board-wide slashing waves!");
@@ -730,9 +733,9 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
                 unitAI.animator.speed = slashAnimationSpeedMultiplier * 1.5f;
             }
 
-            // Create 20 massive slashes that sweep across the entire board
+            // Create 10 massive slashes that sweep across the entire board
             int totalSlashes = 10;
-            float boardRadius = 3f; // Cover the entire board (8 unit radius)
+            float boardRadius = 3f; // Cover the entire board
 
             for (int i = 0; i < totalSlashes; i++)
             {
@@ -750,8 +753,8 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
                     break;
                 }
 
-                // Calculate sweeping angle (18 degrees apart = 360/20)
-                float angle = i * 18f;
+                // Calculate sweeping angle (36 degrees apart = 360/10)
+                float angle = i * 36f;
                 Vector3 slashDirection = new Vector3(
                     Mathf.Cos(angle * Mathf.Deg2Rad),
                     0f,
@@ -764,7 +767,7 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
                 // Create 5 slash points along the line from Haymaker to edge of board
                 for (int j = 0; j < 5; j++)
                 {
-                    float distance = (j + 1) * (boardRadius / 5f); // 1.6, 3.2, 4.8, 6.4, 8.0 units out
+                    float distance = (j + 1) * (boardRadius / 5f);
                     Vector3 slashPos = transform.position + slashDirection * distance;
                     slashPositions.Add(slashPos);
                 }
@@ -782,10 +785,10 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
                     // Large damage radius for each slash point (covers more area)
                     List<UnitAI> slashTargets = FindEnemiesInRadius(2.5f, slashPos);
 
-                    foreach (UnitAI target in slashTargets)
+                    foreach (UnitAI slashTarget in slashTargets)
                     {
-                        target.TakeDamage(slashDmg);
-                        Debug.Log($"💥 Board Slash {i + 1}/{totalSlashes}: {slashDmg} damage to {target.unitName}");
+                        slashTarget.TakeDamage(slashDmg);
+                        Debug.Log($"💥 Board Slash {i + 1}/{totalSlashes}: {slashDmg} damage to {slashTarget.unitName}");
                     }
 
                     // Spawn slash VFX at each position along the line
@@ -811,11 +814,9 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
 
             Debug.Log("🏆 3-STAR HAYMAKER: Board-wide devastation complete!");
         }
-
-
         else
         {
-            // ✅ ORIGINAL: Normal behavior for 1-star and 2-star Haymakers
+            // Normal behavior for 1-star and 2-star Haymakers
             // Calculate number of slashes based on attack speed
             float attackSpeed = unitAI.attackSpeed;
             int totalSlashes = Mathf.RoundToInt(attackSpeed * slashesPerAttackSpeed * slashDuration);
@@ -846,7 +847,7 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
                     break;
                 }
 
-                // ✅ UPDATED: Find enemies within 3 hex radius (approximately 3 units)
+                // Find enemies within 3 hex radius (approximately 3 units)
                 List<UnitAI> slashTargets = FindEnemiesInRadius(3f, transform.position);
 
                 if (slashTargets.Count > 0)
@@ -858,13 +859,13 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
                         PlaySound(slashSound);
                     }
 
-                    // ✅ UPDATED: Apply damage to ALL enemies within 3 hex radius
+                    // Apply damage to ALL enemies within 3 hex radius
                     float slashDmg = slashDamage[Mathf.Clamp(unitAI.starLevel - 1, 0, slashDamage.Length - 1)];
 
-                    foreach (UnitAI target in slashTargets)
+                    foreach (UnitAI slashTarget in slashTargets)
                     {
-                        target.TakeDamage(slashDmg);
-                        Debug.Log($"💥 Slash {i + 1}/{totalSlashes}: {slashDmg} damage to {target.unitName}");
+                        slashTarget.TakeDamage(slashDmg);
+                        Debug.Log($"💥 Slash {i + 1}/{totalSlashes}: {slashDmg} damage to {slashTarget.unitName}");
                     }
 
                     // Spawn slash VFX around Haymaker's position
@@ -873,7 +874,7 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
                         // Create VFX in a circle around Haymaker
                         float angle = (float)i / totalSlashes * 360f; // Distribute around circle
                         Vector3 offset = new Vector3(
-                            Mathf.Cos(angle * Mathf.Deg2Rad) * 1.5f, // ✅ Slightly larger radius for VFX
+                            Mathf.Cos(angle * Mathf.Deg2Rad) * 1.5f, // Slightly larger radius for VFX
                             1f, // Chest level
                             Mathf.Sin(angle * Mathf.Deg2Rad) * 1.5f
                         );
@@ -901,21 +902,28 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         }
         unitAI.armor = originalArmor;
 
-
-        // ✅ PHASE 3: Clone slam (with clone death check)
+        // PHASE 3: Clone slam (with clone death check)
         Debug.Log("💥 Phase 3: Clone slam!");
 
         // Check if we're still in combat and clone is alive before slam
         if (StageManager.Instance != null && StageManager.Instance.currentPhase == StageManager.GamePhase.Combat)
         {
-            // ✅ UPDATED: Check if clone is still alive before slam
-            if (cloneInstance != null && cloneInstance.GetComponent<UnitAI>().isAlive)
+            // Check if clone is still alive before slam
+            if (cloneInstance != null)
             {
-                yield return StartCoroutine(PerformCloneSlamWithRetargeting());
+                var cloneAI = cloneInstance.GetComponent<UnitAI>();
+                if (cloneAI != null && cloneAI.isAlive)
+                {
+                    yield return StartCoroutine(PerformCloneSlamWithRetargeting());
+                }
+                else
+                {
+                    Debug.Log("[HaymakerAbility] Clone is dead or missing, skipping slam");
+                }
             }
             else
             {
-                Debug.Log("[HaymakerAbility] Clone is dead or missing, skipping slam");
+                Debug.Log("[HaymakerAbility] Clone is missing, skipping slam");
             }
         }
         else
@@ -923,7 +931,7 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
             Debug.Log("[HaymakerAbility] Phase changed, skipping clone slam");
         }
 
-        // ✅ PHASE 4: Dash back to original position (ONLY if still in combat)
+        // PHASE 4: Dash back to original position (ONLY if still in combat)
         if (StageManager.Instance != null && StageManager.Instance.currentPhase == StageManager.GamePhase.Combat &&
             unitAI.isAlive && isPerformingAbility)
         {
@@ -937,7 +945,7 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
 
         isPerformingAbility = false;
 
-        // ✅ Stop any playing audio when ability finishes
+        // Stop any playing audio when ability finishes
         if (audioSource != null && audioSource.isPlaying)
         {
             audioSource.Stop();
@@ -946,7 +954,6 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         Debug.Log("✅ Fury of Slashes complete!");
     }
 
-    // ✅ NEW: Handle star upgrade events
     public void OnStarLevelUpgraded()
     {
         Debug.Log($"[HaymakerAbility] {unitAI.unitName} upgraded to {unitAI.starLevel} stars");
@@ -960,17 +967,11 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
                 var cloneAI = cloneInstance.GetComponent<UnitAI>();
                 if (cloneAI != null && cloneAI.isAlive)
                 {
-                    // Update clone's star level to match
-                    cloneAI.starLevel = unitAI.starLevel;
-
-                    // ✅ FIX: Don't recalculate stats, just update star level
-                    // The soul bonuses should remain intact
-
-                    // ✅ FIX: Update clone's HaymakerClone component to point to this ability
+                    // Update clone's HaymakerClone component to point to this ability
                     var cloneComponent = cloneInstance.GetComponent<HaymakerClone>();
                     if (cloneComponent != null)
                     {
-                        cloneComponent.masterHaymaker = this; // Add this reference
+                        cloneComponent.masterHaymaker = this;
                     }
 
                     Debug.Log($"✅ Clone maintained for {unitAI.starLevel}★ {unitAI.unitName} with {soulCount} souls");
@@ -984,32 +985,9 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         }
     }
 
-
-    // ✅ NEW: Update clone stats after star upgrade
-    private void UpdateCloneStatsAfterUpgrade(UnitAI cloneAI)
-    {
-        // Recalculate clone stats based on upgraded Haymaker
-        cloneAI.maxHealth = unitAI.maxHealth * 0.25f;
-        cloneAI.currentHealth = cloneAI.maxHealth;
-        cloneAI.attackDamage = unitAI.attackDamage * 0.25f;
-
-        // Apply any existing soul bonuses
-        ApplySoulBonusesToClone(cloneAI);
-
-        // Update UI if present
-        if (cloneAI.ui != null)
-        {
-            cloneAI.ui.SetMaxHealth(cloneAI.maxHealth);
-            cloneAI.ui.UpdateHealth(cloneAI.currentHealth);
-        }
-
-        Debug.Log($"📈 Clone stats updated: HP {cloneAI.maxHealth:F0}, AD {cloneAI.attackDamage:F0}");
-    }
-
-    // ✅ UPDATED: Enhanced clone slam with multiple death checks
     private IEnumerator PerformCloneSlamWithRetargeting()
     {
-        // ✅ Initial clone death check
+        // Initial clone death check
         if (cloneInstance == null)
         {
             Debug.Log("[HaymakerAbility] No clone available for slam");
@@ -1044,7 +1022,7 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         float elapsed = 0f;
         while (elapsed < slamDuration)
         {
-            // ✅ Continuous clone death check during slam animation
+            // Continuous clone death check during slam animation
             if (cloneInstance == null || cloneAI == null || !cloneAI.isAlive)
             {
                 Debug.Log("[HaymakerAbility] Clone died during slam animation, aborting slam");
@@ -1075,7 +1053,7 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
             yield return null;
         }
 
-        // ✅ Final clone death check before damage application
+        // Final clone death check before damage application
         if (cloneInstance == null || cloneAI == null || !cloneAI.isAlive)
         {
             Debug.Log("[HaymakerAbility] Clone died before damage application, no slam damage");
@@ -1118,7 +1096,7 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
             }
         }
 
-        // ✅ Final clone check before returning to position
+        // Final clone check before returning to position
         if (cloneInstance != null && cloneAI != null && cloneAI.isAlive)
         {
             // Return clone to original position
@@ -1130,8 +1108,6 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         }
     }
 
-
-
     private IEnumerator DashToPosition(Vector3 targetPosition)
     {
         Vector3 startPos = transform.position;
@@ -1141,14 +1117,14 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         float elapsed = 0f;
         while (elapsed < dashTime)
         {
-            // ✅ Enhanced interruption checks
+            // Enhanced interruption checks
             if (!isPerformingAbility || !unitAI.isAlive)
             {
                 Debug.Log("[HaymakerAbility] Dash interrupted - ability stopped or unit died");
                 yield break;
             }
 
-            // ✅ FIX: Check phase during dash
+            // Check phase during dash
             if (StageManager.Instance != null && StageManager.Instance.currentPhase != StageManager.GamePhase.Combat)
             {
                 Debug.Log("[HaymakerAbility] Dash interrupted - phase changed to non-combat");
@@ -1185,7 +1161,6 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         cloneInstance.transform.position = targetPos;
     }
 
-    // ✅ NEW: Find position adjacent to enemy clump (not inside)
     private Vector3 FindBestClumpPosition(float searchRadius)
     {
         List<UnitAI> enemies = FindEnemiesInRadius(searchRadius);
@@ -1212,7 +1187,7 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
             }
         }
 
-        // ✅ FIX: Find adjacent position instead of clump center
+        // Find adjacent position instead of clump center
         Vector3 clumpCenter = bestCenter.transform.position;
         Vector3 haymakerPos = transform.position;
 
@@ -1229,7 +1204,6 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         return targetPosition;
     }
 
-    // ✅ NEW: Find nearest valid position around the target
     private Vector3 FindNearestValidPosition(Vector3 preferredPos, Vector3 clumpCenter, float minDistance)
     {
         // Try the preferred position first
@@ -1261,7 +1235,6 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         return preferredPos;
     }
 
-    // ✅ NEW: Check if position is valid (not too close to other units)
     private bool IsPositionValid(Vector3 position, float minDistanceToUnits)
     {
         UnitAI[] allUnits = FindObjectsOfType<UnitAI>();
@@ -1280,7 +1253,6 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
 
         return true; // Position is valid
     }
-
 
     private UnitAI FindClosestEnemy(float maxDistance)
     {
@@ -1302,6 +1274,7 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
 
         return closest;
     }
+
     private List<UnitAI> FindEnemiesInRadius(float radius, Vector3? center = null)
     {
         if (center == null) center = transform.position;

@@ -1,7 +1,8 @@
-﻿// Updated /Assets/Scripts/System/AugmentManager.cs
+﻿// Complete updated /Assets/Scripts/Augments/AugmentManager.cs
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using System.Collections;
 
 public class AugmentManager : MonoBehaviour
 {
@@ -11,8 +12,9 @@ public class AugmentManager : MonoBehaviour
     [SerializeField] private List<BaseAugment> activeAugments = new List<BaseAugment>();
     [SerializeField] private int maxAugments = 3;
 
-    [Header("Stage Timing")]
-    [SerializeField] private int[] augmentStages = { 2, 4, 6 };
+    [Header("Round Timing")]
+    [SerializeField] private int[] augmentRounds = { 1, 3, 5 }; // Changed from stages to specific rounds
+    [SerializeField] private bool showOnFirstRound = true; // New option to control first round behavior
 
     [Header("Audio")]
     [SerializeField] private AudioClip augmentSelectSound;
@@ -20,6 +22,9 @@ public class AugmentManager : MonoBehaviour
 
     // Cache for augment configurations
     private AugmentConfiguration[] allConfigurations;
+
+    // Track selected augments to prevent duplicates
+    private HashSet<string> selectedAugmentIds = new HashSet<string>();
 
     // UI elements to hide during augment selection
     private GameObject shopUI;
@@ -55,17 +60,53 @@ public class AugmentManager : MonoBehaviour
         Debug.Log($"🎯 AugmentManager initialized with {allConfigurations.Length} configurations found");
     }
 
-    public bool ShouldOfferAugment(int stage)
+    // NEW: Check if we should offer augment based on total round number
+    public bool ShouldOfferAugment(int stage, int roundInStage, int roundsPerStage)
     {
-        return activeAugments.Count < maxAugments && augmentStages.Contains(stage);
+        // Calculate total round number across all stages
+        int totalRound = ((stage - 1) * roundsPerStage) + roundInStage;
+
+        // Always offer on first round, then check configured rounds
+        bool shouldOffer = (showOnFirstRound && totalRound == 1) || augmentRounds.Contains(totalRound);
+
+        // Only offer if we haven't reached max augments and there are unselected options
+        return shouldOffer &&
+               activeAugments.Count < maxAugments &&
+               GetAvailableAugmentIds().Count > 0;
     }
 
-    public void ShowStaticAugmentSelection(int currentStage)
+    // NEW: Get list of available (unselected) augment IDs
+    private List<string> GetAvailableAugmentIds()
     {
-        Debug.Log($"🎯 Showing static augment selection for stage {currentStage}");
+        if (allConfigurations == null || allConfigurations.Length == 0)
+        {
+            allConfigurations = FindObjectsOfType<AugmentConfiguration>();
+        }
 
-        // Hide other UI elements first
-        HideOtherUI();
+        List<string> availableIds = new List<string>();
+
+        foreach (var config in allConfigurations)
+        {
+            if (config != null && !string.IsNullOrEmpty(config.AugmentId))
+            {
+                // Only include if not already selected
+                if (!selectedAugmentIds.Contains(config.AugmentId))
+                {
+                    availableIds.Add(config.AugmentId);
+                }
+            }
+        }
+
+        return availableIds;
+    }
+
+    public void ShowStaticAugmentSelection(int currentStage, int currentRound)
+    {
+        int totalRound = ((currentStage - 1) * 3) + currentRound; // Assuming 3 rounds per stage
+        Debug.Log($"🎯 Showing static augment selection for Stage {currentStage}, Round {currentRound} (Total Round {totalRound})");
+
+        // Hide unavailable augments before showing
+        HideSelectedAugmentButtons();
 
         GameObject augmentCanvas = GameObject.Find("AugmentCanvas");
         if (augmentCanvas != null)
@@ -73,18 +114,74 @@ public class AugmentManager : MonoBehaviour
             Transform panel = augmentCanvas.transform.Find("AugmentSelectionPanel");
             if (panel != null)
             {
+                // Hide other UI first
+                HideOtherUI();
+
+                // Update title
                 Transform title = panel.Find("Title");
                 if (title != null)
                 {
                     TMPro.TMP_Text titleText = title.GetComponent<TMPro.TMP_Text>();
                     if (titleText != null)
                     {
-                        titleText.text = $"Choose an Augment - Stage {currentStage} ({activeAugments.Count + 1}/3)";
+                        titleText.text = $"Choose an Augment - Round {totalRound} ({activeAugments.Count + 1}/{maxAugments})";
+                    }
+                }
+
+                // Get all available augment buttons and trigger their fade-in
+                StaticAugmentButton[] allButtons = panel.GetComponentsInChildren<StaticAugmentButton>(true);
+                List<StaticAugmentButton> availableButtons = new List<StaticAugmentButton>();
+
+                foreach (var button in allButtons)
+                {
+                    if (button != null && !selectedAugmentIds.Contains(button.augmentId))
+                    {
+                        button.gameObject.SetActive(true);
+                        availableButtons.Add(button);
                     }
                 }
 
                 panel.gameObject.SetActive(true);
-                // NO TIME.TIMESCALE = 0 - Game continues running!
+
+                // Stagger the button fade-ins for available buttons only
+                StartCoroutine(StaggeredButtonFadeIn(availableButtons.ToArray()));
+
+                Debug.Log($"📋 Showing {availableButtons.Count} available augments (Total: {allButtons.Length}, Selected: {selectedAugmentIds.Count})");
+            }
+        }
+    }
+
+    // NEW: Hide buttons for already selected augments
+    private void HideSelectedAugmentButtons()
+    {
+        GameObject augmentCanvas = GameObject.Find("AugmentCanvas");
+        if (augmentCanvas != null)
+        {
+            Transform panel = augmentCanvas.transform.Find("AugmentSelectionPanel");
+            if (panel != null)
+            {
+                StaticAugmentButton[] allButtons = panel.GetComponentsInChildren<StaticAugmentButton>(true);
+
+                foreach (var button in allButtons)
+                {
+                    if (button != null && selectedAugmentIds.Contains(button.augmentId))
+                    {
+                        button.gameObject.SetActive(false);
+                        Debug.Log($"🚫 Hiding already selected augment: {button.augmentId}");
+                    }
+                }
+            }
+        }
+    }
+
+    private IEnumerator StaggeredButtonFadeIn(StaticAugmentButton[] buttons)
+    {
+        for (int i = 0; i < buttons.Length; i++)
+        {
+            if (buttons[i] != null)
+            {
+                buttons[i].FadeIn();
+                yield return new WaitForSecondsRealtime(0.1f);
             }
         }
     }
@@ -97,121 +194,97 @@ public class AugmentManager : MonoBehaviour
             Transform panel = augmentCanvas.transform.Find("AugmentSelectionPanel");
             if (panel != null)
             {
-                panel.gameObject.SetActive(false);
+                StaticAugmentButton[] buttons = panel.GetComponentsInChildren<StaticAugmentButton>();
+                StartCoroutine(FadeOutAndHide(buttons, panel.gameObject));
+            }
+        }
+    }
+
+    private IEnumerator FadeOutAndHide(StaticAugmentButton[] buttons, GameObject panel)
+    {
+        foreach (var button in buttons)
+        {
+            if (button != null)
+            {
+                button.FadeOut();
             }
         }
 
-        // Restore other UI elements
+        yield return new WaitForSecondsRealtime(0.3f);
+
+        panel.SetActive(false);
         ShowOtherUI();
     }
 
     private void HideOtherUI()
     {
-        // Find and hide shop UI
         if (shopUI == null)
         {
-            // Try multiple possible names/paths for shop UI
             shopUI = GameObject.Find("ShopUI") ??
                      GameObject.Find("Shop") ??
                      GameObject.Find("ShopCanvas") ??
                      GameObject.Find("ShopPanel");
         }
 
-        // Find and hide trait UI  
         if (traitUI == null)
         {
-            // Try multiple possible names/paths for trait UI
             traitUI = GameObject.Find("TraitUI") ??
                       GameObject.Find("TraitsPanel") ??
                       GameObject.Find("TraitCanvas") ??
                       GameObject.Find("ActiveTraitsPanel");
         }
 
-        // Hide shop UI if found
         if (shopUI != null && shopUI.activeInHierarchy)
         {
             shopUI.SetActive(false);
             Debug.Log("🔽 Hidden Shop UI for augment selection");
         }
 
-        // Hide trait UI if found
         if (traitUI != null && traitUI.activeInHierarchy)
         {
             traitUI.SetActive(false);
             Debug.Log("🔽 Hidden Trait UI for augment selection");
         }
 
-        // Alternative: Use managers if available
         HideUIViaManagers();
     }
 
     private void ShowOtherUI()
     {
-        // Show shop UI if it was hidden
         if (shopUI != null)
         {
             shopUI.SetActive(true);
             Debug.Log("🔼 Restored Shop UI after augment selection");
         }
 
-        // Show trait UI if it was hidden
         if (traitUI != null)
         {
             traitUI.SetActive(true);
             Debug.Log("🔼 Restored Trait UI after augment selection");
         }
 
-        // Alternative: Use managers if available
         ShowUIViaManagers();
     }
 
     private void HideUIViaManagers()
     {
-        // Try to hide via ShopUIManager if it exists
         ShopUIManager shopManager = FindObjectOfType<ShopUIManager>();
-        if (shopManager != null)
-        {
-            // Assuming it has a method to hide UI
-            // shopManager.HideShopUI(); // Uncomment if this method exists
-        }
-
-        // Try to hide via TraitUIManager if it exists
         TraitUIManager traitManager = FindObjectOfType<TraitUIManager>();
-        if (traitManager != null)
-        {
-            // Assuming it has a method to hide UI
-            // traitManager.HideTraitUI(); // Uncomment if this method exists
-        }
     }
 
     private void ShowUIViaManagers()
     {
-        // Try to show via ShopUIManager if it exists
         ShopUIManager shopManager = FindObjectOfType<ShopUIManager>();
-        if (shopManager != null)
-        {
-            // Assuming it has a method to show UI
-            // shopManager.ShowShopUI(); // Uncomment if this method exists
-        }
-
-        // Try to show via TraitUIManager if it exists
         TraitUIManager traitManager = FindObjectOfType<TraitUIManager>();
-        if (traitManager != null)
-        {
-            // Assuming it has a method to show UI
-            // traitManager.ShowTraitUI(); // Uncomment if this method exists
-        }
     }
 
     public BaseAugment CreateAugmentFromId(string augmentId)
     {
-        // Refresh configurations in case they changed
         if (allConfigurations == null || allConfigurations.Length == 0)
         {
             allConfigurations = FindObjectsOfType<AugmentConfiguration>();
         }
 
-        // Find the configuration for this augment ID
         AugmentConfiguration config = System.Array.Find(allConfigurations,
             c => c != null && c.AugmentId == augmentId);
 
@@ -235,6 +308,14 @@ public class AugmentManager : MonoBehaviour
             return;
         }
 
+        // Find the augment ID to track it as selected
+        string augmentId = GetAugmentIdFromInstance(selectedAugment);
+        if (!string.IsNullOrEmpty(augmentId))
+        {
+            selectedAugmentIds.Add(augmentId);
+            Debug.Log($"🚫 Marked augment as selected: {augmentId}");
+        }
+
         if (augmentSelectSound != null && audioSource != null)
         {
             audioSource.PlayOneShot(augmentSelectSound);
@@ -255,8 +336,27 @@ public class AugmentManager : MonoBehaviour
             }
         }
 
-        // Hide the augment selection immediately (this will also restore other UI)
         HideAugmentSelection();
+    }
+
+    // NEW: Get augment ID from instance (reverse lookup)
+    private string GetAugmentIdFromInstance(BaseAugment augment)
+    {
+        if (allConfigurations == null) return null;
+
+        foreach (var config in allConfigurations)
+        {
+            if (config != null)
+            {
+                var testAugment = config.CreateAugmentInstance();
+                if (testAugment != null && testAugment.GetType() == augment.GetType())
+                {
+                    return config.AugmentId;
+                }
+            }
+        }
+
+        return null;
     }
 
     public void OnCombatStart()
@@ -305,6 +405,16 @@ public class AugmentManager : MonoBehaviour
             augment.RemoveAugment();
         }
         activeAugments.Clear();
+        selectedAugmentIds.Clear(); // Clear selected tracking
         Debug.Log("🔄 All augments reset");
+    }
+
+    // NEW: Debug method to see current state
+    [ContextMenu("Debug Augment State")]
+    public void DebugAugmentState()
+    {
+        Debug.Log($"🎯 Active Augments: {activeAugments.Count}/{maxAugments}");
+        Debug.Log($"🚫 Selected IDs: {string.Join(", ", selectedAugmentIds)}");
+        Debug.Log($"✅ Available IDs: {string.Join(", ", GetAvailableAugmentIds())}");
     }
 }

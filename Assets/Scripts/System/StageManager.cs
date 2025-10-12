@@ -32,6 +32,7 @@ public class StageManager : MonoBehaviour
         UIManager.Instance.UpdateStageUI(currentStage, roundInStage, roundsPerStage);
 
         EnterPrepPhase(); // start in prep
+        CheckForAugmentSelection();
     }
 
     public void OnCombatEnd(bool playerWon)
@@ -143,17 +144,17 @@ public class StageManager : MonoBehaviour
         currentPhase = GamePhase.Prep;
     }
 
-
-    // Add this method to your StageManager.cs
     private void CheckForAugmentSelection()
     {
-        if (AugmentManager.Instance != null && AugmentManager.Instance.ShouldOfferAugment(currentStage))
+        if (AugmentManager.Instance != null &&
+            AugmentManager.Instance.ShouldOfferAugment(currentStage, roundInStage, roundsPerStage))
         {
-            Debug.Log($"🎯 Offering augment selection for stage {currentStage}");
+            int totalRound = ((currentStage - 1) * roundsPerStage) + roundInStage;
+            Debug.Log($"🎯 Offering augment selection for Stage {currentStage}, Round {roundInStage} (Total Round {totalRound})");
 
             if (UIManager.Instance != null)
             {
-                UIManager.Instance.ShowStaticAugmentSelection(currentStage);
+                UIManager.Instance.ShowStaticAugmentSelection(currentStage, roundInStage);
             }
         }
     }
@@ -166,12 +167,11 @@ public class StageManager : MonoBehaviour
         {
             roundInStage = 1;
             currentStage++;
-
-            // NEW: Check for augment selection when advancing to a new stage
-            CheckForAugmentSelection();
         }
 
         UIManager.Instance.UpdateStageUI(currentStage, roundInStage, roundsPerStage);
-    }
 
+        // Check for augment selection on new round
+        CheckForAugmentSelection();
+    }
 }

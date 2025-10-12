@@ -1072,8 +1072,36 @@ public class UnitAI : MonoBehaviour
                 return "This unit has no ability description yet.";
         }
     }
+    public void ForceResetMovementState()
+    {
+        currentPath.Clear();
+        hasReachedDestination = true;
+        currentDestination = transform.position;
 
+        if (animator)
+        {
+            animator.SetBool("IsRunning", false);
+        }
 
+        // Clear any movement velocity
+        Rigidbody rb = GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.velocity = Vector3.zero;
+        }
+
+        Debug.Log($"🔄 {unitName} movement state forcefully reset");
+    }
+
+    public void ResetPathfinding()
+    {
+        currentPath.Clear();
+        hasReachedDestination = false;
+        lastPathRecalculation = 0f;
+        isUsingAlternativePath = false;
+
+        Debug.Log($"🗺️ {unitName} pathfinding system reset");
+    }
 
     private void MoveTowards(Vector3 targetPos)
     {

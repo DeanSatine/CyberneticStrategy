@@ -100,18 +100,35 @@ public class SupportTheRevolutionAugment : BaseAugment
         return baseHealAmount + (healPerStage * (currentStage - 1));
     }
 
+    // Replace the FindLowestHealthAlly method in SupportTheRevolutionAugment.cs:
+
     public UnitAI FindLowestHealthAlly(UnitAI attacker)
     {
+        // ✅ CRITICAL: Only target PLAYER units that are on the board
         UnitAI[] playerUnits = Object.FindObjectsOfType<UnitAI>().Where(u =>
-            u.team == Team.Player && u.isAlive && u != attacker).ToArray();
+            u.team == Team.Player && // ✅ MUST be player team
+            u.isAlive &&
+            u != attacker &&
+            (u.currentState == UnitAI.UnitState.BoardIdle || u.currentState == UnitAI.UnitState.Combat)).ToArray();
 
-        if (playerUnits.Length == 0) return null;
+        if (playerUnits.Length == 0)
+        {
+            Debug.Log("⚙️ No valid PLAYER allies found for gear healing");
+            return null;
+        }
 
         UnitAI lowestHealthUnit = playerUnits[0];
         float lowestHealthPercent = (float)lowestHealthUnit.currentHealth / lowestHealthUnit.maxHealth;
 
         foreach (var unit in playerUnits)
         {
+            // ✅ DOUBLE CHECK: Verify it's a player unit
+            if (unit.team != Team.Player)
+            {
+                Debug.LogWarning($"⚠️ Filtered out non-player unit: {unit.unitName} (Team: {unit.team})");
+                continue;
+            }
+
             float healthPercent = (float)unit.currentHealth / unit.maxHealth;
             if (healthPercent < lowestHealthPercent)
             {
@@ -120,8 +137,11 @@ public class SupportTheRevolutionAugment : BaseAugment
             }
         }
 
+        Debug.Log($"⚙️ Gear targeting PLAYER {lowestHealthUnit.unitName} (HP: {lowestHealthPercent * 100:F1}%, Team: {lowestHealthUnit.team})");
         return lowestHealthUnit;
     }
+
+
 
     public void OnGearHeal(UnitAI target, float healAmount)
     {

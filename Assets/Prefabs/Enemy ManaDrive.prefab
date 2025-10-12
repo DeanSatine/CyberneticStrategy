@@ -23,13 +23,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2349589256075078628}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0.243, z: 0.019}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5113662417154957240}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &668066043330046804
 PrefabInstance:
@@ -325,6 +325,7 @@ Animation:
   - {fileID: -203655887218126122, guid: 6dd8fa1d5432d8f4596410386dff1c4c, type: 3}
   - {fileID: -203655887218126122, guid: 648a81418ccdd5d4d9c3d7878436d8b8, type: 3}
   - {fileID: -203655887218126122, guid: 4faead4203c8687488d0244f41e1ebe1, type: 3}
+  - {fileID: -203655887218126122, guid: 311478580bc54204b83cc572670d1bcd, type: 3}
   m_WrapMode: 0
   m_PlayAutomatically: 0
   m_AnimatePhysics: 0
@@ -415,6 +416,7 @@ MonoBehaviour:
     type: 3}
   splashVFX: {fileID: 0}
   abilityStartSound: {fileID: 0}
+  voiceLine: {fileID: 0}
   bombLaunchSound: {fileID: 8300000, guid: ff2bd0ef740f7394a89a0491845fc4f0, type: 3}
   bombExplosionSound: {fileID: 8300000, guid: 598d20696bf898547a059abb95dece97, type: 3}
   attackSpeedGainSound: {fileID: 0}

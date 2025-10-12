@@ -29,7 +29,7 @@ public class EradicatorTrait : MonoBehaviour
 
     [Header("🎯 Execution Settings")]
     public float executionHeight = 7f; // ✅ How high above target to start slam
-
+    private static float? stuckStateTimer = null;
     private void OnEnable()
     {
         activeEradicatorCount++;
@@ -51,26 +51,121 @@ public class EradicatorTrait : MonoBehaviour
     private void Update()
     {
         if (executeThreshold <= 0) return;
+
+        // FIX: Add state recovery mechanism
+        if (DetectStuckState())
+        {
+            Debug.LogWarning($"⚠️ Eradicator press stuck - recovering...");
+            RecoverFromStuckState();
+            return;
+        }
+
         if (!EnsurePressExists()) return;
 
-        // ✅ COMMITMENT CHECK: Once committed to execution, no more decisions!
+        // COMMITMENT CHECK: Once committed to execution, no more decisions!
         if (isCommittedToExecution)
         {
             // Press is committed - let the animation finish
             return;
         }
 
-        // ✅ If already executing, don't start another execution
+        // If already executing, don't start another execution
         if (isPressing || isSlammingDown)
         {
             return;
         }
 
-        // ✅ SIMPLE: Just scan for executable enemies
+        // SIMPLE: Just scan for executable enemies
         CheckForExecutableEnemies();
     }
+    private bool DetectStuckState()
+    {
+        // If we're committed to execution but the press has been stuck for too long
+        if (isCommittedToExecution && pressInstance != null)
+        {
+            // Check if press hasn't moved in a while (add a timer field)
+            if (!stuckStateTimer.HasValue)
+            {
+                stuckStateTimer = Time.time;
+            }
+            else if (Time.time - stuckStateTimer.Value > 5f) // 5 second timeout
+            {
+                return true;
+            }
+        }
+        else
+        {
+            stuckStateTimer = null; // Reset timer when not committed
+        }
 
-    // ✅ SIMPLIFIED: Direct execution detection
+        return false;
+    }
+
+    private void RecoverFromStuckState()
+    {
+        Debug.LogWarning($"🚨 Recovering Eradicator press from stuck state");
+
+        // Force complete the execution immediately
+        if (pressInstance != null && isCommittedToExecution)
+        {
+            // Teleport press to slam position and complete impact
+            pressInstance.transform.position = lockedSlamPosition + Vector3.up * 1.3f;
+
+            // Trigger impact effects immediately
+            if (slamEffectPrefab != null)
+            {
+                GameObject fx = Instantiate(slamEffectPrefab, lockedSlamPosition, Quaternion.identity);
+                Destroy(fx, 2f);
+            }
+
+            if (TraitManager.Instance != null)
+            {
+                TraitManager.Instance.PlayEradicatorSlamSound();
+            }
+
+            StartCoroutine(CameraShake(cameraShakeIntensity, cameraShakeDuration));
+
+            // Find and damage any units in slam area
+            Collider[] hits = Physics.OverlapSphere(lockedSlamPosition, 2f);
+            foreach (var hit in hits)
+            {
+                UnitAI enemy = hit.GetComponent<UnitAI>();
+                if (enemy != null && enemy.team == Team.Enemy && enemy.isAlive)
+                {
+                    float hpPercent = (float)enemy.currentHealth / enemy.maxHealth;
+                    if (hpPercent <= executeThreshold)
+                    {
+                        Debug.Log($"💀⚡ RECOVERY EXECUTION: {enemy.unitName} obliterated!");
+                        enemy.TakeDamage(999999);
+                    }
+                }
+            }
+        }
+
+        // Force reset to idle state
+        StartCoroutine(ForceReturnToIdle());
+    }
+
+    // NEW: Force return press to idle
+    private System.Collections.IEnumerator ForceReturnToIdle()
+    {
+        yield return new WaitForSeconds(0.5f); // Brief pause
+
+        if (pressInstance != null)
+        {
+            // Teleport back to idle position
+            pressInstance.transform.position = pressIdlePosition;
+        }
+
+        // Reset all state flags
+        isSlammingDown = false;
+        isPressing = false;
+        isCommittedToExecution = false;
+        lockedSlamPosition = Vector3.zero;
+        stuckStateTimer = null;
+
+        Debug.Log("✅ Eradicator press forcefully returned to idle state");
+    }
     private void CheckForExecutableEnemies()
     {
         UnitAI[] enemies = FindObjectsOfType<UnitAI>();

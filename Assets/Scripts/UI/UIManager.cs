@@ -45,11 +45,11 @@ public class UIManager : MonoBehaviour
         if (livesText != null)
             livesText.text = $"{lives}";
     }
-    public void ShowStaticAugmentSelection(int currentStage)
+    public void ShowStaticAugmentSelection(int currentStage, int currentRound)
     {
         if (AugmentManager.Instance != null)
         {
-            AugmentManager.Instance.ShowStaticAugmentSelection(currentStage);
+            AugmentManager.Instance.ShowStaticAugmentSelection(currentStage, currentRound);
         }
     }
     public void UpdateStageUI(int stage, int round, int roundsPerStage)
