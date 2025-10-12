@@ -10,14 +10,15 @@ public class TooltipSystem : MonoBehaviour
 
     [Header("Tooltip UI")]
     public GameObject tooltipObject;
-    public TextMeshProUGUI tooltipText; // Changed to TextMeshProUGUI
+    public TextMeshProUGUI tooltipText;
     public Image tooltipBackground;
     public CanvasGroup tooltipCanvasGroup;
 
     [Header("Settings")]
-    public float fadeSpeed = 5f;
-    public Vector2 offset = new Vector2(20, 20); // Increased offset
-    public float maxWidth = 250f;
+    public float fadeSpeed = 8f;
+    public Vector2 offset = new Vector2(15, 15);
+    public float maxWidth = 300f; // Increased max width
+    public int maxCharactersPerLine = 45; // Character limit per line
 
     private RectTransform tooltipRect;
     private Canvas tooltipCanvas;
@@ -55,7 +56,8 @@ public class TooltipSystem : MonoBehaviour
     {
         if (instance != null)
         {
-            instance.Show(text, position);
+            string formattedText = instance.FormatTooltipText(text);
+            instance.Show(formattedText, position);
         }
     }
 
@@ -65,6 +67,41 @@ public class TooltipSystem : MonoBehaviour
         {
             instance.Hide();
         }
+    }
+
+    private string FormatTooltipText(string originalText)
+    {
+        if (string.IsNullOrEmpty(originalText)) return originalText;
+
+        // Break long text into manageable chunks
+        string[] words = originalText.Split(' ');
+        string formattedText = "";
+        string currentLine = "";
+
+        foreach (string word in words)
+        {
+            // Check if adding this word would exceed the line limit
+            if ((currentLine + " " + word).Length > maxCharactersPerLine && currentLine.Length > 0)
+            {
+                formattedText += currentLine + "\n";
+                currentLine = word;
+            }
+            else
+            {
+                if (currentLine.Length > 0)
+                    currentLine += " " + word;
+                else
+                    currentLine = word;
+            }
+        }
+
+        // Add the last line
+        if (currentLine.Length > 0)
+        {
+            formattedText += currentLine;
+        }
+
+        return formattedText;
     }
 
     private void Show(string text, Vector2 position)
@@ -79,7 +116,7 @@ public class TooltipSystem : MonoBehaviour
             tooltipObject.SetActive(true);
         }
 
-        // IMPORTANT: Wait one frame for layout to update, then position
+        // Wait one frame for layout to update, then position
         StartCoroutine(PositionTooltipNextFrame(position));
 
         // Fade in
@@ -87,7 +124,6 @@ public class TooltipSystem : MonoBehaviour
         fadeCoroutine = StartCoroutine(FadeTooltip(1f));
 
         isShowing = true;
-        Debug.Log($"🔍 Showing tooltip: {text} at {position}");
     }
 
     private void Hide()
@@ -103,20 +139,14 @@ public class TooltipSystem : MonoBehaviour
 
     private IEnumerator PositionTooltipNextFrame(Vector2 screenPosition)
     {
-        // Wait for layout to rebuild
-        yield return null;
+        yield return null; // Wait for layout rebuild
         PositionTooltip(screenPosition);
     }
 
     private void PositionTooltip(Vector2 screenPosition)
     {
-        if (tooltipRect == null || tooltipCanvas == null)
-        {
-            Debug.LogError("❌ Tooltip positioning failed - missing components");
-            return;
-        }
+        if (tooltipRect == null || tooltipCanvas == null) return;
 
-        // FIX: Convert screen position to canvas space properly
         RectTransform canvasRect = tooltipCanvas.transform as RectTransform;
 
         Vector2 localPoint;
@@ -126,11 +156,7 @@ public class TooltipSystem : MonoBehaviour
             tooltipCanvas.worldCamera,
             out localPoint);
 
-        if (!success)
-        {
-            Debug.LogError("❌ Failed to convert screen point to local point");
-            return;
-        }
+        if (!success) return;
 
         // Add offset
         localPoint += offset;
@@ -139,25 +165,29 @@ public class TooltipSystem : MonoBehaviour
         Vector2 tooltipSize = tooltipRect.sizeDelta;
         Vector2 canvasSize = canvasRect.sizeDelta;
 
-        // FIX: Clamp to screen bounds more accurately
+        // Smart positioning to keep tooltip on screen
         float halfCanvasWidth = canvasSize.x * 0.5f;
         float halfCanvasHeight = canvasSize.y * 0.5f;
         float halfTooltipWidth = tooltipSize.x * 0.5f;
         float halfTooltipHeight = tooltipSize.y * 0.5f;
 
-        // Clamp X (keep within screen)
+        // If tooltip would go off right edge, show it on the left instead
         if (localPoint.x + halfTooltipWidth > halfCanvasWidth)
         {
-            localPoint.x = screenPosition.x - tooltipSize.x - offset.x; // Show on left side instead
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, new Vector2(localPoint.x, screenPosition.y), tooltipCanvas.worldCamera, out localPoint);
+            localPoint.x = localPoint.x - tooltipSize.x - (offset.x * 2);
         }
 
-        // Clamp Y (keep within screen)
+        // If tooltip would go off top edge, show it below instead  
+        if (localPoint.y + halfTooltipHeight > halfCanvasHeight)
+        {
+            localPoint.y = localPoint.y - tooltipSize.y - (offset.y * 2);
+        }
+
+        // Clamp to screen bounds as final safety
+        localPoint.x = Mathf.Clamp(localPoint.x, -halfCanvasWidth + halfTooltipWidth, halfCanvasWidth - halfTooltipWidth);
         localPoint.y = Mathf.Clamp(localPoint.y, -halfCanvasHeight + halfTooltipHeight, halfCanvasHeight - halfTooltipHeight);
 
         tooltipRect.localPosition = localPoint;
-
-        Debug.Log($"🔍 Positioned tooltip at local: {localPoint}, screen: {screenPosition}, size: {tooltipSize}");
     }
 
     private IEnumerator FadeTooltip(float targetAlpha)
@@ -193,19 +223,19 @@ public class TooltipSystem : MonoBehaviour
         // Add canvas group for fading
         tooltipCanvasGroup = tooltipObject.AddComponent<CanvasGroup>();
 
-        // Add background image
+        // Add background image with better styling
         tooltipBackground = tooltipObject.AddComponent<Image>();
-        tooltipBackground.color = new Color(0.05f, 0.05f, 0.05f, 0.95f); // Darker background
+        tooltipBackground.color = new Color(0.05f, 0.05f, 0.05f, 0.95f);
 
-        // Add outline
+        // Add outline for better visibility
         Outline outline = tooltipObject.AddComponent<Outline>();
-        outline.effectColor = new Color(0.8f, 0.8f, 0.8f, 0.5f);
+        outline.effectColor = new Color(1f, 1f, 1f, 0.3f);
         outline.effectDistance = new Vector2(1, -1);
 
-        // Set initial size (will be adjusted by ContentSizeFitter)
+        // Set rect transform
         RectTransform tooltipRect = tooltipObject.GetComponent<RectTransform>();
         tooltipRect.sizeDelta = new Vector2(maxWidth, 50);
-        tooltipRect.pivot = new Vector2(0, 1); // Top-left pivot for easier positioning
+        tooltipRect.pivot = new Vector2(0, 1); // Top-left pivot
 
         // Add text
         GameObject textObj = new GameObject("TooltipText");
@@ -213,23 +243,25 @@ public class TooltipSystem : MonoBehaviour
 
         tooltipText = textObj.AddComponent<TextMeshProUGUI>();
         tooltipText.text = "Tooltip Text";
-        tooltipText.fontSize = 12;
+        tooltipText.fontSize = 14; // Slightly larger font
+        tooltipText.fontStyle = FontStyles.Normal;
         tooltipText.color = Color.white;
         tooltipText.alignment = TextAlignmentOptions.TopLeft;
         tooltipText.enableWordWrapping = true;
+        tooltipText.overflowMode = TextOverflowModes.Overflow;
 
         // Set text rect to fill parent with padding
         RectTransform textRect = tooltipText.GetComponent<RectTransform>();
         textRect.anchorMin = Vector2.zero;
         textRect.anchorMax = Vector2.one;
-        textRect.offsetMin = new Vector2(8, 8);
-        textRect.offsetMax = new Vector2(-8, -8);
+        textRect.offsetMin = new Vector2(10, 8); // More padding
+        textRect.offsetMax = new Vector2(-10, -8);
 
         // Add content size fitter for auto-sizing
         ContentSizeFitter sizeFitter = tooltipObject.AddComponent<ContentSizeFitter>();
         sizeFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
         sizeFitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-        Debug.Log("✅ Enhanced Tooltip UI created");
+        Debug.Log("✅ Enhanced Tooltip UI created with better formatting");
     }
 }
