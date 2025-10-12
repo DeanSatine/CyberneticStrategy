@@ -11,60 +11,89 @@ public class CompactAugmentItem : MonoBehaviour, IPointerEnterHandler, IPointerE
     public Image backgroundImage;
 
     private BaseAugment augment;
+    private bool isPreviewMode = false;
 
     public void Setup(BaseAugment augment)
     {
         this.augment = augment;
+        this.isPreviewMode = false;
+        SetupUI(augment);
+    }
 
+    public void SetupPreview(BaseAugment augment)
+    {
+        this.augment = augment;
+        this.isPreviewMode = true;
+        SetupUI(augment);
+    }
+
+    private void SetupUI(BaseAugment augment)
+    {
         // Set icon
-        if (iconImage != null && augment.icon != null)
+        if (iconImage != null)
         {
-            iconImage.sprite = augment.icon;
-            iconImage.color = Color.white;
-        }
-        else if (iconImage != null)
-        {
-            // Use a default icon or hide
-            iconImage.color = new Color(0.5f, 0.5f, 0.5f, 0.3f);
+            if (augment.icon != null)
+            {
+                iconImage.sprite = augment.icon;
+                iconImage.color = Color.white;
+            }
+            else
+            {
+                iconImage.sprite = null;
+                iconImage.color = GetAugmentColor(augment.type);
+            }
         }
 
-        // Set name
+        // Set name with perfect centering
         if (nameText != null)
         {
             nameText.text = augment.augmentName;
             nameText.fontStyle = FontStyles.Bold;
+            nameText.alignment = TextAlignmentOptions.Left;
+            nameText.verticalAlignment = VerticalAlignmentOptions.Middle;
         }
 
-        // Set background color based on augment type
+        // Set background color
         if (backgroundImage != null)
         {
             Color bgColor = GetAugmentColor(augment.type);
+            bgColor.a = 0.3f; // Semi-transparent
             backgroundImage.color = bgColor;
         }
 
-        Debug.Log($"🔍 Setup compact augment item: {augment.augmentName}");
+        Debug.Log($"🔍 Setup {(isPreviewMode ? "preview" : "runtime")} item: {augment.augmentName}");
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (augment != null && !string.IsNullOrEmpty(augment.description))
-        {
-            // FIX: Use the UI element's position instead of just mouse position
-            RectTransform rectTransform = GetComponent<RectTransform>();
-            Vector3 worldPos = rectTransform.position;
-            Vector2 screenPos = worldPos;
+        if (augment == null || string.IsNullOrEmpty(augment.description)) return;
 
-            // Add some offset to show tooltip to the right of the item
-            screenPos.x += rectTransform.sizeDelta.x * 0.5f;
+#if UNITY_EDITOR
+        if (!Application.isPlaying && isPreviewMode)
+        {
+            Debug.Log($"🔍 Would show tooltip: {augment.description}");
+            return;
+        }
+#endif
+
+        // Only show tooltip in play mode
+        if (Application.isPlaying)
+        {
+            Vector3 worldPos = transform.position;
+            Vector2 screenPos = worldPos;
+            screenPos.x += 100f; // Offset to the right
+            screenPos.y += 50f;  // Offset upward
 
             TooltipSystem.ShowTooltip(augment.description, screenPos);
-            Debug.Log($"🔍 Showing tooltip for: {augment.augmentName} at {screenPos}");
         }
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        TooltipSystem.HideTooltip();
+        if (Application.isPlaying)
+        {
+            TooltipSystem.HideTooltip();
+        }
     }
 
     private Color GetAugmentColor(AugmentType type)
@@ -72,18 +101,21 @@ public class CompactAugmentItem : MonoBehaviour, IPointerEnterHandler, IPointerE
         switch (type)
         {
             case AugmentType.Origin:
-                return new Color(0.2f, 0.6f, 0.2f, 0.8f); // Green
+                return new Color(0.2f, 0.8f, 0.2f, 1f); // Green
             case AugmentType.Class:
-                return new Color(0.2f, 0.4f, 0.8f, 0.8f); // Blue
+                return new Color(0.2f, 0.4f, 0.9f, 1f); // Blue
             case AugmentType.Generic:
-                return new Color(0.6f, 0.4f, 0.8f, 0.8f); // Purple
+                return new Color(0.8f, 0.4f, 0.9f, 1f); // Purple
             default:
-                return new Color(0.3f, 0.3f, 0.3f, 0.8f); // Gray
+                return new Color(0.6f, 0.6f, 0.6f, 1f); // Gray
         }
     }
 
     private void OnDestroy()
     {
-        TooltipSystem.HideTooltip();
+        if (Application.isPlaying)
+        {
+            TooltipSystem.HideTooltip();
+        }
     }
 }
