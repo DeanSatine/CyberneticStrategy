@@ -57,7 +57,7 @@ public class CompactAugmentItem : MonoBehaviour, IPointerEnterHandler, IPointerE
         if (backgroundImage != null)
         {
             Color bgColor = GetAugmentColor(augment.type);
-            bgColor.a = 0.3f; // Semi-transparent
+            bgColor.a = 0.3f;
             backgroundImage.color = bgColor;
         }
 
@@ -76,15 +76,15 @@ public class CompactAugmentItem : MonoBehaviour, IPointerEnterHandler, IPointerE
         }
 #endif
 
-        // Only show tooltip in play mode
+        // Use the simple tooltip system
         if (Application.isPlaying)
         {
             Vector3 worldPos = transform.position;
             Vector2 screenPos = worldPos;
-            screenPos.x += 100f; // Offset to the right
-            screenPos.y += 50f;  // Offset upward
+            screenPos.x += 100f;
+            screenPos.y += 50f;
 
-            TooltipSystem.ShowTooltip(augment.description, screenPos);
+            SimpleTooltipSystem.ShowTooltip(augment.description, screenPos);
         }
     }
 
@@ -92,7 +92,7 @@ public class CompactAugmentItem : MonoBehaviour, IPointerEnterHandler, IPointerE
     {
         if (Application.isPlaying)
         {
-            TooltipSystem.HideTooltip();
+            SimpleTooltipSystem.HideTooltip();
         }
     }
 
@@ -101,13 +101,13 @@ public class CompactAugmentItem : MonoBehaviour, IPointerEnterHandler, IPointerE
         switch (type)
         {
             case AugmentType.Origin:
-                return new Color(0.2f, 0.8f, 0.2f, 1f); // Green
+                return new Color(0.2f, 0.8f, 0.2f, 1f);
             case AugmentType.Class:
-                return new Color(0.2f, 0.4f, 0.9f, 1f); // Blue
+                return new Color(0.2f, 0.4f, 0.9f, 1f);
             case AugmentType.Generic:
-                return new Color(0.8f, 0.4f, 0.9f, 1f); // Purple
+                return new Color(0.8f, 0.4f, 0.9f, 1f);
             default:
-                return new Color(0.6f, 0.6f, 0.6f, 1f); // Gray
+                return new Color(0.6f, 0.6f, 0.6f, 1f);
         }
     }
 
@@ -115,7 +115,7 @@ public class CompactAugmentItem : MonoBehaviour, IPointerEnterHandler, IPointerE
     {
         if (Application.isPlaying)
         {
-            TooltipSystem.HideTooltip();
+            SimpleTooltipSystem.HideTooltip();
         }
     }
 }
