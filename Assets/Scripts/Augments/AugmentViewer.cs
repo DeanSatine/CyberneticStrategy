@@ -11,57 +11,181 @@ public class AugmentViewer : MonoBehaviour
     public GameObject compactAugmentItemPrefab;
     public TMP_Text titleText;
 
-    [Header("Manual Positioning")]
-    [SerializeField] private bool useManualPosition = true;
-    [SerializeField] private Vector3 manualUIPosition = new Vector3(0, 0, 0);
-    [SerializeField] private bool positionRelativeToObject = false;
-    [SerializeField] private Vector3 offsetFromObject = new Vector3(150, 100, 0);
+    [Header("Manual UI Positioning")]
+    [SerializeField] private Vector3 fixedUIPosition = new Vector3(400, 300, 0);
+    [SerializeField] private bool useFixedPosition = true;
 
-    [Header("Visual Settings")]
-    [SerializeField] private Material normalMaterial;
-    [SerializeField] private Material highlightMaterial;
+    [Header("Editor Preview")]
+    [SerializeField] private bool showUIInEditor = false;
+
+    [Header("Input Settings")]
+    [SerializeField] private bool leftClickAnywhereToClose = true;
+    [SerializeField] private bool rightClickToToggle = true;
 
     private bool isUIOpen = false;
     private List<GameObject> currentAugmentItems = new List<GameObject>();
-    private Renderer objectRenderer;
 
     private void Start()
     {
-        objectRenderer = GetComponent<Renderer>();
+        // Clean up any existing tooltips first
+        CleanupExistingTooltips();
 
-        // Create materials if not assigned
-        if (normalMaterial == null) CreateDefaultMaterials();
-
-        // Ensure tooltip system exists
-        if (TooltipSystem.Instance == null)
-        {
-            CreateTooltipSystem();
-        }
-
-        // Initially hide the UI
+        // Ensure UI is hidden at start
         if (augmentViewerUI != null)
         {
             augmentViewerUI.SetActive(false);
-            Debug.Log("🔍 AugmentViewer UI initially hidden");
+            isUIOpen = false;
         }
 
-        Debug.Log("🔍 Enhanced AugmentViewer ready for right-clicking!");
+        Debug.Log("🔍 AugmentViewer initialized with clean state");
+    }
+
+    private void CleanupExistingTooltips()
+    {
+        // Find and clean up any existing tooltips
+        SimpleTooltipSystem[] existingSystems = FindObjectsOfType<SimpleTooltipSystem>();
+        if (existingSystems.Length > 1)
+        {
+            Debug.Log($"🗑️ Found {existingSystems.Length} SimpleTooltipSystems, cleaning up duplicates");
+            for (int i = 1; i < existingSystems.Length; i++)
+            {
+                Destroy(existingSystems[i].gameObject);
+            }
+        }
+
+        // Force hide any visible tooltips
+        GameObject[] allObjects = FindObjectsOfType<GameObject>();
+        foreach (GameObject obj in allObjects)
+        {
+            if (obj.name.Contains("Tooltip") || obj.name.Contains("tooltip"))
+            {
+                obj.SetActive(false);
+                Debug.Log($"🔒 Hidden existing tooltip: {obj.name}");
+            }
+        }
     }
 
     private void Update()
     {
-        // Check for right-click
-        if (Input.GetMouseButtonDown(1))
+        // Handle editor preview
+#if UNITY_EDITOR
+        if (!Application.isPlaying)
+        {
+            HandleEditorPreview();
+            return;
+        }
+#endif
+
+        // Runtime input handling
+        HandleInputs();
+    }
+
+    private void HandleInputs()
+    {
+        // Handle right click to toggle (open/close on object)
+        if (rightClickToToggle && Input.GetMouseButtonDown(1))
         {
             CheckForRightClick();
         }
 
-        // Close with escape key
+        // Handle left click anywhere to close when UI is open
+        if (leftClickAnywhereToClose && isUIOpen && Input.GetMouseButtonDown(0))
+        {
+            // Check if the click was on the UI itself
+            if (!IsClickOnUI())
+            {
+                Debug.Log("👆 Left click detected outside UI - closing AugmentViewer");
+                CloseAugmentViewer();
+            }
+        }
+
+        // Handle Escape key to close
         if (isUIOpen && Input.GetKeyDown(KeyCode.Escape))
         {
             CloseAugmentViewer();
         }
     }
+
+    /// <summary>
+    /// Checks if the mouse click was on the UI panel itself
+    /// </summary>
+    private bool IsClickOnUI()
+    {
+        if (augmentViewerUI == null || !augmentViewerUI.activeSelf) return false;
+
+        // Use Unity's built-in UI raycast system
+        Vector2 mousePosition = Input.mousePosition;
+
+        // Check if mouse is over any UI element
+        UnityEngine.EventSystems.PointerEventData eventData = new UnityEngine.EventSystems.PointerEventData(UnityEngine.EventSystems.EventSystem.current)
+        {
+            position = mousePosition
+        };
+
+        List<UnityEngine.EventSystems.RaycastResult> results = new List<UnityEngine.EventSystems.RaycastResult>();
+        UnityEngine.EventSystems.EventSystem.current.RaycastAll(eventData, results);
+
+        // Check if any of the raycast hits are part of our UI
+        foreach (var result in results)
+        {
+            if (result.gameObject != null)
+            {
+                // Check if the hit object is a child of our augmentViewerUI
+                Transform checkTransform = result.gameObject.transform;
+                while (checkTransform != null)
+                {
+                    if (checkTransform.gameObject == augmentViewerUI)
+                    {
+                        Debug.Log($"👆 Click was on UI element: {result.gameObject.name}");
+                        return true;
+                    }
+                    checkTransform = checkTransform.parent;
+                }
+            }
+        }
+
+        return false;
+    }
+
+#if UNITY_EDITOR
+    private void HandleEditorPreview()
+    {
+        if (showUIInEditor && augmentViewerUI != null)
+        {
+            if (!augmentViewerUI.activeSelf)
+            {
+                augmentViewerUI.SetActive(true);
+                PositionUI();
+                CreateEditorPreviewItems();
+            }
+        }
+        else if (!showUIInEditor && augmentViewerUI != null)
+        {
+            if (augmentViewerUI.activeSelf)
+            {
+                augmentViewerUI.SetActive(false);
+                ClearAugmentItems();
+            }
+        }
+    }
+
+#if UNITY_EDITOR
+    private void CreateEditorPreviewItems()
+    {
+        ClearAugmentItems();
+
+        if (titleText != null)
+        {
+            titleText.text = "AUGMENTS (PREVIEW) - Play mode to see real data";
+        }
+
+        // Skip creating preview items to avoid compilation issues
+        Debug.Log("🔍 Preview mode - play the scene to see actual augment data");
+    }
+#endif
+
+
+#endif
 
     private void CheckForRightClick()
     {
@@ -72,7 +196,7 @@ public class AugmentViewer : MonoBehaviour
         {
             if (hit.collider.gameObject == gameObject)
             {
-                Debug.Log("🔍 Right-clicked on AugmentViewer object!");
+                Debug.Log("🔍 Right-clicked on AugmentViewer!");
                 ToggleAugmentViewer();
             }
         }
@@ -98,17 +222,13 @@ public class AugmentViewer : MonoBehaviour
             return;
         }
 
-        // Position UI using manual positioning
-        PositionUIManually();
-
-        // Update the augment list
+        PositionUI();
         UpdateAugmentList();
 
-        // Show the UI
         isUIOpen = true;
         augmentViewerUI.SetActive(true);
 
-        Debug.Log("🔍 Enhanced Augment Viewer opened with manual positioning!");
+        Debug.Log("🔍 Augment Viewer opened!");
     }
 
     private void CloseAugmentViewer()
@@ -121,49 +241,31 @@ public class AugmentViewer : MonoBehaviour
             augmentViewerUI.SetActive(false);
         }
 
-        // Hide any open tooltips
-        TooltipSystem.HideTooltip();
+        // Hide any tooltips when closing
+        SimpleTooltipSystem.HideTooltip();
 
-        Debug.Log("🔍 Enhanced Augment Viewer closed");
+        Debug.Log("🔍 Augment Viewer closed");
     }
 
-    private void PositionUIManually()
+    private void PositionUI()
     {
-        if (augmentViewerUI == null || Camera.main == null) return;
+        if (augmentViewerUI == null) return;
 
         RectTransform uiRect = augmentViewerUI.GetComponent<RectTransform>();
         if (uiRect == null) return;
 
-        Vector3 targetPosition;
-
-        if (useManualPosition)
+        if (useFixedPosition)
         {
-            if (positionRelativeToObject)
-            {
-                // Position relative to this object
-                Vector3 objectScreenPos = Camera.main.WorldToScreenPoint(transform.position);
-                targetPosition = objectScreenPos + offsetFromObject;
-            }
-            else
-            {
-                // Use absolute manual position
-                targetPosition = manualUIPosition;
-            }
+            uiRect.position = fixedUIPosition;
         }
         else
         {
-            // Fall back to automatic positioning
+            // Automatic positioning based on object
             Vector3 screenPos = Camera.main.WorldToScreenPoint(transform.position);
-            targetPosition = screenPos + new Vector3(150f, 100f, 0);
+            uiRect.position = screenPos + new Vector3(150f, 100f, 0);
         }
 
-        // Clamp to screen bounds
-        targetPosition.x = Mathf.Clamp(targetPosition.x, 200f, Screen.width - 200f);
-        targetPosition.y = Mathf.Clamp(targetPosition.y, 100f, Screen.height - 100f);
-
-        uiRect.position = targetPosition;
-
-        Debug.Log($"🔍 UI positioned at: {targetPosition} (Manual: {useManualPosition})");
+        Debug.Log($"🔍 UI positioned at: {uiRect.position}");
     }
 
     private void UpdateAugmentList()
@@ -177,7 +279,6 @@ public class AugmentViewer : MonoBehaviour
         }
 
         List<BaseAugment> activeAugments = AugmentManager.Instance.GetActiveAugments();
-        Debug.Log($"🔍 Found {activeAugments.Count} active augments");
 
         if (activeAugments.Count == 0)
         {
@@ -185,50 +286,31 @@ public class AugmentViewer : MonoBehaviour
             return;
         }
 
-        // Update title
         if (titleText != null)
         {
             titleText.text = $"AUGMENTS ({activeAugments.Count})";
         }
 
-        // Create compact UI items for each augment
         foreach (BaseAugment augment in activeAugments)
         {
             CreateCompactAugmentItem(augment);
         }
 
-        Debug.Log($"🔍 Created {currentAugmentItems.Count} enhanced augment items");
+        Debug.Log($"🔍 Created {currentAugmentItems.Count} augment items");
     }
 
     private void CreateCompactAugmentItem(BaseAugment augment)
     {
-        if (compactAugmentItemPrefab == null)
-        {
-            Debug.LogError("❌ Compact Augment Item Prefab is not assigned!");
-            return;
-        }
-
-        if (augmentListParent == null)
-        {
-            Debug.LogError("❌ Augment List Parent is not assigned!");
-            return;
-        }
+        if (compactAugmentItemPrefab == null || augmentListParent == null) return;
 
         GameObject item = Instantiate(compactAugmentItemPrefab, augmentListParent);
         currentAugmentItems.Add(item);
 
-        // Set up the compact item
         CompactAugmentItem itemScript = item.GetComponent<CompactAugmentItem>();
         if (itemScript != null)
         {
             itemScript.Setup(augment);
         }
-        else
-        {
-            Debug.LogError("❌ CompactAugmentItem script not found on prefab!");
-        }
-
-        Debug.Log($"🔍 Created enhanced item for: {augment.augmentName}");
     }
 
     private void ShowNoAugmentsMessage()
@@ -237,90 +319,75 @@ public class AugmentViewer : MonoBehaviour
         {
             titleText.text = "NO AUGMENTS";
         }
-
-        Debug.Log("🔍 Showing 'No Augments' message");
     }
 
     private void ClearAugmentItems()
     {
         foreach (GameObject item in currentAugmentItems)
         {
-            if (item != null) DestroyImmediate(item);
+            if (item != null)
+            {
+#if UNITY_EDITOR
+                if (!Application.isPlaying)
+                    DestroyImmediate(item);
+                else
+                    Destroy(item);
+#else
+                Destroy(item);
+#endif
+            }
         }
         currentAugmentItems.Clear();
     }
 
-    private void CreateTooltipSystem()
-    {
-        // Find or create tooltip canvas
-        Canvas tooltipCanvas = FindObjectOfType<Canvas>();
-        if (tooltipCanvas == null)
-        {
-            GameObject canvasObj = new GameObject("TooltipCanvas");
-            tooltipCanvas = canvasObj.AddComponent<Canvas>();
-            tooltipCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            tooltipCanvas.sortingOrder = 9999;
-            canvasObj.AddComponent<GraphicRaycaster>();
-        }
-
-        // Add tooltip system to canvas
-        GameObject tooltipSystemObj = new GameObject("TooltipSystem");
-        tooltipSystemObj.transform.SetParent(tooltipCanvas.transform, false);
-        tooltipSystemObj.AddComponent<TooltipSystem>();
-
-        Debug.Log("✅ Enhanced tooltip system created");
-    }
-
-    private void CreateDefaultMaterials()
-    {
-        normalMaterial = new Material(Shader.Find("Universal Render Pipeline/Lit"));
-        normalMaterial.color = new Color(0.3f, 0.8f, 1f, 1f);
-
-        highlightMaterial = new Material(Shader.Find("Universal Render Pipeline/Lit"));
-        highlightMaterial.color = new Color(0.8f, 1f, 0.3f, 1f);
-        highlightMaterial.SetFloat("_Metallic", 0.8f);
-        highlightMaterial.SetFloat("_Smoothness", 0.9f);
-
-        if (objectRenderer != null)
-        {
-            objectRenderer.material = normalMaterial;
-        }
-    }
-
-    private void OnMouseEnter()
-    {
-        if (objectRenderer != null && highlightMaterial != null)
-        {
-            objectRenderer.material = highlightMaterial;
-        }
-    }
-
-    private void OnMouseExit()
-    {
-        if (objectRenderer != null && normalMaterial != null)
-        {
-            objectRenderer.material = normalMaterial;
-        }
-    }
-
-    // Editor helper methods
-    [ContextMenu("Set Manual Position to Current UI Position")]
-    public void SetManualPositionToCurrent()
+    // Context menu methods for easier setup
+    [ContextMenu("Set Fixed Position to Current")]
+    public void SetFixedPositionToCurrent()
     {
         if (augmentViewerUI != null)
         {
             RectTransform uiRect = augmentViewerUI.GetComponent<RectTransform>();
             if (uiRect != null)
             {
-                manualUIPosition = uiRect.position;
-                Debug.Log($"✅ Manual position set to: {manualUIPosition}");
+                fixedUIPosition = uiRect.position;
+                Debug.Log($"✅ Fixed position set to: {fixedUIPosition}");
             }
         }
     }
 
-    [ContextMenu("Test Show UI")]
-    public void TestShowUI()
+    [ContextMenu("Show UI Preview")]
+    public void ShowUIPreview()
     {
-        ShowAugmentViewer();
+        showUIInEditor = true;
+    }
+
+    [ContextMenu("Hide UI Preview")]
+    public void HideUIPreview()
+    {
+        showUIInEditor = false;
+    }
+
+    [ContextMenu("Force Close UI")]
+    public void ForceCloseUI()
+    {
+        CloseAugmentViewer();
+    }
+
+    [ContextMenu("Test UI Click Detection")]
+    public void TestUIClickDetection()
+    {
+        bool clickOnUI = IsClickOnUI();
+        Debug.Log($"🖱️ Current mouse position over UI: {clickOnUI}");
+    }
+
+    private void OnValidate()
+    {
+#if UNITY_EDITOR
+        if (!Application.isPlaying)
+        {
+            HandleEditorPreview();
+        }
+#endif
     }
 }
+
