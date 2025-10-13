@@ -129,11 +129,12 @@ public class SimpleTooltipSystem : MonoBehaviour
         }
     }
 
-    public static void ShowTooltip(string text, Vector2 position)
+    public static void ShowTooltip(string text, Vector2 position = default)
     {
         if (instance != null && !string.IsNullOrEmpty(text))
         {
             string formattedText = instance.FormatTooltipText(text);
+            // Position parameter is ignored when using fixed positioning
             instance.Show(formattedText, position);
         }
     }
@@ -193,7 +194,15 @@ public class SimpleTooltipSystem : MonoBehaviour
             tooltipObject.SetActive(true);
         }
 
-        StartCoroutine(PositionTooltipNextFrame(position));
+        // Use fixed position or passed position based on settings
+        if (tooltipSettings != null && tooltipSettings.useFixedPosition)
+        {
+            StartCoroutine(PositionTooltipNextFrame(Vector2.zero)); // Position ignored for fixed
+        }
+        else
+        {
+            StartCoroutine(PositionTooltipNextFrame(position));
+        }
 
         if (fadeCoroutine != null) StopCoroutine(fadeCoroutine);
         fadeCoroutine = StartCoroutine(FadeTooltip(1f));
@@ -221,39 +230,120 @@ public class SimpleTooltipSystem : MonoBehaviour
     {
         if (tooltipRect == null || tooltipCanvas == null || tooltipSettings == null) return;
 
-        RectTransform canvasRect = tooltipCanvas.transform as RectTransform;
-        Vector2 localPoint;
-
-        bool success = RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            canvasRect, screenPosition, tooltipCanvas.worldCamera, out localPoint);
-
-        if (!success) return;
-
-        localPoint += tooltipSettings.offsetFromCursor;
-
-        Vector2 tooltipSize = tooltipRect.sizeDelta;
-        Vector2 canvasSize = canvasRect.sizeDelta;
-
-        float halfCanvasWidth = canvasSize.x * 0.5f;
-        float halfCanvasHeight = canvasSize.y * 0.5f;
-        float halfTooltipWidth = tooltipSize.x * 0.5f;
-        float halfTooltipHeight = tooltipSize.y * 0.5f;
-
-        if (localPoint.x + halfTooltipWidth > halfCanvasWidth)
+        if (tooltipSettings.useFixedPosition)
         {
-            localPoint.x = localPoint.x - tooltipSize.x - (tooltipSettings.offsetFromCursor.x * 2);
+            // FIXED: Use anchored position instead of local position for true fixed positioning
+            SetFixedAnchoredPosition();
+            Debug.Log($"🔍 Using fixed tooltip anchored position: {tooltipRect.anchoredPosition}");
         }
-
-        if (localPoint.y + halfTooltipHeight > halfCanvasHeight)
+        else
         {
-            localPoint.y = localPoint.y - tooltipSize.y - (tooltipSettings.offsetFromCursor.y * 2);
+            // Mouse following mode (existing logic)
+            Vector2 localPoint;
+            RectTransform canvasRect = tooltipCanvas.transform as RectTransform;
+            bool success = RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                canvasRect, screenPosition, tooltipCanvas.worldCamera, out localPoint);
+
+            if (!success)
+            {
+                Debug.LogWarning("⚠️ Failed to convert screen position to canvas coordinates");
+                return;
+            }
+
+            localPoint += tooltipSettings.offsetFromCursor;
+
+            // Clamp to canvas bounds
+            Vector2 tooltipSize = tooltipRect.sizeDelta;
+            Vector2 canvasSize = canvasRect.sizeDelta;
+
+            float halfCanvasWidth = canvasSize.x * 0.5f;
+            float halfCanvasHeight = canvasSize.y * 0.5f;
+            float halfTooltipWidth = tooltipSize.x * 0.5f;
+            float halfTooltipHeight = tooltipSize.y * 0.5f;
+
+            if (localPoint.x + halfTooltipWidth > halfCanvasWidth)
+            {
+                localPoint.x = localPoint.x - tooltipSize.x - (tooltipSettings.offsetFromCursor.x * 2);
+            }
+
+            if (localPoint.y + halfTooltipHeight > halfCanvasHeight)
+            {
+                localPoint.y = localPoint.y - tooltipSize.y - (tooltipSettings.offsetFromCursor.y * 2);
+            }
+
+            localPoint.x = Mathf.Clamp(localPoint.x, -halfCanvasWidth + halfTooltipWidth, halfCanvasWidth - halfTooltipWidth);
+            localPoint.y = Mathf.Clamp(localPoint.y, -halfCanvasHeight + halfTooltipHeight, halfCanvasHeight - halfTooltipHeight);
+
+            tooltipRect.localPosition = localPoint;
         }
-
-        localPoint.x = Mathf.Clamp(localPoint.x, -halfCanvasWidth + halfTooltipWidth, halfCanvasWidth - halfTooltipWidth);
-        localPoint.y = Mathf.Clamp(localPoint.y, -halfCanvasHeight + halfTooltipHeight, halfCanvasHeight - halfTooltipHeight);
-
-        tooltipRect.localPosition = localPoint;
     }
+
+    /// <summary>
+    /// Sets the tooltip to a fixed position using anchoring for consistent screen placement
+    /// </summary>
+    private void SetFixedAnchoredPosition()
+    {
+        if (tooltipRect == null || tooltipSettings == null) return;
+
+        if (tooltipSettings.usePercentagePositioning)
+        {
+            // PERCENTAGE MODE: Always consistent across screen sizes
+            Vector2 anchorPos = new Vector2(
+                tooltipSettings.screenPercentageX,
+                tooltipSettings.screenPercentageY
+            );
+
+            tooltipRect.anchorMin = anchorPos;
+            tooltipRect.anchorMax = anchorPos;
+            tooltipRect.anchoredPosition = Vector2.zero;
+            tooltipRect.pivot = new Vector2(0f, 1f); // Top-left pivot
+
+            Debug.Log($"🔧 Set tooltip to percentage: {anchorPos}");
+        }
+        else
+        {
+            // LEGACY COORDINATE MODE: Convert coordinates to anchor-based positioning
+            Vector2 fixedPos = tooltipSettings.fixedPosition;
+
+            Vector2 anchorMin, anchorMax, anchoredPosition;
+
+            if (fixedPos.x < 0) // Left side
+            {
+                if (fixedPos.y > 0) // Top-left
+                {
+                    anchorMin = anchorMax = new Vector2(0f, 1f);
+                    anchoredPosition = new Vector2(Mathf.Abs(fixedPos.x), -fixedPos.y);
+                }
+                else // Bottom-left  
+                {
+                    anchorMin = anchorMax = new Vector2(0f, 0f);
+                    anchoredPosition = new Vector2(Mathf.Abs(fixedPos.x), Mathf.Abs(fixedPos.y));
+                }
+            }
+            else // Right side
+            {
+                if (fixedPos.y > 0) // Top-right
+                {
+                    anchorMin = anchorMax = new Vector2(1f, 1f);
+                    anchoredPosition = new Vector2(-fixedPos.x, -fixedPos.y);
+                }
+                else // Bottom-right
+                {
+                    anchorMin = anchorMax = new Vector2(1f, 0f);
+                    anchoredPosition = new Vector2(-fixedPos.x, Mathf.Abs(fixedPos.y));
+                }
+            }
+
+            tooltipRect.anchorMin = anchorMin;
+            tooltipRect.anchorMax = anchorMax;
+            tooltipRect.anchoredPosition = anchoredPosition;
+            tooltipRect.pivot = anchorMin;
+
+            Debug.Log($"🔧 Set tooltip anchor to: {anchorMin} with position: {anchoredPosition}");
+        }
+    }
+
+
 
     private IEnumerator FadeTooltip(float targetAlpha)
     {

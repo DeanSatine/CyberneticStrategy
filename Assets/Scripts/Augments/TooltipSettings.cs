@@ -28,7 +28,15 @@ public class TooltipSettings : ScriptableObject
     public Vector2 outlineDistance = new Vector2(1, -1);
 
     [Header("Positioning")]
-    public Vector2 offsetFromCursor = new Vector2(15, 15);
+    public bool useFixedPosition = true;  // Toggle between fixed and mouse following
+    [Space]
+    [Header("Fixed Position Mode")]
+    public bool usePercentagePositioning = true; // Use screen percentage instead
+    [Range(0f, 1f)] public float screenPercentageX = 0.75f; // 75% from left
+    [Range(0f, 1f)] public float screenPercentageY = 0.8f;  // 80% from bottom
+    [Space]
+    public Vector2 fixedPosition = new Vector2(400f, -200f);  // Canvas coordinates (if not using percentage)
+    public Vector2 offsetFromCursor = new Vector2(15, 15);  // For mouse following mode
     public float fadeSpeed = 8f;
 
     [Header("Font Asset (Optional)")]

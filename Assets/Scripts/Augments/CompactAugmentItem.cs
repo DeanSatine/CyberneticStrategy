@@ -76,15 +76,11 @@ public class CompactAugmentItem : MonoBehaviour, IPointerEnterHandler, IPointerE
         }
 #endif
 
-        // Use the simple tooltip system
         if (Application.isPlaying)
         {
-            Vector3 worldPos = transform.position;
-            Vector2 screenPos = worldPos;
-            screenPos.x += 100f;
-            screenPos.y += 50f;
-
-            SimpleTooltipSystem.ShowTooltip(augment.description, screenPos);
+            // SIMPLIFIED: Position parameter is ignored for fixed positioning
+            SimpleTooltipSystem.ShowTooltip(augment.description);
+            Debug.Log($"🔍 Showing tooltip for: {augment.augmentName}");
         }
     }
 
@@ -95,6 +91,8 @@ public class CompactAugmentItem : MonoBehaviour, IPointerEnterHandler, IPointerE
             SimpleTooltipSystem.HideTooltip();
         }
     }
+
+
 
     private Color GetAugmentColor(AugmentType type)
     {

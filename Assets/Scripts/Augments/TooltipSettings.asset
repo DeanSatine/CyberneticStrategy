@@ -27,6 +27,11 @@ MonoBehaviour:
   useOutline: 0
   outlineColor: {r: 1, g: 1, b: 1, a: 0.3}
   outlineDistance: {x: 1, y: -1}
+  useFixedPosition: 1
+  usePercentagePositioning: 1
+  screenPercentageX: 0.4
+  screenPercentageY: 0.9
+  fixedPosition: {x: -800, y: 600}
   offsetFromCursor: {x: 100, y: 30}
   fadeSpeed: 8
   customFont: {fileID: 11400000, guid: d81d8f46036ab584c8e06335cec4edcf, type: 2}

@@ -256,17 +256,43 @@ public class AugmentViewer : MonoBehaviour
 
         if (useFixedPosition)
         {
-            uiRect.position = fixedUIPosition;
+            // SIMPLE FIX: Use localPosition instead of position for consistent placement
+            uiRect.localPosition = new Vector3(fixedUIPosition.x - 960f, fixedUIPosition.y - 540f, 0);
+            // Note: Adjust -960, -540 based on your canvas reference resolution
         }
         else
         {
-            // Automatic positioning based on object
-            Vector3 screenPos = Camera.main.WorldToScreenPoint(transform.position);
-            uiRect.position = screenPos + new Vector3(150f, 100f, 0);
+            // Automatic positioning - convert world to screen, then to local canvas position
+            Vector3 worldPos = transform.position;
+            Vector3 screenPos = Camera.main.WorldToScreenPoint(worldPos);
+
+            // Convert to local canvas coordinates (adjust for your reference resolution)
+            float canvasScaleFactor = GetCanvasScaleFactor();
+            Vector2 localPos = new Vector2(
+                (screenPos.x / canvasScaleFactor) - 960f,  // Assuming 1920x1080 reference
+                (screenPos.y / canvasScaleFactor) - 540f
+            );
+
+            uiRect.localPosition = localPos + new Vector2(150f, 100f); // Apply offset
         }
 
-        Debug.Log($"🔍 UI positioned at: {uiRect.position}");
+        Debug.Log($"🔍 UI positioned at local: {uiRect.localPosition}");
     }
+
+    private float GetCanvasScaleFactor()
+    {
+        Canvas canvas = FindObjectOfType<Canvas>();
+        if (canvas != null)
+        {
+            CanvasScaler scaler = canvas.GetComponent<CanvasScaler>();
+            if (scaler != null && scaler.uiScaleMode == CanvasScaler.ScaleMode.ScaleWithScreenSize)
+            {
+                return Screen.width / scaler.referenceResolution.x;
+            }
+        }
+        return 1f;
+    }
+
 
     private void UpdateAugmentList()
     {
