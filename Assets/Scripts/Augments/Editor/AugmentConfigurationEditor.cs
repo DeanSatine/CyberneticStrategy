@@ -15,6 +15,9 @@ public class AugmentConfigurationEditor : Editor
         EditorGUILayout.PropertyField(serializedObject.FindProperty("selectedAugment"), new GUIContent("Selected Augment"));
 
         EditorGUILayout.Space();
+        EditorGUILayout.LabelField("UI Settings", EditorStyles.boldLabel);
+        EditorGUILayout.PropertyField(serializedObject.FindProperty("augmentIcon"), new GUIContent("Augment Icon", "Icon to display in tooltips"));
+        EditorGUILayout.Space();
 
         // Get the current selection
         var selectedAugmentProp = serializedObject.FindProperty("selectedAugment");

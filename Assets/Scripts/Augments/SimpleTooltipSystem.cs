@@ -15,6 +15,7 @@ public class SimpleTooltipSystem : MonoBehaviour
     public TextMeshProUGUI tooltipText;
     public Image tooltipBackground;
     public CanvasGroup tooltipCanvasGroup;
+    public Image tooltipIcon; 
 
     private RectTransform tooltipRect;
     private Canvas tooltipCanvas;
@@ -129,13 +130,12 @@ public class SimpleTooltipSystem : MonoBehaviour
         }
     }
 
-    public static void ShowTooltip(string text, Vector2 position = default)
+    public static void ShowTooltip(string text, Sprite icon = null, Vector2 position = default)
     {
         if (instance != null && !string.IsNullOrEmpty(text))
         {
             string formattedText = instance.FormatTooltipText(text);
-            // Position parameter is ignored when using fixed positioning
-            instance.Show(formattedText, position);
+            instance.Show(formattedText, icon, position);
         }
     }
 
@@ -179,7 +179,7 @@ public class SimpleTooltipSystem : MonoBehaviour
         return formattedText;
     }
 
-    private void Show(string text, Vector2 position)
+    private void Show(string text, Sprite icon, Vector2 position)
     {
         // Apply current settings before showing
         ApplySettings();
@@ -187,6 +187,21 @@ public class SimpleTooltipSystem : MonoBehaviour
         if (tooltipText != null)
         {
             tooltipText.text = text;
+        }
+
+        // Handle icon display
+        if (tooltipIcon != null)
+        {
+            if (icon != null)
+            {
+                tooltipIcon.sprite = icon;
+                tooltipIcon.gameObject.SetActive(true);
+                tooltipIcon.color = Color.white;
+            }
+            else
+            {
+                tooltipIcon.gameObject.SetActive(false);
+            }
         }
 
         if (tooltipObject != null)
@@ -385,6 +400,20 @@ public class SimpleTooltipSystem : MonoBehaviour
         tooltipRect.sizeDelta = new Vector2(300, 50);
         tooltipRect.pivot = new Vector2(0, 1);
 
+        // Create icon container
+        GameObject iconObj = new GameObject("TooltipIcon");
+        iconObj.transform.SetParent(tooltipObject.transform, false);
+
+        tooltipIcon = iconObj.AddComponent<Image>();
+        tooltipIcon.preserveAspect = true;
+
+        RectTransform iconRect = tooltipIcon.GetComponent<RectTransform>();
+        iconRect.anchorMin = new Vector2(0, 1);
+        iconRect.anchorMax = new Vector2(0, 1);
+        iconRect.anchoredPosition = new Vector2(15, -15); // Top-left with padding
+        iconRect.sizeDelta = new Vector2(32, 32); // Icon size
+
+        // Create text container
         GameObject textObj = new GameObject("TooltipText");
         textObj.transform.SetParent(tooltipObject.transform, false);
 
@@ -396,6 +425,9 @@ public class SimpleTooltipSystem : MonoBehaviour
         RectTransform textRect = tooltipText.GetComponent<RectTransform>();
         textRect.anchorMin = Vector2.zero;
         textRect.anchorMax = Vector2.one;
+        // Add left margin for icon space
+        textRect.offsetMin = new Vector2(55, 10); // Left margin for icon + padding
+        textRect.offsetMax = new Vector2(-10, -10); // Right and vertical padding
 
         ContentSizeFitter sizeFitter = tooltipObject.AddComponent<ContentSizeFitter>();
         sizeFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
@@ -403,7 +435,7 @@ public class SimpleTooltipSystem : MonoBehaviour
 
         tooltipObject.SetActive(false);
 
-        Debug.Log("✅ Simple Tooltip UI created");
+        Debug.Log("✅ Simple Tooltip UI with icon support created");
     }
 
     // Context menu for testing
@@ -411,12 +443,6 @@ public class SimpleTooltipSystem : MonoBehaviour
     public void ApplySettingsNow()
     {
         ApplySettings();
-    }
-
-    [ContextMenu("Test Show Tooltip")]
-    public void TestShowTooltip()
-    {
-        ShowTooltip("This is a test tooltip with longer text to see how it wraps and formats properly in the UI system!", Input.mousePosition);
     }
 
     // Update settings in real-time

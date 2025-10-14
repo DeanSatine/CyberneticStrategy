@@ -18,13 +18,13 @@ MonoBehaviour:
   textAlignment: 257
   maxWidth: 300
   minHeight: 300
-  maxCharactersPerLine: 45
+  maxCharactersPerLine: 60
   leftPadding: 10
   rightPadding: 10
   topPadding: 20
   bottomPadding: 8
-  backgroundColor: {r: 0, g: 0, b: 0, a: 0.95}
-  useOutline: 0
+  backgroundColor: {r: 0, g: 0, b: 0, a: 0.65882355}
+  useOutline: 1
   outlineColor: {r: 1, g: 1, b: 1, a: 0.3}
   outlineDistance: {x: 1, y: -1}
   useFixedPosition: 1

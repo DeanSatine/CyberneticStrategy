@@ -1,5 +1,4 @@
-﻿// Updated /Assets/Scripts/Augments/AugmentConfiguration.cs
-using UnityEngine;
+﻿using UnityEngine;
 
 public enum ConfigurableAugmentType
 {
@@ -17,8 +16,8 @@ public class AugmentConfiguration : MonoBehaviour
     [Header("Eradicate the Weak Settings")]
     [SerializeField] private GameObject manaDrivePrefab;
     [SerializeField] private float bonusAttackDamage = 10f;
-    [SerializeField] private float bonusAttackSpeed = 0.1f; // 10%
-    [SerializeField] private float healPercentage = 0.1f; // 10%
+    [SerializeField] private float bonusAttackSpeed = 0.1f; 
+    [SerializeField] private float healPercentage = 0.1f;
     [SerializeField] private GameObject linkVFXPrefab;
     [SerializeField] private GameObject healVFXPrefab;
     [SerializeField] private GameObject linkedUnitVFXPrefab;
@@ -38,6 +37,8 @@ public class AugmentConfiguration : MonoBehaviour
     [SerializeField] private float gearOrbitSpeed = 90f;
     [SerializeField] private float baseHealAmount = 15f;
     [SerializeField] private GameObject gearHealVFXPrefab;
+    [Header("UI Settings")]
+    [SerializeField] private Sprite augmentIcon;
 
     public string AugmentId
     {
@@ -93,9 +94,10 @@ public class AugmentConfiguration : MonoBehaviour
         augment.description = GetDefaultDescription();
         augment.type = GetAugmentType();
         augment.augmentColor = GetDefaultColor();
+        augment.icon = augmentIcon;
     }
 
-    private string GetDefaultName()
+    public string GetDefaultName()
     {
         switch (selectedAugment)
         {
@@ -142,29 +144,26 @@ public class AugmentConfiguration : MonoBehaviour
             default: return Color.white;
         }
     }
+    public Sprite GetAugmentIcon() => augmentIcon;
 
     // Getters for specific augment settings
     public GameObject GetManaDrivePrefab() => manaDrivePrefab;
     public GameObject GetBOPPrefab() => bopPrefab;
     public GameObject GetGearPrefab() => gearPrefab;
 
-    // Eradicate the Weak getters
     public float GetBonusAttackDamage() => bonusAttackDamage;
     public float GetBonusAttackSpeed() => bonusAttackSpeed;
     public float GetHealPercentage() => healPercentage;
 
-    // Clobbering Time getters
     public float GetAttackDamageBonus() => attackDamageBonus;
     public float GetLowHealthThreshold() => lowHealthThreshold;
     public float GetJumpDamage() => jumpDamage;
 
-    // Support Revolution getters
     public int GetGearsPerUnit() => gearsPerUnit;
     public float GetGearOrbitRadius() => gearOrbitRadius;
     public float GetGearOrbitSpeed() => gearOrbitSpeed;
     public float GetBaseHealAmount() => baseHealAmount;
 
-    // Debug info
     [Header("Debug Info (Read Only)")]
     [SerializeField] private string debugAugmentId;
     [SerializeField] private string debugAugmentName;

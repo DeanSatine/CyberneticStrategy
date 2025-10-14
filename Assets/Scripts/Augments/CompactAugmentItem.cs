@@ -78,10 +78,35 @@ public class CompactAugmentItem : MonoBehaviour, IPointerEnterHandler, IPointerE
 
         if (Application.isPlaying)
         {
-            // SIMPLIFIED: Position parameter is ignored for fixed positioning
-            SimpleTooltipSystem.ShowTooltip(augment.description);
+            // Get icon from AugmentConfiguration if available
+            Sprite tooltipIcon = GetTooltipIcon();
+
+            // Show tooltip with icon
+            SimpleTooltipSystem.ShowTooltip(augment.description, tooltipIcon);
             Debug.Log($"🔍 Showing tooltip for: {augment.augmentName}");
         }
+    }
+    private Sprite GetTooltipIcon()
+    {
+        // Try to get icon from AugmentConfiguration
+        AugmentConfiguration[] configs = Object.FindObjectsOfType<AugmentConfiguration>();
+        foreach (var config in configs)
+        {
+            if (config != null && IsMatchingAugment(config))
+            {
+                return config.GetAugmentIcon();
+            }
+        }
+
+        return null; // No icon found
+    }
+    private bool IsMatchingAugment(AugmentConfiguration config)
+    {
+        if (augment == null) return false;
+
+        // Match by augment name or type
+        string configName = config.GetDefaultName();
+        return configName == augment.augmentName;
     }
 
     public void OnPointerExit(PointerEventData eventData)

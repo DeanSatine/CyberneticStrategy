@@ -2983,7 +2983,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: -0.84422, y: 288.0912}
+  m_AnchoredPosition: {x: -0.8442383, y: 288.0912}
   m_SizeDelta: {x: 165.21, y: 150.924}
   m_Pivot: {x: 0, y: 0}
 --- !u!114 &101331254
@@ -31557,6 +31557,7 @@ MonoBehaviour:
   baseHealAmount: 15
   gearHealVFXPrefab: {fileID: 8593464584776411535, guid: b21d155ec7ea5a349a0e36106f913148,
     type: 3}
+  augmentIcon: {fileID: 21300000, guid: 715093b6bfb22be4884793742c8ca48f, type: 3}
   debugAugmentId: SupportRevolution
   debugAugmentName: Support the Revolution
   debugAugmentType: Generic
@@ -31594,6 +31595,7 @@ MonoBehaviour:
   gearOrbitSpeed: 90
   baseHealAmount: 15
   gearHealVFXPrefab: {fileID: 0}
+  augmentIcon: {fileID: 21300000, guid: 9ae431d1e8850554cb296838ce6c5ffa, type: 3}
   debugAugmentId: ClobberingTime
   debugAugmentName: It's Clobbering Time!
   debugAugmentType: Class
@@ -31633,6 +31635,7 @@ MonoBehaviour:
   gearOrbitSpeed: 90
   baseHealAmount: 15
   gearHealVFXPrefab: {fileID: 0}
+  augmentIcon: {fileID: 21300000, guid: b508952635b081f43b22926c4a31e9a1, type: 3}
   debugAugmentId: EradicateTheWeak
   debugAugmentName: Eradicate the Weak
   debugAugmentType: Origin
@@ -41503,6 +41506,7 @@ MonoBehaviour:
   tooltipText: {fileID: 1499494912}
   tooltipBackground: {fileID: 120627218}
   tooltipCanvasGroup: {fileID: 120627217}
+  tooltipIcon: {fileID: 0}
 --- !u!114 &1620437325
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -46921,7 +46925,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxAugments: 3
   augmentRounds: 04000000070000000a000000
-  showOnFirstRound: 0
+  showOnFirstRound: 1
   augmentSelectSound: {fileID: 0}
   audioSource: {fileID: 0}
 --- !u!1 &1822649720

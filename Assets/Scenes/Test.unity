@@ -8594,6 +8594,7 @@ MonoBehaviour:
   gearOrbitSpeed: 90
   baseHealAmount: 15
   gearHealVFXPrefab: {fileID: 0}
+  augmentIcon: {fileID: 21300000, guid: b508952635b081f43b22926c4a31e9a1, type: 3}
   debugAugmentId: EradicateTheWeak
   debugAugmentName: Eradicate the Weak
   debugAugmentType: Origin
@@ -8631,6 +8632,7 @@ MonoBehaviour:
   baseHealAmount: 15
   gearHealVFXPrefab: {fileID: 8593464584776411535, guid: b21d155ec7ea5a349a0e36106f913148,
     type: 3}
+  augmentIcon: {fileID: 21300000, guid: 715093b6bfb22be4884793742c8ca48f, type: 3}
   debugAugmentId: SupportRevolution
   debugAugmentName: Support the Revolution
   debugAugmentType: Generic
@@ -8669,6 +8671,7 @@ MonoBehaviour:
   gearOrbitSpeed: 90
   baseHealAmount: 15
   gearHealVFXPrefab: {fileID: 0}
+  augmentIcon: {fileID: 21300000, guid: 9ae431d1e8850554cb296838ce6c5ffa, type: 3}
   debugAugmentId: ClobberingTime
   debugAugmentName: It's Clobbering Time!
   debugAugmentType: Class
@@ -72073,6 +72076,7 @@ MonoBehaviour:
   tooltipText: {fileID: 624781141}
   tooltipBackground: {fileID: 2139269304}
   tooltipCanvasGroup: {fileID: 2139269306}
+  tooltipIcon: {fileID: 0}
 --- !u!114 &1517125461
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -91778,7 +91782,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0.8}
-  m_AnchoredPosition: {x: -88.3, y: 3.800003}
+  m_AnchoredPosition: {x: -83.9, y: 3.800003}
   m_SizeDelta: {x: -200, y: -60}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1980304769
@@ -92020,11 +92024,11 @@ RectTransform:
   - {fileID: 1343992289}
   m_Father: {fileID: 949686860}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 333, y: 1}
+  m_AnchorMin: {x: 1, y: 1}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: -195, y: 0}
   m_SizeDelta: {x: 160, y: 133.7811}
-  m_Pivot: {x: 0, y: 1}
+  m_Pivot: {x: 1, y: 1}
 --- !u!114 &1988401949
 MonoBehaviour:
   m_ObjectHideFlags: 0
