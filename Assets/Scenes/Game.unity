@@ -613,7 +613,7 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 0
-  m_Spacing: 0
+  m_Spacing: 20
   m_ChildForceExpandWidth: 1
   m_ChildForceExpandHeight: 1
   m_ChildControlWidth: 0
@@ -31555,7 +31555,7 @@ MonoBehaviour:
   gearOrbitRadius: 0.7
   gearOrbitSpeed: 90
   baseHealAmount: 15
-  gearHealVFXPrefab: {fileID: 8593464584776411535, guid: b21d155ec7ea5a349a0e36106f913148,
+  gearHealVFXPrefab: {fileID: 9017484664307500583, guid: 1245b8d2997d5b34fb1637be70a7eb05,
     type: 3}
   augmentIcon: {fileID: 21300000, guid: 715093b6bfb22be4884793742c8ca48f, type: 3}
   debugAugmentId: SupportRevolution

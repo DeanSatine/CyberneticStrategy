@@ -1,5 +1,4 @@
-﻿// Updated /Assets/Scripts/Augments/SupportTheRevolutionAugment.cs
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -54,6 +53,13 @@ public class SupportTheRevolutionAugment : BaseAugment
             {
                 gearPrefab = supportConfig.GetGearPrefab();
                 Debug.Log($"⚙️ Using configured gear prefab: {gearPrefab.name}");
+            }
+
+            // Add this section to load the heal VFX prefab
+            if (supportConfig.GetGearHealVFXPrefab() != null)
+            {
+                healVFXPrefab = supportConfig.GetGearHealVFXPrefab();
+                Debug.Log($"⚙️ Using configured heal VFX prefab: {healVFXPrefab.name}");
             }
 
             gearsPerUnit = supportConfig.GetGearsPerUnit();
@@ -155,11 +161,17 @@ public class SupportTheRevolutionAugment : BaseAugment
             target.ui.UpdateHealth(target.currentHealth);
         }
 
-        // Play heal VFX
+        // Play heal VFX at the target's position (slightly above)
         if (healVFXPrefab != null)
         {
-            GameObject vfx = Object.Instantiate(healVFXPrefab, target.transform.position, Quaternion.identity);
+            Vector3 vfxPosition = target.transform.position + Vector3.up * 1f; // Spawn 1 unit above the target
+            GameObject vfx = Object.Instantiate(healVFXPrefab, vfxPosition, Quaternion.identity);
             Object.Destroy(vfx, 2f);
+            Debug.Log($"⚙️ Spawned heal VFX at {vfxPosition} for {target.unitName}");
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ Heal VFX prefab is not assigned!");
         }
 
         Debug.Log($"⚙️ Gear healed {target.unitName} for {healAmount} health!");
