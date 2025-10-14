@@ -19,7 +19,7 @@ MonoBehaviour:
   maxWidth: 300
   minHeight: 300
   maxCharactersPerLine: 45
-  leftPadding: 50
+  leftPadding: 10
   rightPadding: 10
   topPadding: 20
   bottomPadding: 8

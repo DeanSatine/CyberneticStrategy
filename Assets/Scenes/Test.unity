@@ -8659,7 +8659,8 @@ MonoBehaviour:
   attackDamageBonus: 20
   lowHealthThreshold: 0.1
   jumpDamage: 25
-  jumpVFXPrefab: {fileID: 0}
+  jumpVFXPrefab: {fileID: 9080140021571130472, guid: 82066d902ed0dd6488ddfd32eb994801,
+    type: 3}
   landingVFXPrefab: {fileID: 9080140021571130472, guid: 82066d902ed0dd6488ddfd32eb994801,
     type: 3}
   gearPrefab: {fileID: 0}

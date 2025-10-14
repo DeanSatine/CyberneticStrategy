@@ -47,11 +47,8 @@ public class EradicateTheWeakAugment : BaseAugment
         // Spawn ManaDrive unit
         SpawnManaDrive();
 
-        // Find and link strongest Eradicator (with delay to ensure stats are ready)
-        if (AugmentManager.Instance != null)
-        {
-            AugmentManager.Instance.StartCoroutine(DelayedStrongestCheck(0.1f, "Initial augment application"));
-        }
+        // Find and link strongest Eradicator IMMEDIATELY (no delay)
+        LinkStrongestEradicator();
 
         // Register this instance for execution tracking
         activeInstances.Add(this);
@@ -59,7 +56,7 @@ public class EradicateTheWeakAugment : BaseAugment
         // Start watching for executions
         StartExecutionWatcher();
 
-        // Start periodic strongest check
+        // Start periodic strongest check (less frequent and only for switching)
         if (AugmentManager.Instance != null)
         {
             periodicChecker = AugmentManager.Instance.StartCoroutine(PeriodicStrongestCheck());
@@ -244,29 +241,30 @@ public class EradicateTheWeakAugment : BaseAugment
         }
     }
 
-    // Add periodic check for stronger units (in case we miss events)
     private IEnumerator PeriodicStrongestCheck()
     {
         while (true)
         {
-            yield return new WaitForSeconds(5f); // Check every 5 seconds
+            yield return new WaitForSeconds(10f); // Check every 10 seconds instead of 5
 
-            if (linkedUnit != null && linkedUnit.isAlive)
+            // Only check if we don't have a linked unit or if the current one died
+            if (linkedUnit == null || !linkedUnit.isAlive)
             {
-                UnitAI currentStrongest = FindStrongestEradicator();
-                if (currentStrongest != null && currentStrongest != linkedUnit && IsStronger(currentStrongest, linkedUnit))
-                {
-                    Debug.Log($"🔍 Periodic check found stronger unit: {currentStrongest.unitName}");
-                    LinkToSpecificEradicator(currentStrongest);
-                }
-            }
-            else if (linkedUnit == null)
-            {
-                // Try to find an eradicator if we don't have one linked
                 UnitAI currentStrongest = FindStrongestEradicator();
                 if (currentStrongest != null)
                 {
                     Debug.Log($"🔍 Periodic check found eradicator when none was linked: {currentStrongest.unitName}");
+                    LinkToSpecificEradicator(currentStrongest);
+                }
+            }
+            else
+            {
+                // Only switch if there's a SIGNIFICANTLY stronger unit (higher star level)
+                UnitAI currentStrongest = FindStrongestEradicator();
+                if (currentStrongest != null && currentStrongest != linkedUnit &&
+                    currentStrongest.starLevel > linkedUnit.starLevel)
+                {
+                    Debug.Log($"🔍 Periodic check found significantly stronger unit: {currentStrongest.unitName}");
                     LinkToSpecificEradicator(currentStrongest);
                 }
             }
@@ -325,10 +323,16 @@ public class EradicateTheWeakAugment : BaseAugment
         return strongestEradicator;
     }
 
-    // Add this method to link to a specific unit
     private void LinkToSpecificEradicator(UnitAI targetUnit)
     {
         if (targetUnit == null) return;
+
+        // If this is the same unit, don't reapply
+        if (linkedUnit == targetUnit && buffsApplied)
+        {
+            Debug.Log($"🔗 Already linked to {targetUnit.unitName}, skipping reapplication");
+            return;
+        }
 
         // Remove buffs from previous linked unit
         RemoveBuffsFromLinkedUnit();
@@ -343,6 +347,7 @@ public class EradicateTheWeakAugment : BaseAugment
 
         Debug.Log($"🔗 Successfully linked to: {linkedUnit.unitName} (AD: {linkedUnit.attackDamage}, Star: {linkedUnit.starLevel})");
     }
+
 
 
     // Update the LinkStrongestEradicator method to use the new helper
@@ -541,18 +546,21 @@ public class EradicateTheWeakAugment : BaseAugment
             return;
         }
 
-        // Store current stats as "original" before any augment modifications
-        // This assumes the unit's current stats are their base stats when first linked
-        originalAttackDamage = linkedUnit.attackDamage;
-        originalAttackSpeed = linkedUnit.attackSpeed;
+        // Store TRUE base stats - try to get original values before any modifications
+        originalAttackDamage = GetTrueBaseAttackDamage(linkedUnit);
+        originalAttackSpeed = GetTrueBaseAttackSpeed(linkedUnit);
 
-        // Apply buffs as bonuses to current stats
-        linkedUnit.attackDamage = originalAttackDamage + bonusAttackDamage;
-        linkedUnit.attackSpeed = originalAttackSpeed * (1f + bonusAttackSpeed);
+        // Calculate and apply bonuses
+        float attackDamageBonus = bonusAttackDamage;
+        float attackSpeedMultiplier = (1f + bonusAttackSpeed);
+
+        // Apply bonuses to the original base stats
+        linkedUnit.attackDamage = originalAttackDamage + attackDamageBonus;
+        linkedUnit.attackSpeed = originalAttackSpeed * attackSpeedMultiplier;
 
         buffsApplied = true;
 
-        // Update UI using correct UnitUI methods
+        // Update UI
         if (linkedUnit.ui != null)
         {
             linkedUnit.ui.UpdateHealth(linkedUnit.currentHealth);
@@ -560,41 +568,44 @@ public class EradicateTheWeakAugment : BaseAugment
         }
 
         Debug.Log($"🔗 Applied buffs to {linkedUnit.unitName}:");
-        Debug.Log($"   Attack Damage: {originalAttackDamage} → {linkedUnit.attackDamage} (+{bonusAttackDamage})");
-        Debug.Log($"   Attack Speed: {originalAttackSpeed:F2} → {linkedUnit.attackSpeed:F2} (+{bonusAttackSpeed * 100}%)");
+        Debug.Log($"   Attack Damage: {originalAttackDamage} → {linkedUnit.attackDamage} (+{attackDamageBonus})");
+        Debug.Log($"   Attack Speed: {originalAttackSpeed:F2} → {linkedUnit.attackSpeed:F2} (*{attackSpeedMultiplier:F2})");
     }
-    private float CalculateBaseAttackDamage(UnitAI unit)
-    {
-        // Try to estimate base attack damage by checking unit cost/star level
-        float baseAD = unit.attackDamage;
 
-        // If this unit already has augment buffs, try to subtract them
-        // This is a fallback method - ideally use UnitData
-        if (buffsApplied)
+    private float GetTrueBaseAttackDamage(UnitAI unit)
+    {
+        // Try to calculate the true base attack damage for this unit
+        // This is an estimation since the project doesn't have a proper base stat system
+
+        // If this is the first time applying to this unit, current value is likely base
+        if (!buffsApplied)
         {
-            baseAD = unit.attackDamage - bonusAttackDamage;
+            return unit.attackDamage;
         }
 
-        return Mathf.Max(1f, baseAD); // Ensure it's at least 1
+        // If we've applied before, subtract our known bonus
+        return unit.attackDamage - bonusAttackDamage;
     }
-    private float CalculateBaseAttackSpeed(UnitAI unit)
-    {
-        // Try to estimate base attack speed
-        float baseAS = unit.attackSpeed;
 
-        // If this unit already has augment buffs, try to subtract them
-        if (buffsApplied)
+    private float GetTrueBaseAttackSpeed(UnitAI unit)
+    {
+        // Try to calculate the true base attack speed for this unit
+
+        // If this is the first time applying to this unit, current value is likely base
+        if (!buffsApplied)
         {
-            baseAS = unit.attackSpeed / (1f + bonusAttackSpeed);
+            return unit.attackSpeed;
         }
 
-        return Mathf.Max(0.1f, baseAS); // Ensure it's at least 0.1
+        // If we've applied before, reverse our known multiplier
+        return unit.attackSpeed / (1f + bonusAttackSpeed);
     }
+
     private void RemoveBuffsFromLinkedUnit()
     {
         if (linkedUnit != null && buffsApplied)
         {
-            // Restore original stats (subtract the bonuses we added)
+            // Restore original base stats
             linkedUnit.attackDamage = originalAttackDamage;
             linkedUnit.attackSpeed = originalAttackSpeed;
 
@@ -732,12 +743,6 @@ public class EradicateTheWeakAugment : BaseAugment
     public override void OnCombatEnd()
     {
         Debug.Log($"🔗 {augmentName} - Combat ended, checking for strongest unit");
-
-        // Re-evaluate strongest unit after combat (stats might have changed)
-        if (AugmentManager.Instance != null)
-        {
-            AugmentManager.Instance.StartCoroutine(DelayedStrongestCheck(0.2f, "Combat ended"));
-        }
     }
 
     public override void OnUnitSpawned(UnitAI unit)

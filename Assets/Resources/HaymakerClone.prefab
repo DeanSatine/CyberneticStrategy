@@ -438,7 +438,7 @@ MonoBehaviour:
   armor: 45
   attackRange: 1.8
   mana: 0
-  maxMana: 1000
+  maxMana: 999
   currentMana: 0
   traits: 
   canMove: 1
