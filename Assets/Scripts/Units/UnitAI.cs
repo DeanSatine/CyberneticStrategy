@@ -999,6 +999,19 @@ public class UnitAI : MonoBehaviour
                     return "ManaDrive ability missing.";
                 }
 
+            case "HyperShot":
+                {
+                    var ability = GetComponent<HyperShotAbility>();
+                    if (ability != null)
+                    {
+                        float asBonus = ability.attackSpeedBonus[Mathf.Clamp(star - 1, 0, ability.attackSpeedBonus.Length - 1)];
+
+                        return $"Passive: Auto attacks hit in a cone, dealing {ability.passiveBonusDamage} bonus damage to additional targets within a 2 hexes.\n\n" +
+                               $"Active: Gain +{asBonus * 100:F0}% attack speed for {ability.buffDuration} seconds. Effect Stacks!";
+                    }
+                    return "HyperShot ability missing.";
+                }
+
             case "KillSwitch":
                 {
                     var ability = GetComponent<KillSwitchAbility>();
@@ -1071,6 +1084,8 @@ public class UnitAI : MonoBehaviour
             default:
                 return "This unit has no ability description yet.";
         }
+
+
     }
     public void ForceResetMovementState()
     {

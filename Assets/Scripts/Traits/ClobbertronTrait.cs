@@ -4,12 +4,12 @@ using System.Collections;
 public class ClobbertronTrait : MonoBehaviour
 {
     [HideInInspector] public float bonusArmor = 10f;
-    [HideInInspector] public float bonusAttackDamage = 10f; // FIX: Flat AD, not percentage
+    [HideInInspector] public float bonusAttackDamage = 10f;
     [HideInInspector] public float crashRadius = 2f;
     [HideInInspector] public float crashDamage = 200f;
 
     private UnitAI unitAI;
-    private bool traitsApplied = false;
+    public bool traitsApplied = false;
     private bool hasCrashed = false;
     private bool isCrashing = false;
 
@@ -60,8 +60,6 @@ public class ClobbertronTrait : MonoBehaviour
             StartCoroutine(CrashSequence());
         }
     }
-
-    // FIX: Apply flat bonuses, not percentage
     private void ApplyTraitBonuses()
     {
         if (traitsApplied) return;
@@ -178,7 +176,6 @@ public class ClobbertronTrait : MonoBehaviour
         Camera.main.transform.position = originalPos;
     }
 
-    // Public methods and debug methods remain the same...
     public void ApplyTraitBonusesPublic()
     {
         ApplyTraitBonuses();

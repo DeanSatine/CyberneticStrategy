@@ -440,7 +440,7 @@ MonoBehaviour:
   startDelay: 0.25
   throwInterval: 0.1
   abilityDuration: 1.5
-  maxHexRange: 6
+  maxHexRange: 4
 --- !u!65 &715305022984521276
 BoxCollider:
   m_ObjectHideFlags: 0
