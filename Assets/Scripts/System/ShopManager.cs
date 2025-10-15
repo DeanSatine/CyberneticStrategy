@@ -168,17 +168,34 @@ public class ShopManager : MonoBehaviour
         if (shopCard.cardPrefab == null || slotIndex >= shopSlotParents.Length)
             return;
 
-        // Instantiate the card
         GameObject cardInstance = Instantiate(shopCard.cardPrefab, shopSlotParents[slotIndex]);
-        cardInstance.transform.localRotation = Quaternion.identity;
 
-        // Set the cost on the ShopSlotUI component
+        RectTransform cardRect = cardInstance.GetComponent<RectTransform>();
+        if (cardRect != null)
+        {
+            // ✅ FIX: Standardize anchors to center
+            cardRect.anchorMin = new Vector2(0.5f, 0.5f);
+            cardRect.anchorMax = new Vector2(0.5f, 0.5f);
+            cardRect.pivot = new Vector2(0.5f, 0.5f);
+
+            // Now reset position
+            cardRect.localPosition = Vector3.zero;
+            cardRect.localRotation = Quaternion.identity;
+            cardRect.localScale = new Vector3(8.9f, 8.9f, 8.9f);
+            cardRect.anchoredPosition = Vector2.zero;
+        }
+        else
+        {
+            cardInstance.transform.localPosition = Vector3.zero;
+            cardInstance.transform.localRotation = Quaternion.identity;
+            cardRect.localScale = new Vector3(8.9f, 8.9f, 8.9f);
+        }
+
         ShopSlotUI shopSlotUI = cardInstance.GetComponent<ShopSlotUI>();
         if (shopSlotUI != null)
         {
             shopSlotUI.cost = shopCard.cost;
 
-            // Ensure button is connected
             if (shopSlotUI.buyButton == null)
             {
                 Button cardButton = cardInstance.GetComponent<Button>();
@@ -200,14 +217,13 @@ public class ShopManager : MonoBehaviour
             }
         }
 
-        // Activate and track the card
         cardInstance.SetActive(true);
         currentShopInstances.Add(cardInstance);
 
         Debug.Log($"🃏 Instantiated {shopCard.cardPrefab.name} in slot {slotIndex} (Cost: {shopCard.cost})");
     }
 
-    // ✅ REROLL: This now properly clears and regenerates
+
     public void RerollShop()
     {
         Debug.Log("🎲 RerollShop method called!");
