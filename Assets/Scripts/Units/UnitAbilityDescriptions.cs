@@ -66,11 +66,13 @@ public static class UnitAbilityDescriptions
         var ability = unit.GetComponent<HyperShotAbility>();
         if (ability == null) return "HyperShot ability missing.";
 
-        float asBonus = ability.attackSpeedBonus[Mathf.Clamp(star - 1, 0, ability.attackSpeedBonus.Length - 1)];
+        int starIndex = Mathf.Clamp(star - 1, 0, ability.aoeDamagePerStar.Length - 1);
+        float aoeDamage = ability.aoeDamagePerStar[starIndex];
 
-        return $"Passive: Auto attacks hit in a cone, dealing {ability.passiveBonusDamage} bonus damage to additional targets within a 2 hexes.\n\n" +
-               $"Active: Gain +{asBonus * 100:F0}% attack speed for {ability.buffDuration} seconds. Effect Stacks!";
+        return $"Passive: Every {ability.attacksToTrigger} attacks, trigger an explosion dealing {aoeDamage} damage to all enemies in a {ability.aoeRadius} hex radius.\n\n" +
+               $"Active: Gain +{ability.attackSpeedBonus * 100:F0}% attack speed for {ability.buffDuration} seconds. \n\nThis effect stacks!";
     }
+
 
     private static string GetKillSwitchDescription(UnitAI unit, float ad, int star)
     {

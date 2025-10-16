@@ -6,41 +6,43 @@ using static UnitAI;
 public class HyperShotAbility : MonoBehaviour, IUnitAbility
 {
     private UnitAI unitAI;
+    private CyberneticVFX vfxManager;
 
-    [Header("Passive: Cone Attack")]
-    [Tooltip("Radius of the cone attack in hexes")]
-    public float coneRadius = 2f;
-    [Tooltip("Angle of the cone attack in degrees")]
-    public float coneAngle = 60f;
-    [Tooltip("Bonus damage per auto attack")]
-    public float passiveBonusDamage = 10f;
+    [Header("Passive: Explosive Rounds")]
+    [Tooltip("Number of attacks needed to trigger AOE")]
+    public int attacksToTrigger = 3;
+    [Tooltip("Damage dealt in AOE per star level")]
+    public float[] aoeDamagePerStar = { 200f, 300f, 500f };
+    [Tooltip("Radius of AOE damage in hexes")]
+    public float aoeRadius = 3f;
 
     [Header("Active: Hyper Assault")]
-    [Tooltip("Attack speed bonus by star level")]
-    public float[] attackSpeedBonus = { 0.40f, 0.50f, 0.60f };
+    [Tooltip("Attack speed bonus (flat additive)")]
+    public float attackSpeedBonus = 0.40f;
     [Tooltip("Duration of attack speed buff")]
-    public float buffDuration = 4f;
+    public float buffDuration = 8f;
 
     [Header("VFX")]
-    public GameObject coneAttackVFX;
+    public GameObject explosionVFX;
     public GameObject abilityBuffVFX;
-    public GameObject autoAttackVFX;
-    [Tooltip("VFX that spawns at the fire point when shooting")]
-    public GameObject muzzleFlashVFX;
 
     [Header("Audio")]
     public AudioClip autoAttackSound;
     public AudioClip abilitySound;
+    public AudioClip explosionSound;
     [Range(0f, 1f)] public float volume = 0.8f;
 
     private AudioSource audioSource;
     private List<Coroutine> activeBuffs = new List<Coroutine>();
     private List<GameObject> activeBuffVFXs = new List<GameObject>();
     private int activeStackCount = 0;
+    private int attackCounter = 0;
+    private bool handleProjectiles = false;
 
     private void Awake()
     {
         unitAI = GetComponent<UnitAI>();
+        vfxManager = GetComponent<CyberneticVFX>();
 
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null)
@@ -49,11 +51,19 @@ public class HyperShotAbility : MonoBehaviour, IUnitAbility
             audioSource.playOnAwake = false;
             audioSource.spatialBlend = 0.8f;
         }
+
+        // Disable CyberneticVFX if present so we can handle projectiles manually
+        if (vfxManager != null)
+        {
+            vfxManager.enabled = false;
+            handleProjectiles = true;
+            Debug.Log($"⚡ HyperShot will handle its own projectiles");
+        }
     }
 
     private void OnEnable()
     {
-        if (unitAI != null)
+        if (unitAI != null && handleProjectiles)
         {
             unitAI.OnAttackEvent += OnAutoAttack;
         }
@@ -61,7 +71,7 @@ public class HyperShotAbility : MonoBehaviour, IUnitAbility
 
     private void OnDisable()
     {
-        if (unitAI != null)
+        if (unitAI != null && handleProjectiles)
         {
             unitAI.OnAttackEvent -= OnAutoAttack;
         }
@@ -71,81 +81,133 @@ public class HyperShotAbility : MonoBehaviour, IUnitAbility
     {
         if (target == null || !target.isAlive) return;
 
-        PlaySound(autoAttackSound);
+        Vector3 spawnPos = unitAI.firePoint != null ? unitAI.firePoint.position : transform.position + Vector3.up * 1.5f;
 
-        SpawnMuzzleFlash();
-
-        ApplyConeAttack(target);
-    }
-
-    private void SpawnMuzzleFlash()
-    {
-        if (muzzleFlashVFX != null && unitAI.firePoint != null)
+        // Spawn muzzle flash
+        if (vfxManager != null && vfxManager.vfxConfig.autoAttackMuzzleFlash != null)
         {
-            GameObject muzzle = Instantiate(muzzleFlashVFX, unitAI.firePoint.position, unitAI.firePoint.rotation);
-            muzzle.transform.SetParent(unitAI.firePoint);
-            Destroy(muzzle, 1f);
+            GameObject muzzleFlash = Instantiate(vfxManager.vfxConfig.autoAttackMuzzleFlash, spawnPos, Quaternion.identity);
+            Destroy(muzzleFlash, 0.5f);
         }
+
+        // Play sound
+        if (autoAttackSound != null)
+        {
+            PlaySound(autoAttackSound);
+        }
+        else if (vfxManager != null && vfxManager.vfxConfig.autoAttackSound != null)
+        {
+            audioSource.PlayOneShot(vfxManager.vfxConfig.autoAttackSound, volume);
+        }
+
+        // Fire projectile
+        StartCoroutine(FireProjectile(spawnPos, target, unitAI.attackDamage));
     }
 
-    private void ApplyConeAttack(UnitAI primaryTarget)
+    private IEnumerator FireProjectile(Vector3 startPos, UnitAI target, float damage)
     {
-        Vector3 attackDirection = (primaryTarget.transform.position - transform.position).normalized;
-        List<UnitAI> coneTargets = FindUnitsInCone(attackDirection, coneRadius, coneAngle);
+        GameObject projectilePrefab = null;
 
-        foreach (UnitAI coneTarget in coneTargets)
+        if (vfxManager != null && vfxManager.vfxConfig.autoAttackProjectile != null)
         {
-            if (coneTarget == primaryTarget) continue;
+            projectilePrefab = vfxManager.vfxConfig.autoAttackProjectile;
+        }
+        else if (unitAI.projectilePrefab != null)
+        {
+            projectilePrefab = unitAI.projectilePrefab;
+        }
 
-            coneTarget.TakeDamage(passiveBonusDamage);
+        if (projectilePrefab == null)
+        {
+            Debug.LogWarning($"No projectile prefab found for {unitAI.unitName}");
+            yield break;
+        }
 
-            if (coneAttackVFX != null)
+        GameObject projectile = Instantiate(projectilePrefab, startPos, Quaternion.identity);
+        float speed = 20f;
+
+        while (projectile != null && target != null && target.isAlive && target.currentState != UnitState.Bench)
+        {
+            Vector3 targetPos = target.transform.position + Vector3.up * 1.2f;
+            Vector3 direction = (targetPos - projectile.transform.position).normalized;
+
+            projectile.transform.position += direction * speed * Time.deltaTime;
+            projectile.transform.rotation = Quaternion.LookRotation(direction);
+
+            if (Vector3.Distance(projectile.transform.position, targetPos) < 0.3f)
             {
-                Vector3 vfxPos = coneTarget.transform.position + Vector3.up * 1f;
-                GameObject vfx = Instantiate(coneAttackVFX, vfxPos, Quaternion.identity);
-                Destroy(vfx, 1f);
+                target.TakeDamage(damage);
+
+                // Spawn hit effect
+                if (vfxManager != null && vfxManager.vfxConfig.autoAttackHitEffect != null)
+                {
+                    GameObject hitEffect = Instantiate(vfxManager.vfxConfig.autoAttackHitEffect, targetPos, Quaternion.identity);
+                    Destroy(hitEffect, 1f);
+                }
+
+                // Count this hit toward passive
+                IncrementAttackCounter(targetPos);
+
+                Destroy(projectile);
+                yield break;
             }
 
-            Debug.Log($"⚡ {unitAI.unitName} cone damage: {passiveBonusDamage} to {coneTarget.unitName}");
+            yield return null;
         }
 
-        if (coneTargets.Count > 0 && autoAttackVFX != null)
+        if (projectile != null)
         {
-            Vector3 vfxPos = transform.position + attackDirection * (coneRadius / 2f) + Vector3.up * 1f;
-            GameObject vfx = Instantiate(autoAttackVFX, vfxPos, Quaternion.LookRotation(attackDirection));
-            Destroy(vfx, 1.5f);
-        }
-
-        if (coneTargets.Count > 0)
-        {
-            Debug.Log($"⚡ {unitAI.unitName} hit {coneTargets.Count} additional targets with cone attack");
+            Destroy(projectile);
         }
     }
 
-    private List<UnitAI> FindUnitsInCone(Vector3 direction, float radius, float angle)
+    private void IncrementAttackCounter(Vector3 hitPosition)
     {
-        List<UnitAI> unitsInCone = new List<UnitAI>();
+        attackCounter++;
+        Debug.Log($"⚡ {unitAI.unitName} attack counter: {attackCounter}/{attacksToTrigger}");
+
+        if (attackCounter >= attacksToTrigger)
+        {
+            TriggerExplosion(hitPosition);
+            attackCounter = 0;
+        }
+    }
+
+    private void TriggerExplosion(Vector3 epicenter)
+    {
+        int starIndex = Mathf.Clamp(unitAI.starLevel - 1, 0, aoeDamagePerStar.Length - 1);
+        float damage = aoeDamagePerStar[starIndex];
+
+        Debug.Log($"💥 {unitAI.unitName} triggers explosion at {epicenter} for {damage} damage!");
+
+        PlaySound(explosionSound);
+
+        // Spawn explosion VFX
+        if (explosionVFX != null)
+        {
+            GameObject vfx = Instantiate(explosionVFX, epicenter + Vector3.up * 1f, Quaternion.identity);
+            Destroy(vfx, 3f);
+        }
+
+        // Find all enemies in radius
         UnitAI[] allUnits = FindObjectsOfType<UnitAI>();
+        List<UnitAI> hitTargets = new List<UnitAI>();
 
         foreach (var unit in allUnits)
         {
             if (unit == unitAI || !unit.isAlive || unit.team == unitAI.team || unit.currentState == UnitState.Bench)
                 continue;
 
-            Vector3 toTarget = unit.transform.position - transform.position;
-            float distance = toTarget.magnitude;
-
-            if (distance > radius) continue;
-
-            float angleToTarget = Vector3.Angle(direction, toTarget.normalized);
-
-            if (angleToTarget <= angle / 2f)
+            float distance = Vector3.Distance(epicenter, unit.transform.position);
+            if (distance <= aoeRadius)
             {
-                unitsInCone.Add(unit);
+                unit.TakeDamage(damage);
+                hitTargets.Add(unit);
+                Debug.Log($"💥 Explosion hit {unit.unitName} for {damage} damage");
             }
         }
 
-        return unitsInCone;
+        Debug.Log($"💥 {unitAI.unitName} explosion hit {hitTargets.Count} enemies!");
     }
 
     public void Cast(UnitAI target)
@@ -159,8 +221,6 @@ public class HyperShotAbility : MonoBehaviour, IUnitAbility
         if (unitAI.animator)
         {
             unitAI.animator.SetTrigger("AbilityTrigger");
-
-            // Optional: Speed up the ability animation
             unitAI.animator.speed = 2f;
             StartCoroutine(ResetAnimatorSpeed());
         }
@@ -169,10 +229,7 @@ public class HyperShotAbility : MonoBehaviour, IUnitAbility
 
         activeStackCount++;
 
-        int starIndex = Mathf.Clamp(unitAI.starLevel - 1, 0, attackSpeedBonus.Length - 1);
-        float asBonus = attackSpeedBonus[starIndex];
-
-        Coroutine newBuff = StartCoroutine(ApplyAttackSpeedBuff(asBonus));
+        Coroutine newBuff = StartCoroutine(ApplyAttackSpeedBuff(attackSpeedBonus));
         activeBuffs.Add(newBuff);
 
         if (abilityBuffVFX != null)
@@ -184,7 +241,7 @@ public class HyperShotAbility : MonoBehaviour, IUnitAbility
             StartCoroutine(ManageBuffVFX(vfx, buffDuration));
         }
 
-        Debug.Log($"⚡ {unitAI.unitName} activates Hyper Assault! Stack {activeStackCount}: +{asBonus * 100f}% AS for {buffDuration}s");
+        Debug.Log($"⚡ {unitAI.unitName} activates Hyper Assault! Stack {activeStackCount}: +{attackSpeedBonus} AS for {buffDuration}s!");
     }
 
     private IEnumerator ResetAnimatorSpeed()
@@ -196,49 +253,32 @@ public class HyperShotAbility : MonoBehaviour, IUnitAbility
         }
     }
 
-
     private IEnumerator ManageBuffVFX(GameObject vfx, float duration)
     {
         yield return new WaitForSeconds(duration);
 
-        if (vfx != null)
+        if (vfx != null && activeBuffVFXs.Contains(vfx))
         {
+            activeBuffVFXs.Remove(vfx);
+
             ParticleSystem[] particles = vfx.GetComponentsInChildren<ParticleSystem>();
             foreach (ParticleSystem ps in particles)
             {
-                ps.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+                if (ps != null)
+                {
+                    ps.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+                }
             }
 
-            activeBuffVFXs.Remove(vfx);
-
-            yield return new WaitForSeconds(2f);
-
-            if (vfx != null)
-            {
-                Destroy(vfx);
-            }
+            Destroy(vfx, 2f);
         }
     }
 
-
-    private IEnumerator DestroyBuffVFXAfterDuration(GameObject vfx, float duration)
+    private IEnumerator ApplyAttackSpeedBuff(float bonusAmount)
     {
-        yield return new WaitForSeconds(duration);
-
-        if (vfx != null)
-        {
-            activeBuffVFXs.Remove(vfx);
-            Destroy(vfx);
-        }
-    }
-
-    private IEnumerator ApplyAttackSpeedBuff(float bonusPercent)
-    {
-        float bonusAmount = unitAI.attackSpeed * bonusPercent;
-
         unitAI.attackSpeed += bonusAmount;
 
-        Debug.Log($"⚡ {unitAI.unitName} gained +{bonusAmount:F2} attack speed ({bonusPercent * 100f}%). Total speed: {unitAI.attackSpeed:F2} (stack {activeStackCount})");
+        Debug.Log($"⚡ {unitAI.unitName} gained +{bonusAmount:F2} attack speed. Total speed: {unitAI.attackSpeed:F2} (stack {activeStackCount})");
 
         yield return new WaitForSeconds(buffDuration);
 
@@ -284,6 +324,7 @@ public class HyperShotAbility : MonoBehaviour, IUnitAbility
 
         activeBuffVFXs.Clear();
         activeStackCount = 0;
+        attackCounter = 0;
 
         Debug.Log($"[HyperShotAbility] Round ended for {unitAI.unitName}");
     }

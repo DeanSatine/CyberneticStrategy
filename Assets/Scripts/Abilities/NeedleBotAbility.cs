@@ -78,7 +78,9 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
 
         StartCoroutine(FireNeedlesRoutine());
     }
-
+    public void OnRoundEnd()
+    {
+    }
     private IEnumerator FireNeedlesRoutine()
     {
         yield return new WaitForSeconds(startDelay);

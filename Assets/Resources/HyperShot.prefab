@@ -442,9 +442,9 @@ MonoBehaviour:
   unitName: HyperShot
   starLevel: 1
   team: 0
-  maxHealth: 500
-  currentHealth: 500
-  attackDamage: 50
+  maxHealth: 600
+  currentHealth: 600
+  attackDamage: 60
   attackSpeed: 1.1
   armor: 25
   attackRange: 8
@@ -458,7 +458,7 @@ MonoBehaviour:
   isCastingAbility: 0
   projectilePrefab: {fileID: 0}
   firePoint: {fileID: 8644183347139676320}
-  projectileSpeed: 15
+  projectileSpeed: 30
   portraitSprite: {fileID: 0}
   unitUIPrefab: {fileID: 6939982145822855837, guid: 63931d92c48ef65418d45ec02069a522,
     type: 3}
@@ -499,22 +499,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 52a65d71132f5194f9fd0a808b9ff5f3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  coneRadius: 4
-  coneAngle: 60
-  passiveBonusDamage: 10
-  attackSpeedBonus:
-  - 0.4
-  - 0.5
-  - 0.6
-  buffDuration: 4
-  coneAttackVFX: {fileID: 0}
+  attacksToTrigger: 3
+  aoeDamagePerStar:
+  - 200
+  - 300
+  - 500
+  aoeRadius: 3
+  attackSpeedBonus: 0.4
+  buffDuration: 10
+  secondaryProjectileDamage: 0.5
+  explosionVFX: {fileID: 3077343761403282166, guid: f78aaaec3b393e24ca74cd6de8194347,
+    type: 3}
   abilityBuffVFX: {fileID: 3744133877081091469, guid: b6bc0276fc983a049ad8f1ab568ad75a,
     type: 3}
-  autoAttackVFX: {fileID: 0}
   muzzleFlashVFX: {fileID: 8078720523478869859, guid: 4f5fc4bbd01b03a4499a6ed77f175fc7,
     type: 3}
   autoAttackSound: {fileID: 0}
   abilitySound: {fileID: 0}
+  explosionSound: {fileID: 0}
   volume: 0.8
 --- !u!114 &2582493348379936119
 MonoBehaviour:
@@ -533,7 +535,7 @@ MonoBehaviour:
       type: 3}
     autoAttackMuzzleFlash: {fileID: 8078720523478869859, guid: 4f5fc4bbd01b03a4499a6ed77f175fc7,
       type: 3}
-    autoAttackHitEffect: {fileID: 3077343761403282166, guid: f78aaaec3b393e24ca74cd6de8194347,
+    autoAttackHitEffect: {fileID: 6823302871133167919, guid: 3138a83bedbd6ad4481ba0b061da2eb6,
       type: 3}
     abilityEffect: {fileID: 8078720523478869859, guid: 4f5fc4bbd01b03a4499a6ed77f175fc7,
       type: 3}

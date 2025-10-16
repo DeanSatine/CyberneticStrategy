@@ -242,23 +242,28 @@ public class UnitAI : MonoBehaviour
         {
             float dist = Vector3.Distance(transform.position, currentTarget.position);
 
+            // ✅ FIX: Stop movement when in attack range
             if (dist <= attackRange)
             {
+                // Stop all movement immediately
+                if (animator) animator.SetBool("IsRunning", false);
+                hasReachedDestination = true;
+                currentPath.Clear();
+
+                // Attack on cooldown
                 if (attackCooldown <= 0f)
                 {
                     Attack(currentTarget);
                     attackCooldown = 1f / attackSpeed;
                 }
-                if (animator) animator.SetBool("IsRunning", false);
-                hasReachedDestination = true;
             }
-            else if (canMove && dist > attackRange - 0.1f) // 🔹 buffer prevents stall
+            // ✅ FIX: Only move if we're NOT in attack range
+            else if (canMove)
             {
                 MoveTowards(currentTarget.position);
             }
         }
     }
-
 
     private void Attack(Transform target)
     {
@@ -399,7 +404,7 @@ public class UnitAI : MonoBehaviour
 
                 Debug.Log($"💗 [AFTER] {enemy.unitName} health: {enemy.currentHealth}/{enemy.maxHealth}");
             }
- 
+
             GainMana(10);
             OnAttackEvent?.Invoke(enemy);
         }
@@ -718,6 +723,17 @@ public class UnitAI : MonoBehaviour
     public interface IUnitAbility
     {
         void Cast(UnitAI target);
+        void OnRoundEnd();
+    }
+    public void ResetAbilityState()
+    {
+        foreach (var ability in GetComponents<MonoBehaviour>())
+        {
+            if (ability is IUnitAbility unitAbility)
+            {
+                unitAbility.OnRoundEnd();
+            }
+        }
     }
 
     private Transform FindNearestEnemy()
@@ -964,6 +980,7 @@ public class UnitAI : MonoBehaviour
     {
         return UnitAbilityDescriptions.GetDescription(this);
     }
+
     public void ForceResetMovementState()
     {
         currentPath.Clear();
@@ -1003,7 +1020,7 @@ public class UnitAI : MonoBehaviour
         Vector3 idealDestination = CalculateIdealDestination(targetPos);
 
         // Only recalculate path if destination changed significantly
-        if (Vector3.Distance(idealDestination, currentDestination) > 0.5f)
+        if (Vector3.Distance(idealDestination, currentDestination) > 1.0f)
         {
             currentDestination = idealDestination;
             hasReachedDestination = false;

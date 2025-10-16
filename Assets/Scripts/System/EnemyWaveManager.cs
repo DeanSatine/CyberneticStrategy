@@ -57,7 +57,12 @@ public class EnemyWaveManager : MonoBehaviour
             HexTile freeTile = GetNextAvailableEnemyTile(usedTiles);
             if (freeTile == null)
             {
-                Debug.LogWarning($"⚠️ No more free enemy tiles available! Spawned {i}/{actualEnemyCount} enemies.");
+                Debug.LogError($"⚠️ No more free enemy tiles! Checking all enemy tiles:");
+                List<HexTile> allEnemyTiles = BoardManager.Instance.GetEnemyTiles();
+                foreach (var tile in allEnemyTiles)
+                {
+                    Debug.LogError($"  Tile {tile.gridPosition}: occupied={tile.occupyingUnit != null}, occupant={(tile.occupyingUnit != null ? tile.occupyingUnit.unitName : "NONE")}");
+                }
                 break;
             }
 

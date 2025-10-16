@@ -499,22 +499,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 52a65d71132f5194f9fd0a808b9ff5f3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  coneRadius: 4
-  coneAngle: 60
-  passiveBonusDamage: 10
-  attackSpeedBonus:
-  - 0.4
-  - 0.5
-  - 0.6
+  attacksToTrigger: 3
+  aoeDamagePerStar:
+  - 200
+  - 300
+  - 500
+  aoeRadius: 3
+  attackSpeedBonus: 0.4
   buffDuration: 4
-  coneAttackVFX: {fileID: 0}
-  abilityBuffVFX: {fileID: 3744133877081091469, guid: b6bc0276fc983a049ad8f1ab568ad75a,
-    type: 3}
-  autoAttackVFX: {fileID: 0}
-  muzzleFlashVFX: {fileID: 8078720523478869859, guid: 4f5fc4bbd01b03a4499a6ed77f175fc7,
+  explosionVFX: {fileID: 0}
+  abilityBuffVFX: {fileID: 3744133877081091469, guid: 3303ffa87df88074a929cc3a6928879d,
     type: 3}
   autoAttackSound: {fileID: 0}
   abilitySound: {fileID: 0}
+  explosionSound: {fileID: 0}
   volume: 0.8
 --- !u!114 &2582493348379936119
 MonoBehaviour:
@@ -529,13 +527,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   vfxConfig:
-    autoAttackProjectile: {fileID: 8548050680436672203, guid: 43ea084526b23e34680f81800aa0a3e2,
+    autoAttackProjectile: {fileID: 8548050680436672203, guid: a0c58b79ca7aa624b94c02fa9bbb2cef,
       type: 3}
-    autoAttackMuzzleFlash: {fileID: 8078720523478869859, guid: 4f5fc4bbd01b03a4499a6ed77f175fc7,
+    autoAttackMuzzleFlash: {fileID: 8078720523478869859, guid: 47c23915a8535514494e15655c8dcbf1,
       type: 3}
-    autoAttackHitEffect: {fileID: 3077343761403282166, guid: f78aaaec3b393e24ca74cd6de8194347,
+    autoAttackHitEffect: {fileID: 3077343761403282166, guid: 6e2f6921380dcb24ca6f3e366b7ef101,
       type: 3}
-    abilityEffect: {fileID: 8078720523478869859, guid: 4f5fc4bbd01b03a4499a6ed77f175fc7,
+    abilityEffect: {fileID: 3077343761403282166, guid: 6e2f6921380dcb24ca6f3e366b7ef101,
       type: 3}
     abilityProjectile: {fileID: 0}
     abilityImpactEffect: {fileID: 0}

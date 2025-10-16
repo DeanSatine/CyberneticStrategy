@@ -11,6 +11,8 @@ public class ClobbertronJumpBehaviour : MonoBehaviour
     public float jumpHeight = 3f;
     public float jumpDuration = 0.5f;
     public GameObject jumpVFXPrefab;
+    [HideInInspector] public ItsClobberingTimeAugment augment;
+    private HexTile reservedLandingTile = null;
 
     private UnitAI unitAI;
     private ClobbertronTrait clobbertronTrait;
@@ -151,19 +153,20 @@ public class ClobbertronJumpBehaviour : MonoBehaviour
 
     private bool IsValidLandingPosition(Vector3 position)
     {
-        // Check if position is on a valid board tile
         HexTile nearestTile = GetNearestBoardTile(position);
         if (nearestTile == null) return false;
 
-        // Check if tile is not occupied by another unit
+        // FIX BUG 2: Check if tile is reserved by another jumping unit
+        if (augment != null && augment.IsTileReserved(nearestTile)) return false;
+
+        // Check if tile is occupied by another unit (not me)
         if (nearestTile.occupyingUnit != null && nearestTile.occupyingUnit != unitAI) return false;
 
         // Check if it's not the same tile I'm currently on
         if (unitAI.currentTile != null && nearestTile == unitAI.currentTile) return false;
 
-        // Check distance from tile center (should be reasonably close)
         float distanceFromTileCenter = Vector3.Distance(position, nearestTile.transform.position);
-        return distanceFromTileCenter <= 1f; // Allow some tolerance
+        return distanceFromTileCenter <= 1f;
     }
 
     private HexTile GetNearestBoardTile(Vector3 position)
@@ -272,6 +275,21 @@ public class ClobbertronJumpBehaviour : MonoBehaviour
         if (isJumping) yield break;
 
         isJumping = true;
+        HexTile landingTile = GetNearestBoardTile(targetPosition);
+        if (landingTile != null && augment != null)
+        {
+            if (!augment.TryReserveTile(landingTile))
+            {
+                Debug.LogWarning($"⚠️ {unitAI.unitName} landing tile is reserved, finding alternative");
+                targetPosition = GetClosestValidBoardPosition(targetPosition);
+                landingTile = GetNearestBoardTile(targetPosition);
+                if (landingTile != null)
+                {
+                    augment.TryReserveTile(landingTile);
+                }
+            }
+            reservedLandingTile = landingTile;
+        }
         Vector3 startPos = transform.position;
         Vector3 endPos = targetPosition;
         Vector3 jumpPeakPos = Vector3.Lerp(startPos, endPos, 0.5f) + Vector3.up * jumpHeight;
@@ -362,7 +380,11 @@ public class ClobbertronJumpBehaviour : MonoBehaviour
         // Re-enable movement
         unitAI.canMove = originalCanMove;
         isJumping = false;
-
+        if (reservedLandingTile != null && augment != null)
+        {
+            augment.UnreserveTile(reservedLandingTile);
+            reservedLandingTile = null;
+        }
         Debug.Log($"🔨 {unitAI.unitName} completed jump landing at {endPos}!");
     }
 

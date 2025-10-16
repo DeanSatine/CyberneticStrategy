@@ -225,7 +225,19 @@ public class CombatManager : MonoBehaviour
         {
             RestoreUnitFromSnapshot(snapshot);
         }
+        foreach (var unit in GameManager.Instance.GetPlayerUnits())
+        {
+            if (unit != null)
+            {
+                unit.ResetAbilityState();
+            }
+        }
 
+        // ✅ First restore all snapshotted units
+        foreach (var snapshot in preCombatPlayerSnapshots)
+        {
+            RestoreUnitFromSnapshot(snapshot);
+        }
         // ✅ NEW: Handle units that died during combat but need restoration
         foreach (var deadUnit in unitsDeadThisCombat)
         {

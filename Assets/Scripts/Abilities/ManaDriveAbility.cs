@@ -275,5 +275,9 @@ public class ManaDriveAbility : MonoBehaviour, IUnitAbility
         Debug.Log($"🎯 {unitAI.unitName} ManaDrive targeting position with {maxEnemiesInRange} enemies");
         return bestPosition;
     }
+    public void OnRoundEnd()
+    {
+        // No cleanup needed for BOP
+    }
 
 }

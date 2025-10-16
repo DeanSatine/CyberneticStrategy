@@ -132,6 +132,10 @@ public class BOPAbility : MonoBehaviour, IUnitAbility
         Debug.Log($"💪 {unitAI.unitName} pounds chest! +{buffAmount:F1} HP (now {unitAI.currentHealth:F1}/{unitAI.maxHealth:F1}).");
     }
 
+    public void OnRoundEnd()
+    {
+        // No cleanup needed for BOP
+    }
 
 
     // 🔨 Animation Event: Bonk Strike frame
