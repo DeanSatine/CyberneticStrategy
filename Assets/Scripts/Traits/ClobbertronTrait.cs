@@ -3,8 +3,6 @@ using System.Collections;
 
 public class ClobbertronTrait : MonoBehaviour
 {
-    [HideInInspector] public float bonusArmor = 10f;
-    [HideInInspector] public float bonusAttackDamage = 10f;
     [HideInInspector] public float crashRadius = 2f;
     [HideInInspector] public float crashDamage = 200f;
 
@@ -24,6 +22,50 @@ public class ClobbertronTrait : MonoBehaviour
     public float slamDuration = 0.2f;
     public float cameraShakeIntensity = 0.4f;
     public float cameraShakeDuration = 0.25f;
+    private float _bonusArmor = 10f;
+    private float _bonusAttackDamage = 10f;
+
+    [HideInInspector]
+    public float bonusArmor
+    {
+        get => _bonusArmor;
+        set
+        {
+            if (_bonusArmor != value)
+            {
+                Debug.Log($"🔄 [CLOBBERTRON] bonusArmor changed from {_bonusArmor} to {value} for {unitAI?.unitName}");
+                _bonusArmor = value;
+
+                // If bonuses are already applied, refresh them with new values
+                if (traitsApplied && unitAI != null && unitAI.currentState == UnitAI.UnitState.BoardIdle)
+                {
+                    Debug.Log($"🔄 [CLOBBERTRON] Auto-refreshing bonuses for {unitAI.unitName} due to bonusArmor change");
+                    ForceRefreshBonuses();
+                }
+            }
+        }
+    }
+
+    [HideInInspector]
+    public float bonusAttackDamage
+    {
+        get => _bonusAttackDamage;
+        set
+        {
+            if (_bonusAttackDamage != value)
+            {
+                Debug.Log($"🔄 [CLOBBERTRON] bonusAttackDamage changed from {_bonusAttackDamage} to {value} for {unitAI?.unitName}");
+                _bonusAttackDamage = value;
+
+                // If bonuses are already applied, refresh them with new values
+                if (traitsApplied && unitAI != null && unitAI.currentState == UnitAI.UnitState.BoardIdle)
+                {
+                    Debug.Log($"🔄 [CLOBBERTRON] Auto-refreshing bonuses for {unitAI.unitName} due to bonusAttackDamage change");
+                    ForceRefreshBonuses();
+                }
+            }
+        }
+    }
 
     private void Awake()
     {
@@ -103,7 +145,19 @@ public class ClobbertronTrait : MonoBehaviour
         Debug.Log($"🔨 Final stats: {unitAI.armor} armor, {unitAI.attackDamage} attack damage");
     }
 
-    // Rest of the methods remain the same...
+    public void ForceRefreshBonuses()
+    {
+        Debug.Log($"🔄 [CLOBBERTRON] Force refreshing bonuses for {unitAI.unitName}");
+
+        // Remove existing bonuses if applied
+        if (traitsApplied)
+        {
+            RemoveTraitBonuses();
+        }
+
+        // Reapply with current bonus values
+        ApplyTraitBonuses();
+    }
     private IEnumerator CrashSequence()
     {
         isCrashing = true;
