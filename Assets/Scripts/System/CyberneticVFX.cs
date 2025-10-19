@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 [System.Serializable]
@@ -112,18 +112,37 @@ public class CyberneticVFX : MonoBehaviour
         Vector3 spawnPos = firePoint != null ? firePoint.position : transform.position + Vector3.up * 1.5f;
 
         // ✅ Muzzle flash
-        if (vfxConfig.autoAttackMuzzleFlash != null)
+        if (vfxConfig != null && vfxConfig.autoAttackMuzzleFlash != null)
         {
             PlayEffect(vfxConfig.autoAttackMuzzleFlash, spawnPos, 0.5f);
         }
 
-        // ✅ Fire needle projectile
-        if (vfxConfig.autoAttackProjectile != null && target != null)
+        // ✅ Fire needle projectile with defensive checks
+        if (target != null)
         {
-            StartCoroutine(FireNeedle(spawnPos, target));
+            if (vfxConfig != null && vfxConfig.autoAttackProjectile != null)
+            {
+                StartCoroutine(FireNeedle(spawnPos, target));
+            }
+            else
+            {
+                // FALLBACK: Use unitAI projectile if VFX config missing
+                Debug.LogWarning($"⚠️ Needlebot {unitAI.unitName} missing VFX config projectile - using unitAI.projectilePrefab");
+                if (unitAI.projectilePrefab != null)
+                {
+                    StartCoroutine(FireNeedleFromUnitAI(spawnPos, target));
+                }
+                else
+                {
+                    Debug.LogError($"❌ Needlebot {unitAI.unitName} has NO projectile assigned! Cannot fire.");
+                }
+            }
         }
 
-        PlaySound(vfxConfig.autoAttackSound);
+        if (vfxConfig != null)
+        {
+            PlaySound(vfxConfig.autoAttackSound);
+        }
     }
 
     // ✅ NEEDLEBOT: Rapid throw ability (4 needles to nearest 2 enemies)
@@ -132,7 +151,7 @@ public class CyberneticVFX : MonoBehaviour
         Vector3 spawnPos = firePoint != null ? firePoint.position : transform.position + Vector3.up * 1.5f;
 
         // ✅ Ability effect at fire point
-        if (vfxConfig.abilityEffect != null)
+        if (vfxConfig != null && vfxConfig.abilityEffect != null)
         {
             PlayEffect(vfxConfig.abilityEffect, spawnPos, 1f);
         }
@@ -140,17 +159,34 @@ public class CyberneticVFX : MonoBehaviour
         // ✅ Find nearest 2 enemies
         UnitAI[] enemies = FindNearestEnemies(2);
 
+        if (enemies.Length == 0)
+        {
+            Debug.LogWarning($"⚠️ Needlebot {unitAI.unitName} found no enemies for ability");
+            return;
+        }
+
         // ✅ Fire 4 needles split between them
         for (int i = 0; i < 4; i++)
         {
             UnitAI target = enemies[i % enemies.Length]; // Alternate between targets
             if (target != null)
             {
-                StartCoroutine(FireNeedleWithDelay(spawnPos, target, i * 0.1f));
+                if (vfxConfig != null && vfxConfig.autoAttackProjectile != null)
+                {
+                    StartCoroutine(FireNeedleWithDelay(spawnPos, target, i * 0.1f));
+                }
+                else if (unitAI.projectilePrefab != null)
+                {
+                    // FALLBACK: Use unitAI projectile
+                    StartCoroutine(FireNeedleWithDelayFromUnitAI(spawnPos, target, i * 0.1f));
+                }
             }
         }
 
-        PlaySound(vfxConfig.abilitySound);
+        if (vfxConfig != null)
+        {
+            PlaySound(vfxConfig.abilitySound);
+        }
     }
 
     // ✅ B.O.P: Chest pound + bonk
@@ -349,10 +385,41 @@ public class CyberneticVFX : MonoBehaviour
         if (needle != null) Destroy(needle);
     }
 
+    // FALLBACK: Fire needle using unitAI projectile if VFX config missing
+    private IEnumerator FireNeedleFromUnitAI(Vector3 startPos, UnitAI target)
+    {
+        GameObject needle = Instantiate(unitAI.projectilePrefab, startPos, Quaternion.identity);
+
+        while (needle != null && target != null && target.isAlive)
+        {
+            Vector3 targetPos = target.transform.position + Vector3.up * 1.2f;
+            Vector3 direction = (targetPos - needle.transform.position).normalized;
+
+            needle.transform.position += direction * 20f * Time.deltaTime;
+            needle.transform.rotation = Quaternion.LookRotation(direction);
+
+            if (Vector3.Distance(needle.transform.position, targetPos) < 0.3f)
+            {
+                Destroy(needle);
+                yield break;
+            }
+
+            yield return null;
+        }
+
+        if (needle != null) Destroy(needle);
+    }
+
     private IEnumerator FireNeedleWithDelay(Vector3 startPos, UnitAI target, float delay)
     {
         yield return new WaitForSeconds(delay);
         yield return StartCoroutine(FireNeedle(startPos, target));
+    }
+
+    private IEnumerator FireNeedleWithDelayFromUnitAI(Vector3 startPos, UnitAI target, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        yield return StartCoroutine(FireNeedleFromUnitAI(startPos, target));
     }
 
     private IEnumerator FireBomb(UnitAI target, bool isMassive)
