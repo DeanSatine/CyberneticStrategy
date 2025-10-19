@@ -1,4 +1,3 @@
-// Updated /Assets/Scripts/Augments/Editor/AugmentConfigurationEditor.cs
 using UnityEngine;
 using UnityEditor;
 

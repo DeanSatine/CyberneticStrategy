@@ -215,6 +215,19 @@ public class ClobbertronTrait : MonoBehaviour
     {
         RemoveTraitBonuses();
     }
+    public void ForceRefreshBonuses()
+    {
+        if (unitAI == null) return;
+
+        if (traitsApplied)
+            RemoveTraitBonuses();
+
+        ApplyTraitBonuses();
+
+        Debug.Log($"♻️ [ClobbertronTrait] Force refreshed bonuses for {unitAI.unitName}: " +
+                  $"+{bonusAttackDamage} AD, +{bonusArmor} Armor");
+    }
+
 
     [ContextMenu("Debug Clobbertron State")]
     public void DebugClobbertronState()

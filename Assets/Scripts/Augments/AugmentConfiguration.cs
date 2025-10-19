@@ -115,7 +115,7 @@ public class AugmentConfiguration : MonoBehaviour
             case ConfigurableAugmentType.EradicateTheWeak:
                 return "Your strongest Eradicator unit is linked to the Hydraulic Press. They gain 10 attack damage, 10% attack speed and heal 10% of their maximum health whenever the press executes an enemy. Gain a ManaDrive.";
             case ConfigurableAugmentType.ClobberingTime:
-                return "Clobbertrons jump to their target on combat start and jump once more at 10% health, and gain 20 Attack Damage and no armour instead. Gain a B.O.P.";
+                return "Clobbertrons jump to their target on combat start and jump once more at 10% health. Their jumps create a shockwave that does 150% of their AD as damage. Gain a B.O.P. and Haymaker.";
             case ConfigurableAugmentType.SupportRevolution:
                 return "Your units start combat with 3 gears which fly to and heal the lowest health ally on attack. Gears heal 50-300 health (based on stage) and refresh every 10 seconds.";
             default:

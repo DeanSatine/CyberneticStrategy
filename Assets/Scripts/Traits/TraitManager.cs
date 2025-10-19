@@ -41,7 +41,7 @@ public class TraitManager : MonoBehaviour
     }
 
     // ==============================
-    // TRAIT SETTINGS (tweak in Inspector)
+    // TRAIT SETTINGS
     // ==============================
 
     [Header("Eradicators")]
@@ -59,6 +59,7 @@ public class TraitManager : MonoBehaviour
     [Header("Clobbertron")]
     public int clobbertronThreshold = 2;
     public float clobbertronBonusArmor = 10f;
+    public float clobbertronBonusAttackDamage = 10f;
     public float clobbertronBonusDamageAmp = 0.10f;
     public float clobbertronCrashRadius = 2f;
     public float clobbertronCrashDamage = 200f;
@@ -325,29 +326,48 @@ public class TraitManager : MonoBehaviour
                     }
                     break;
 
-
                 // =====================
                 // CLOBBERTRON
                 // =====================
                 case Trait.Clobbertron:
                     if (count >= clobbertronThreshold)
                     {
+                        bool hasClobberingTime = AugmentManager.Instance != null &&
+                                                 AugmentManager.Instance.HasAugment<ItsClobberingTimeAugment>();
+
                         foreach (var unit in playerUnits)
                         {
-                            if (unit.currentState == UnitAI.UnitState.Bench) continue;
+                            if (unit == null || unit.currentState == UnitAI.UnitState.Bench)
+                                continue;
 
-                            if (unit.traits.Contains(Trait.Clobbertron))
+                            if (!unit.traits.Contains(Trait.Clobbertron))
+                                continue;
+
+                            var ability = unit.GetComponent<ClobbertronTrait>();
+                            if (ability == null)
+                                ability = unit.gameObject.AddComponent<ClobbertronTrait>();
+
+                            // Always set crash properties (shared)
+                            ability.crashRadius = clobbertronCrashRadius;
+                            ability.crashDamage = clobbertronCrashDamage;
+
+                            // ✅ Skip default bonuses if augment is active
+                            if (hasClobberingTime)
                             {
-                                var ability = unit.GetComponent<ClobbertronTrait>();
-                                if (ability == null) ability = unit.gameObject.AddComponent<ClobbertronTrait>();
-
-                                ability.bonusArmor = clobbertronBonusArmor;
-                                ability.crashRadius = clobbertronCrashRadius;
-                                ability.crashDamage = clobbertronCrashDamage;
+                                Debug.Log($"[TraitManager] Skipping default Clobbertron bonuses for {unit.unitName} (augment active)");
+                                continue;
                             }
+
+                            // Apply normal bonuses only when augment is inactive
+                            ability.bonusArmor = clobbertronBonusArmor;
+                            ability.bonusAttackDamage = clobbertronBonusAttackDamage;
+
+                            // Apply immediately if on board
+                            ability.ForceRefreshBonuses();
                         }
                     }
                     break;
+
 
                 // =====================
                 // STRIKEBYTE

@@ -1,7 +1,7 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Linq;
-
+using System.Collections.Generic;
 public class ClobbertronJumpBehaviour : MonoBehaviour
 {
     [HideInInspector] public float lowHealthThreshold = 0.1f;
@@ -12,6 +12,8 @@ public class ClobbertronJumpBehaviour : MonoBehaviour
     public float jumpDuration = 0.5f;
     public GameObject jumpVFXPrefab;
     [HideInInspector] public ItsClobberingTimeAugment augment;
+    [HideInInspector] public float shockwaveDamageMultiplier = 1.5f;
+    [HideInInspector] public int shockwaveHexRadius = 2;
     private HexTile reservedLandingTile = null;
 
     private UnitAI unitAI;
@@ -303,10 +305,13 @@ public class ClobbertronJumpBehaviour : MonoBehaviour
             unitAI.currentTile.Free(unitAI);
         }
 
-        // Play jump VFX at start position
+        // Play jump VFX at start position (feet level)
         if (jumpVFXPrefab != null)
         {
-            GameObject startVFX = Instantiate(jumpVFXPrefab, startPos, Quaternion.identity);
+            Vector3 feetPosition = startPos;
+            feetPosition.y = 0.1f;
+            
+            GameObject startVFX = Instantiate(jumpVFXPrefab, feetPosition, Quaternion.identity);
             Destroy(startVFX, 2f);
         }
 
@@ -358,20 +363,27 @@ public class ClobbertronJumpBehaviour : MonoBehaviour
         // FIX: COMPREHENSIVE LANDING STATE RESET
         ResetMovementStateAfterLanding(endPos);
 
-        // Play landing VFX
+        // Play landing VFX at FEET (ground level)
         if (jumpVFXPrefab != null)
         {
-            GameObject landVFX = Instantiate(jumpVFXPrefab, endPos, Quaternion.identity);
+            Vector3 feetPosition = endPos;
+            feetPosition.y = 0.8f;
+            
+            GameObject landVFX = Instantiate(jumpVFXPrefab, feetPosition, Quaternion.identity);
 
             // Make landing VFX use augment color
             ParticleSystem particles = landVFX.GetComponent<ParticleSystem>();
             if (particles != null)
             {
                 var main = particles.main;
-                main.startColor = augmentColor;
             }
 
             Destroy(landVFX, 2f);
+            Debug.Log($"💥 Spawned landing VFX at {feetPosition}");
+        }
+        else
+        {
+            Debug.LogWarning($"⚠️ {unitAI.unitName} has no jumpVFXPrefab assigned!");
         }
 
         // Do landing impact damage in small radius
@@ -440,28 +452,79 @@ public class ClobbertronJumpBehaviour : MonoBehaviour
 
     private void DoLandingImpact(Vector3 impactPosition)
     {
-        float impactRadius = 2f;
-        float impactDamage = unitAI.attackDamage * 0.5f; // 50% of attack damage as impact damage
+        if (BoardManager.Instance == null)
+        {
+            Debug.LogWarning("⚠️ BoardManager.Instance is null - cannot perform hex-based shockwave");
+            return;
+        }
 
-        Collider[] hits = Physics.OverlapSphere(impactPosition, impactRadius);
+        HexTile centerTile = GetNearestBoardTile(impactPosition);
+        if (centerTile == null)
+        {
+            Debug.LogWarning("⚠️ No center tile found for shockwave impact");
+            return;
+        }
+
+        float shockwaveDamage = unitAI.attackDamage * shockwaveDamageMultiplier;
+        HashSet<HexTile> affectedTiles = GetTilesInHexRadius(centerTile, shockwaveHexRadius);
         int hitCount = 0;
 
-        foreach (var hit in hits)
+        Debug.Log($"💥 {unitAI.unitName} shockwave impact at {centerTile.gridPosition} affecting {affectedTiles.Count} tiles in {shockwaveHexRadius} hex radius");
+
+        foreach (var tile in affectedTiles)
         {
-            UnitAI enemy = hit.GetComponent<UnitAI>();
-            if (enemy != null && enemy.team != unitAI.team && enemy.isAlive)
+            if (tile.occupyingUnit != null)
             {
-                enemy.TakeDamage((int)impactDamage);
-                hitCount++;
-                Debug.Log($"🔨 {unitAI.unitName} jump impact damaged {enemy.unitName} for {impactDamage}!");
+                UnitAI enemy = tile.occupyingUnit;
+                if (enemy.team != unitAI.team && enemy.isAlive)
+                {
+                    enemy.TakeDamage(shockwaveDamage);
+                    hitCount++;
+                    Debug.Log($"💥 {unitAI.unitName} shockwave damaged {enemy.unitName} for {shockwaveDamage} damage!");
+                }
             }
         }
 
         if (hitCount > 0)
         {
-            Debug.Log($"🔨 {unitAI.unitName} jump impact hit {hitCount} enemies!");
+            Debug.Log($"💥 {unitAI.unitName} shockwave hit {hitCount} enemies!");
             StartCoroutine(CameraShake(0.3f, 0.2f));
         }
+    }
+
+    private HashSet<HexTile> GetTilesInHexRadius(HexTile centerTile, int radius)
+    {
+        HashSet<HexTile> tiles = new HashSet<HexTile>();
+        if (centerTile == null || BoardManager.Instance == null) return tiles;
+
+        Queue<HexTile> toProcess = new Queue<HexTile>();
+        Dictionary<HexTile, int> distances = new Dictionary<HexTile, int>();
+
+        tiles.Add(centerTile);
+        toProcess.Enqueue(centerTile);
+        distances[centerTile] = 0;
+
+        while (toProcess.Count > 0)
+        {
+            HexTile current = toProcess.Dequeue();
+            int currentDist = distances[current];
+
+            if (currentDist >= radius)
+                continue;
+
+            List<HexTile> neighbors = BoardManager.Instance.GetNeighbors(current);
+            foreach (var neighbor in neighbors)
+            {
+                if (!tiles.Contains(neighbor) && neighbor.tileType == TileType.Board)
+                {
+                    tiles.Add(neighbor);
+                    toProcess.Enqueue(neighbor);
+                    distances[neighbor] = currentDist + 1;
+                }
+            }
+        }
+
+        return tiles;
     }
 
     private IEnumerator CameraShake(float intensity, float duration)
