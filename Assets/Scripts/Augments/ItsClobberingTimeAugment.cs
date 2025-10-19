@@ -109,63 +109,20 @@ public class ItsClobberingTimeAugment : BaseAugment
     private void ApplyToClobbertrons()
     {
         UnitAI[] allUnits = Object.FindObjectsOfType<UnitAI>();
-
-        foreach (var unit in allUnits.Where(u => u.team == Team.Player && u.traits.Contains(Trait.Clobbertron)))
+        foreach (var unit in allUnits)
         {
-            ClobbertronTrait clobTrait = unit.GetComponent<ClobbertronTrait>();
-            if (clobTrait == null)
+            if (unit.team == Team.Player && unit.traits.Contains(Trait.Clobbertron))
             {
-                clobTrait = unit.gameObject.AddComponent<ClobbertronTrait>();
-                if (TraitManager.Instance != null)
+                ClobbertronTrait clobTrait = unit.GetComponent<ClobbertronTrait>();
+                if (clobTrait != null)
                 {
-                    clobTrait.crashRadius = TraitManager.Instance.clobbertronCrashRadius;
-                    clobTrait.crashDamage = TraitManager.Instance.clobbertronCrashDamage;
+                    ApplyAugmentToUnit(unit, clobTrait);
                 }
-            }
-
-            ApplyAugmentToUnit(unit, clobTrait);
-
-            // ⚡ Force apply immediately regardless of state
-            // ✅ Force bonuses to apply immediately, even if not yet BoardIdle
-            if (!clobTrait.traitsApplied)
-            {
-                clobTrait.ApplyTraitBonusesPublic();
-            }
-            else
-            {
-                clobTrait.ForceRefreshBonuses();
-            }
-            // 🧩 Also ensure stats are applied if the unit is already fighting
-            if (!clobTrait.traitsApplied)
-            {
-                clobTrait.ApplyTraitBonusesPublic();
-            }
-
-            // ✅ If the unit is currently benched, ensure it reapplies when placed later
-            unit.OnStateChanged -= HandleStateChangeForClobbertrons; // avoid duplicates
-            unit.OnStateChanged += HandleStateChangeForClobbertrons;
-
-            // 🕒 Delayed verify - reapply once after 1 frame in case of state timing issues
-            if (AugmentManager.Instance != null)
-            {
-                AugmentManager.Instance.StartCoroutine(DelayedBonusVerification(unit, clobTrait));
             }
         }
 
         Debug.Log($"🔨 Applied Clobbering Time to {allUnits.Count(u => u.team == Team.Player && u.traits.Contains(Trait.Clobbertron))} Clobbertrons");
     }
-
-    private IEnumerator DelayedBonusVerification(UnitAI unit, ClobbertronTrait clobTrait)
-    {
-        yield return null; // wait one frame
-        if (!clobTrait.traitsApplied && unit != null && unit.isAlive)
-        {
-            Debug.Log($"⚡ [Verification] Reapplying Clobbertron bonuses to {unit.unitName} after delay");
-            clobTrait.ForceRefreshBonuses();
-        }
-    }
-
-
 
     private void ApplyAugmentToUnit(UnitAI unit, ClobbertronTrait clobTrait)
     {
@@ -174,31 +131,51 @@ public class ItsClobberingTimeAugment : BaseAugment
             Debug.LogWarning($"⚠️ {unit.unitName} does not have active Clobbertron trait - skipping augment application");
             return;
         }
+
+        // FIX BUG 1: Force apply trait bonuses first if not already applied
         if (!clobTrait.traitsApplied)
         {
-            clobTrait.ForceRefreshBonuses();
+            Debug.Log($"🔨 Forcing trait bonus application for {unit.unitName} before augment");
+            clobTrait.ApplyTraitBonusesPublic();
         }
 
-        Debug.Log($"🔨 Applying Clobbering Time to {unit.unitName}");
+        // Remove Clobbertron's attack damage bonus
+        if (clobTrait.appliedAttackBonus > 0)
+        {
+            unit.attackDamage -= clobTrait.appliedAttackBonus;
+            Debug.Log($"🔨 Removed Clobbertron attack bonus ({clobTrait.appliedAttackBonus}) from {unit.unitName}");
+            clobTrait.bonusAttackDamage = 0f;
+            clobTrait.appliedAttackBonus = 0f;
+        }
 
-        // Update bonus values FIRST
-        clobTrait.bonusArmor = 0f;
-        clobTrait.bonusAttackDamage = bonusAttackDamage;
+        // Add augment attack damage bonus
+        unit.attackDamage += bonusAttackDamage;
+        Debug.Log($"🔨 Added augment attack bonus (+{bonusAttackDamage}) to {unit.unitName}");
 
-        // FORCE REFRESH: This removes old bonuses and applies new ones
-        clobTrait.ForceRefreshBonuses();
+        // Remove armor bonus
+        if (clobTrait.appliedArmorBonus > 0)
+        {
+            unit.armor -= clobTrait.appliedArmorBonus;
+            clobTrait.bonusArmor = 0f;
+            clobTrait.appliedArmorBonus = 0f;
+            Debug.Log($"🔨 Removed Clobbertron armor bonus from {unit.unitName}");
+        }
+        else
+        {
+            unit.armor = 0;
+            Debug.Log($"🔨 Set base armor to 0 for {unit.unitName}");
+        }
 
         // Add jump behavior component
         ClobbertronJumpBehaviour jumpBehavior = unit.GetComponent<ClobbertronJumpBehaviour>();
         if (jumpBehavior == null)
         {
             jumpBehavior = unit.gameObject.AddComponent<ClobbertronJumpBehaviour>();
-            // The Awake() method in ClobbertronJumpBehaviour will handle initialization
         }
 
         jumpBehavior.lowHealthThreshold = lowHealthThreshold;
         jumpBehavior.augmentColor = augmentColor;
-        jumpBehavior.augment = this;
+        jumpBehavior.augment = this; // Give access to augment for tile reservation
 
         jumpBehavior.ResetJumpBehavior();
 
@@ -215,7 +192,6 @@ public class ItsClobberingTimeAugment : BaseAugment
 
         Debug.Log($"🔨 Applied Clobbering Time to {unit.unitName}: +{bonusAttackDamage} AD (total: {unit.attackDamage}), No Armor, Jump Behavior");
     }
-
 
     private System.Collections.IEnumerator ForceStateRefreshForJump(UnitAI unit)
     {
@@ -319,20 +295,4 @@ public class ItsClobberingTimeAugment : BaseAugment
     {
         return tile != null && reservedTiles.Contains(tile);
     }
-    private void HandleStateChangeForClobbertrons(UnitAI.UnitState newState)
-    {
-        if (newState == UnitAI.UnitState.BoardIdle)
-        {
-            var unit = UnityEngine.EventSystems.EventSystem.current?.currentSelectedGameObject?.GetComponent<UnitAI>();
-            if (unit == null) return;
-
-            var clobTrait = unit.GetComponent<ClobbertronTrait>();
-            if (clobTrait != null && !clobTrait.traitsApplied)
-            {
-                Debug.Log($"⚡ [Clobbering Time] {unit.unitName} placed on board — applying bonuses now!");
-                clobTrait.ApplyTraitBonusesPublic();
-            }
-        }
-    }
-
 }

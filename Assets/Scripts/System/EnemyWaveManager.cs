@@ -32,16 +32,7 @@ public class EnemyWaveManager : MonoBehaviour
     public void SpawnEnemyWave(int stage, int round)
     {
         ClearEnemies();
-        List<HexTile> enemyTiles = BoardManager.Instance.GetEnemyTiles();
-        foreach (var tile in enemyTiles)
-        {
-            if (tile.occupyingUnit != null && tile.occupyingUnit.team == Team.Player)
-            {
-                Debug.LogWarning($"🧹 Found player unit {tile.occupyingUnit.unitName} still on enemy tile {tile.gridPosition} - force-freeing!");
-                tile.occupyingUnit.currentTile = null;  // Clear the unit's reference
-                tile.occupyingUnit = null;  // Clear the tile's reference
-            }
-        }
+
         int baseEnemyCount = 2 + ((stage - 1) * 3) + (round - 1);
         int actualEnemyCount = Mathf.Min(baseEnemyCount, 9);
 

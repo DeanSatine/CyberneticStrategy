@@ -31,13 +31,6 @@ public class ClobbertronJumpBehaviour : MonoBehaviour
         {
             Debug.LogError($"❌ ClobbertronJumpBehaviour on {gameObject.name} has no UnitAI component!");
         }
-        else
-        {
-            // CRITICAL FIX: Subscribe to state change event instead of polling
-            unitAI.OnStateChanged += HandleStateChange;
-            lastKnownState = unitAI.currentState;
-            Debug.Log($"🔨 ClobbertronJumpBehaviour initialized on {unitAI.unitName} with state {lastKnownState}");
-        }
     }
 
     private void Update()
@@ -47,22 +40,34 @@ public class ClobbertronJumpBehaviour : MonoBehaviour
         // FIX 1: Check if Clobbertron trait is active
         if (!IsTraitActive()) return;
 
-        // State change detection now handled by event - remove this block
-        // Update last known state is now in HandleStateChange()
+        // Detect when unit enters combat state for the first time
+        if (lastKnownState != UnitAI.UnitState.Combat && unitAI.currentState == UnitAI.UnitState.Combat)
+        {
+            Debug.Log($"🔨 {unitAI.unitName} detected combat start - preparing to jump");
+            lastKnownState = UnitAI.UnitState.Combat;
+
+            if (!hasCombatStartJumped)
+            {
+                StartCoroutine(DelayedCombatStartJump());
+            }
+        }
+
+        // Update last known state
+        lastKnownState = unitAI.currentState;
 
         // Only check for health-based jumps during combat
         if (unitAI.currentState != UnitAI.UnitState.Combat) return;
 
         float healthPercent = (float)unitAI.currentHealth / unitAI.maxHealth;
 
-        // Check for 50% HP jump first
+        // FIX 2: Check for 50% HP jump first (coordinate with ClobbertronTrait crash)
         if (!hasMidHealthJumped && healthPercent <= 0.5f && healthPercent > lowHealthThreshold)
         {
             Debug.Log($"🔨 {unitAI.unitName} is at {healthPercent:P1} health - executing 50% health jump!");
             hasMidHealthJumped = true;
             JumpToTarget();
         }
-        // Check for 10% HP jump
+        // Check for 10% HP jump (low health threshold)
         else if (!hasLowHealthJumped && healthPercent <= lowHealthThreshold)
         {
             Debug.Log($"🔨 {unitAI.unitName} is at {healthPercent:P1} health - executing low health jump!");
@@ -71,37 +76,12 @@ public class ClobbertronJumpBehaviour : MonoBehaviour
         }
     }
 
-    private void HandleStateChange(UnitAI.UnitState newState)
-    {
-        Debug.Log($"🔨 {unitAI.unitName} state changed: {lastKnownState} → {newState}");
-
-        // Detect transition to Combat state
-        if (lastKnownState != UnitAI.UnitState.Combat && newState == UnitAI.UnitState.Combat)
-        {
-            Debug.Log($"🔨 {unitAI.unitName} detected combat start - preparing to jump");
-
-            if (!hasCombatStartJumped && !isJumping)
-            {
-                StartCoroutine(DelayedCombatStartJump());
-            }
-        }
-
-        lastKnownState = newState;
-    }
-
     // FIX 1: Check if Clobbertron trait is actually active
     private bool IsTraitActive()
     {
         return unitAI.traits.Contains(Trait.Clobbertron);
     }
-    private void OnDestroy()
-    {
-        // Unsubscribe from events
-        if (unitAI != null)
-        {
-            unitAI.OnStateChanged -= HandleStateChange;
-        }
-    }
+
     private IEnumerator DelayedCombatStartJump()
     {
         // Wait a short moment for combat to properly initialize and targets to be assigned

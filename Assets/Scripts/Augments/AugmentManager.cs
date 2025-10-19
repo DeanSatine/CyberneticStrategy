@@ -323,18 +323,6 @@ public class AugmentManager : MonoBehaviour
 
         activeAugments.Add(selectedAugment);
         selectedAugment.ApplyAugment();
-        // After selectedAugment.ApplyAugment();
-        foreach (var unit in GameManager.Instance.GetPlayerUnits())
-        {
-            if (unit != null && unit.currentState != UnitAI.UnitState.Bench)
-            {
-                // Let each active augment re-apply themselves immediately
-                foreach (var aug in activeAugments)
-                {
-                    aug.OnUnitSpawned(unit);
-                }
-            }
-        }
 
         Debug.Log($"🎯 Augment '{selectedAugment.augmentName}' selected and applied! ({activeAugments.Count}/{maxAugments})");
 
@@ -348,15 +336,10 @@ public class AugmentManager : MonoBehaviour
             }
         }
 
-        if (TraitManager.Instance != null && GameManager.Instance != null)
-        {
-            Debug.Log("🔄 Re-evaluating traits after augment selection");
-            TraitManager.Instance.EvaluateTraits(GameManager.Instance.playerUnits);
-            TraitManager.Instance.ApplyTraits(GameManager.Instance.playerUnits);
-        }
-
         HideAugmentSelection();
     }
+
+    // NEW: Get augment ID from instance (reverse lookup)
     private string GetAugmentIdFromInstance(BaseAugment augment)
     {
         if (allConfigurations == null) return null;

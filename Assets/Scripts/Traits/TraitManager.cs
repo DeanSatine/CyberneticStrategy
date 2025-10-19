@@ -41,7 +41,7 @@ public class TraitManager : MonoBehaviour
     }
 
     // ==============================
-    // TRAIT SETTINGS
+    // TRAIT SETTINGS (tweak in Inspector)
     // ==============================
 
     [Header("Eradicators")]
@@ -59,7 +59,6 @@ public class TraitManager : MonoBehaviour
     [Header("Clobbertron")]
     public int clobbertronThreshold = 2;
     public float clobbertronBonusArmor = 10f;
-    public float clobbertronBonusAttackDamage = 10f;
     public float clobbertronBonusDamageAmp = 0.10f;
     public float clobbertronCrashRadius = 2f;
     public float clobbertronCrashDamage = 200f;
@@ -333,10 +332,6 @@ public class TraitManager : MonoBehaviour
                 case Trait.Clobbertron:
                     if (count >= clobbertronThreshold)
                     {
-                        // Check if Clobbering Time augment is active
-                        bool hasClobberingTime = AugmentManager.Instance != null &&
-                                                  AugmentManager.Instance.HasAugment<ItsClobberingTimeAugment>();
-
                         foreach (var unit in playerUnits)
                         {
                             if (unit.currentState == UnitAI.UnitState.Bench) continue;
@@ -344,20 +339,9 @@ public class TraitManager : MonoBehaviour
                             if (unit.traits.Contains(Trait.Clobbertron))
                             {
                                 var ability = unit.GetComponent<ClobbertronTrait>();
-                                if (ability == null)
-                                {
-                                    ability = unit.gameObject.AddComponent<ClobbertronTrait>();
-                                }
+                                if (ability == null) ability = unit.gameObject.AddComponent<ClobbertronTrait>();
 
-                                // CRITICAL FIX: Only apply default values if Clobbering Time is NOT active
-                                if (!hasClobberingTime)
-                                {
-                                    ability.bonusArmor = clobbertronBonusArmor;
-                                    ability.bonusAttackDamage = clobbertronBonusDamageAmp * 100f; // Set default attack bonus
-                                }
-                                // If Clobbering Time IS active, don't overwrite the augment's custom values
-
-                                // Always set crash properties (not affected by augment)
+                                ability.bonusArmor = clobbertronBonusArmor;
                                 ability.crashRadius = clobbertronCrashRadius;
                                 ability.crashDamage = clobbertronCrashDamage;
                             }

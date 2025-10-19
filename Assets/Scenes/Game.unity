@@ -54336,7 +54336,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxAugments: 3
   augmentRounds: 04000000070000000a000000
-  showOnFirstRound: 1
+  showOnFirstRound: 0
   augmentSelectSound: {fileID: 0}
   audioSource: {fileID: 0}
 --- !u!1 &1822649720
