@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 public enum TileType
@@ -15,9 +15,13 @@ public enum TileOwner
 public class HexTile : MonoBehaviour
 {
     public TileType tileType;
-    public TileOwner owner = TileOwner.Neutral; // ✅ new field
-    public UnitAI occupyingUnit; // ✅ Track which unit is on this tile
+    public TileOwner owner = TileOwner.Neutral;
+    public UnitAI occupyingUnit;
     public Vector2Int gridPosition;
+    
+    [Header("Highlight Settings")]
+    public GameObject highlightPrefab;
+    private GameObject activeHighlight;
 
     public bool TryClaim(UnitAI unit)
     {
@@ -32,6 +36,34 @@ public class HexTile : MonoBehaviour
         occupyingUnit = unit;
         unit.currentTile = this;
         return true;
+    }
+    public void HighlightAsValid()
+    {
+        if (highlightPrefab == null) return;
+        
+        if (activeHighlight == null)
+        {
+            activeHighlight = Instantiate(highlightPrefab, transform.position + Vector3.up * 0.72f, Quaternion.Euler(0, 30.541f, 0));
+            activeHighlight.transform.SetParent(transform);
+        }
+        
+        activeHighlight.SetActive(true);
+    }
+
+    public void ClearHighlight()
+    {
+        if (activeHighlight != null)
+        {
+            activeHighlight.SetActive(false);
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (activeHighlight != null)
+        {
+            Destroy(activeHighlight);
+        }
     }
 
 

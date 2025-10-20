@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using static UnitAI;
@@ -10,6 +10,7 @@ public class Draggable : MonoBehaviour
     private UnitAI unitAI;
     public static Draggable currentlyDragging;
     private HexTile originalTile;
+    private List<HexTile> highlightedTiles = new List<HexTile>();
 
     private void Awake()
     {
@@ -56,16 +57,49 @@ public class Draggable : MonoBehaviour
 
                 unitAI.currentTile = null;
             }
+            HighlightValidTiles();
         }
         else
         {
             // Drop the unit
             isDragging = false;
             currentlyDragging = null;
+            ClearTileHighlights();
             SnapToClosestObject();
         }
     }
 
+    private void HighlightValidTiles()
+    {
+        ClearTileHighlights();
+
+        if (BoardManager.Instance == null) return;
+
+        List<HexTile> allTiles = BoardManager.Instance.GetAllTiles();
+
+        foreach (HexTile tile in allTiles)
+        {
+            if (tile == null || tile.occupyingUnit != null) continue;
+
+            if (unitAI.team == Team.Player && CanPlayerPlaceOnTile(tile))
+            {
+                tile.HighlightAsValid();
+                highlightedTiles.Add(tile);
+            }
+        }
+    }
+
+    private void ClearTileHighlights()
+    {
+        foreach (HexTile tile in highlightedTiles)
+        {
+            if (tile != null)
+            {
+                tile.ClearHighlight();
+            }
+        }
+        highlightedTiles.Clear();
+    }
 
     private bool CanInteractWithUnit()
     {
@@ -112,20 +146,12 @@ public class Draggable : MonoBehaviour
     {
         if (isDragging)
         {
-            // ✅ Additional safety check during dragging
             if (!CanInteractWithUnit())
             {
                 Debug.Log("❌ Combat started while dragging! Dropping unit.");
                 isDragging = false;
-                SnapToClosestObject();
-                return;
-            }
-
-            if (!CanInteractWithUnit())
-            {
-                Debug.Log("❌ Combat started while dragging! Dropping unit.");
-                isDragging = false;
-                currentlyDragging = null; // ✅ reset global reference
+                currentlyDragging = null;
+                ClearTileHighlights();
                 SnapToClosestObject();
                 return;
             }

@@ -33,13 +33,14 @@ public class HexRenderer : MonoBehaviour
 
     public Material idleMaterial;
     public Material selectedMaterial;
+    public Material validPlacementMaterial;
 
     public float innerSize;
     public float outerSize;
     public float height;
     public bool isFlatTopped;
     [SerializeField] private bool isSelected = false;
-
+    [SerializeField] private bool isHighlightedAsValid = false;
     private int hexGridLayer;
 
     private void Awake()
@@ -63,7 +64,24 @@ public class HexRenderer : MonoBehaviour
     private void Update()
     {
         DrawMesh();
-        m_renderer.material = isSelected ? selectedMaterial : idleMaterial;
+
+        if (isHighlightedAsValid)
+        {
+            m_renderer.material = validPlacementMaterial;
+        }
+        else if (isSelected)
+        {
+            m_renderer.material = selectedMaterial;
+        }
+        else
+        {
+            m_renderer.material = idleMaterial;
+        }
+    }
+
+    public void SetHighlightedAsValid(bool highlighted)
+    {
+        isHighlightedAsValid = highlighted;
     }
 
     public void DrawMesh()

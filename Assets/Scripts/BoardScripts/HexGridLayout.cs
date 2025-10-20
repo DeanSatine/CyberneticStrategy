@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -17,6 +17,9 @@ public class HexGridLayout : MonoBehaviour
     public Material idlematerial;
     public Material selectedMaterial;
     
+    [Header("Highlight Settings")]
+    public GameObject highlightPrefab;
+
     private void Awake()
     {
         LayoutGrid();
@@ -45,9 +48,9 @@ public class HexGridLayout : MonoBehaviour
                 hexRenderer.DrawMesh();
                 tile.transform.SetParent(transform, true);
 
-                // 👇 Decide role
                 HexTile hexTile = tile.GetComponent<HexTile>();
-                hexTile.gridPosition = new Vector2Int(x, y);   // ✅ assign coords here
+                hexTile.gridPosition = new Vector2Int(x, y);
+                hexTile.highlightPrefab = highlightPrefab;
 
                 // All generated hexes are board tiles
                 hexTile.tileType = TileType.Board;
