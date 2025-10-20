@@ -14,16 +14,16 @@ public static class UnitAbilityDescriptions
                 return GetNeedlebotDescription(unit, ad, star);
 
             case "ManaDrive":
-                return GetManaDriveDescription(unit, star);
+                return GetManaDriveDescription(unit, ad, star);
 
             case "HyperShot":
-                return GetHyperShotDescription(unit, star);
+                return GetHyperShotDescription(unit, ad, star);
 
             case "KillSwitch":
                 return GetKillSwitchDescription(unit, ad, star);
 
             case "Haymaker":
-                return GetHaymakerDescription(unit, star);
+                return GetHaymakerDescription(unit, ad, star);
 
             case "Haymaker Clone":
                 return GetHaymakerCloneDescription(unit);
@@ -45,23 +45,23 @@ public static class UnitAbilityDescriptions
         int bonusNeedles = ability.needlesPerCast - ability.baseNeedleCount;
         string bonusText = bonusNeedles > 0 ? $" (+{bonusNeedles})" : "";
 
-        return $"Active: Rapidly shoot {ability.needlesPerCast}{bonusText} needles split between the nearest 2 enemies within 2 hexes, each dealing {dmg + ad} damage.\n\n" +
+        return $"Active: Rapidly shoot {ability.needlesPerCast}{bonusText} needles split between the nearest 2 enemies within 2 hexes, each dealing {dmg + (ad * 0.6f)} damage.\n\n" +
                $"Every 10 needles shot, increase the needle count by 1 permanently.\n\n" +
                $"Bonus Needle Count: {bonusNeedles}";
     }
 
-    private static string GetManaDriveDescription(UnitAI unit, int star)
+    private static string GetManaDriveDescription(UnitAI unit, float ad, int star)
     {
         var ability = unit.GetComponent<ManaDriveAbility>();
         if (ability == null) return "ManaDrive ability missing.";
 
         float dmg = ability.damagePerStar[Mathf.Clamp(star - 1, 0, ability.damagePerStar.Length - 1)];
 
-        return $"Hurl a massive bomb towards the largest group of enemies, dealing {dmg} damage.\n\n" +
+        return $"Hurl a massive bomb towards the largest group of enemies, dealing {dmg + (ad * 1.5f)} damage.\n\n" +
                $"If the bomb kills a target, ManaDrive gains {ability.attackSpeedGain * 100:F0}% attack speed for the rest of combat and casts again, at {(1f - ability.recursiveDamageReduction) * 100:F0}% effectiveness.";
     }
 
-    private static string GetHyperShotDescription(UnitAI unit, int star)
+    private static string GetHyperShotDescription(UnitAI unit, float ad, int star)
     {
         var ability = unit.GetComponent<HyperShotAbility>();
         if (ability == null) return "HyperShot ability missing.";
@@ -69,7 +69,7 @@ public static class UnitAbilityDescriptions
         int starIndex = Mathf.Clamp(star - 1, 0, ability.aoeDamagePerStar.Length - 1);
         float aoeDamage = ability.aoeDamagePerStar[starIndex];
 
-        return $"Passive: Every {ability.attacksToTrigger} attacks, trigger an explosion dealing {aoeDamage} damage to all enemies in a {ability.aoeRadius} hex radius.\n\n" +
+        return $"Passive: Every {ability.attacksToTrigger} attacks, trigger an explosion dealing {aoeDamage + (ad * 0.75f)} damage to all enemies in a {ability.aoeRadius} hex radius.\n\n" +
                $"Active: Gain +{ability.attackSpeedBonus * 100:F0}% attack speed for {ability.buffDuration} seconds. \n\nThis effect stacks!";
     }
 
@@ -82,10 +82,10 @@ public static class UnitAbilityDescriptions
         float slamDmg = ability.slamDamagePerStar[Mathf.Clamp(star - 1, 0, ability.slamDamagePerStar.Length - 1)];
 
         return $"Passive: Every other attack lowers the target's armour by {ability.armorShred}.\n\n" +
-               $"Active: Leap to the farthest enemy within 4 hexes, heal {ability.healOnTargetSwap} hp and slam them for {slamDmg + ad} damage. Grant KillSwitch 50% attack speed for 4 seconds.";
+               $"Active: Leap to the farthest enemy within 4 hexes, heal {ability.healOnTargetSwap} hp and slam them for {slamDmg + (ad * 0.4f)} damage. Grant KillSwitch 50% attack speed for 4 seconds.";
     }
 
-    private static string GetHaymakerDescription(UnitAI unit, int star)
+    private static string GetHaymakerDescription(UnitAI unit, float ad, int star)
     {
         var ability = unit.GetComponent<HaymakerAbility>();
         if (ability == null) return "Haymaker ability missing.";
@@ -98,8 +98,8 @@ public static class UnitAbilityDescriptions
 
         return $"Passive: Summon a clone of Haymaker with 25% health and damage. The clone does not benefit from traits.\n\n" +
                $"When units on the board die, Haymaker absorbs their soul. The clone gains 1% health and damage for every 5 souls absorbed.\n\n" +
-               $"Active: Dash to the center clump of enemies and unleash a fury of slashes within 3 hexes that each do {slashDmg} damage for 3 seconds. While slashing take {damageReductionPercent}% reduced damage. Then dash back to original position.\n\n" +
-               $"Then, the clone will slam onto the final target, dealing {slamDmg} damage. ";
+               $"Active: Dash to the center clump of enemies and unleash a fury of slashes within 3 hexes that each do {slashDmg + (ad * 1.2f)} damage for 3 seconds. While slashing take {damageReductionPercent}% reduced damage. Then dash back to original position.\n\n" +
+               $"Then, the clone will slam onto the final target, dealing {slamDmg + (ad * 1.2f)} damage. ";
     }
 
     private static string GetHaymakerCloneDescription(UnitAI unit)

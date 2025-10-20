@@ -176,7 +176,7 @@ public class HyperShotAbility : MonoBehaviour, IUnitAbility
     private void TriggerExplosion(Vector3 epicenter)
     {
         int starIndex = Mathf.Clamp(unitAI.starLevel - 1, 0, aoeDamagePerStar.Length - 1);
-        float damage = aoeDamagePerStar[starIndex];
+        float damage = aoeDamagePerStar[starIndex] + (unitAI.attackDamage * 0.75f);
 
         Debug.Log($"💥 {unitAI.unitName} triggers explosion at {epicenter} for {damage} damage!");
 

@@ -163,7 +163,7 @@ public class ManaDriveAbility : MonoBehaviour, IUnitAbility
         // ✅ Play bomb explosion audio
         PlayAbilityAudio(bombExplosionSound, "bomb explosion");
 
-        float damage = damagePerStar[Mathf.Clamp(unitAI.starLevel - 1, 0, damagePerStar.Length - 1)] * damageMultiplier;
+        float damage = (damagePerStar[Mathf.Clamp(unitAI.starLevel - 1, 0, damagePerStar.Length - 1)] + (unitAI.attackDamage * 1.5f)) * damageMultiplier;
         bool killedTarget = false;
 
         Debug.Log($"💥 {unitAI.unitName} bomb explodes at {explosionPos} for {damage} damage!");

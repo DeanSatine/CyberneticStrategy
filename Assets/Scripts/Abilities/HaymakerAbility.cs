@@ -725,7 +725,7 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
         {
             Debug.Log("🌟 3-STAR HAYMAKER: Unleashing massive board-wide slashing waves!");
 
-            float slashDmg = slashDamage[Mathf.Clamp(unitAI.starLevel - 1, 0, slashDamage.Length - 1)];
+            float slashDmg = slashDamage[Mathf.Clamp(unitAI.starLevel - 1, 0, slashDamage.Length - 1)] + (unitAI.attackDamage * 1.2f);
 
             // Much faster slashing animation for 3-star
             if (unitAI.animator)
@@ -860,7 +860,7 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
                     }
 
                     // Apply damage to ALL enemies within 3 hex radius
-                    float slashDmg = slashDamage[Mathf.Clamp(unitAI.starLevel - 1, 0, slashDamage.Length - 1)];
+                    float slashDmg = slashDamage[Mathf.Clamp(unitAI.starLevel - 1, 0, slashDamage.Length - 1)] + (unitAI.attackDamage * 1.2f);
 
                     foreach (UnitAI slashTarget in slashTargets)
                     {

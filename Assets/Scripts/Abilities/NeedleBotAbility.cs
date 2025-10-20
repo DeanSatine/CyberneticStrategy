@@ -96,7 +96,7 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
             yield break;
         }
 
-        float damage = damagePerStar[Mathf.Clamp(unitAI.starLevel - 1, 0, damagePerStar.Length - 1)];
+        float damage = damagePerStar[Mathf.Clamp(unitAI.starLevel - 1, 0, damagePerStar.Length - 1)] + (unitAI.attackDamage * 0.6f);
 
         Debug.Log($"🎯 {unitAI.unitName} firing {needlesPerCast} needles at targets: {string.Join(", ", targets.ConvertAll(t => t.unitName))}");
 
@@ -285,7 +285,7 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
         else
         {
             Debug.LogWarning($"No projectile prefab found for {unitAI.unitName}, applying damage directly");
-            target.TakeDamage(damage + unitAI.attackDamage);
+            target.TakeDamage(damage);
             activeProjectileCount--; // Decrement counter
             yield break;
         }

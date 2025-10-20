@@ -285,7 +285,7 @@ public class KillSwitchAbility : MonoBehaviour, IUnitAbility
             }
 
             float damage = slamDamagePerStar[Mathf.Clamp(unitAI.starLevel - 1, 0, slamDamagePerStar.Length - 1)]
-                           + unitAI.attackDamage;
+                           + (unitAI.attackDamage * 1.4f);
 
             target.TakeDamage(damage);
             Debug.Log($"💥 {unitAI.unitName} dealt {damage} slam damage at impact moment!");
@@ -352,7 +352,7 @@ public class KillSwitchAbility : MonoBehaviour, IUnitAbility
         if (lastTarget != null && lastTarget != target && lastTarget.isAlive)
         {
             // Deal damage to previous target
-            float slamDamage = passiveSlamDamage + unitAI.attackDamage;
+            float slamDamage = passiveSlamDamage + (unitAI.attackDamage * 0.4f);
             lastTarget.TakeDamage(slamDamage);
 
             // Heal KillSwitch
