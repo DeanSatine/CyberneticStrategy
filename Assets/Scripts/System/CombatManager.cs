@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
@@ -225,7 +225,10 @@ public class CombatManager : MonoBehaviour
         {
             RestoreUnitFromSnapshot(snapshot);
         }
-        foreach (var unit in GameManager.Instance.GetPlayerUnits())
+
+        // ✅ FIXED: Iterate over a copy to avoid "Collection was modified" error
+        var playerUnitsCopy = new List<UnitAI>(GameManager.Instance.GetPlayerUnits());
+        foreach (var unit in playerUnitsCopy)
         {
             if (unit != null)
             {
@@ -233,23 +236,16 @@ public class CombatManager : MonoBehaviour
             }
         }
 
-        // ✅ First restore all snapshotted units
-        foreach (var snapshot in preCombatPlayerSnapshots)
-        {
-            RestoreUnitFromSnapshot(snapshot);
-        }
-        // ✅ NEW: Handle units that died during combat but need restoration
+        // ✅ Handle units that died during combat but need restoration
         foreach (var deadUnit in unitsDeadThisCombat)
         {
             if (deadUnit != null)
             {
-                // Find the snapshot for this dead unit
                 var matchingSnapshot = preCombatPlayerSnapshots.FirstOrDefault(s => s.originalUnit == deadUnit);
                 if (matchingSnapshot != null)
                 {
                     Debug.Log($"🔄 Force-restoring late death: {deadUnit.unitName}");
 
-                    // Force restore this unit even if it was hidden
                     deadUnit.gameObject.SetActive(true);
                     deadUnit.isAlive = true;
 
@@ -265,6 +261,7 @@ public class CombatManager : MonoBehaviour
 
         Debug.Log("✅ All player units restored from snapshots!");
     }
+
 
 
     // ✅ NEW: Restore individual unit from snapshot
@@ -633,6 +630,24 @@ public class CombatManager : MonoBehaviour
 
         // ✅ Reset the checking flag
         isCheckingForRoundEnd = false;
+    }
+
+    public void ForceResetCombatState()
+    {
+        Debug.Log("🔄 Force resetting combat state");
+        
+        isCheckingForRoundEnd = false;
+        
+        if (roundEndCheckCoroutine != null)
+        {
+            StopCoroutine(roundEndCheckCoroutine);
+            roundEndCheckCoroutine = null;
+        }
+        
+        UnitAI.OnAnyUnitDeath -= HandleUnitDeath;
+        UnitAI.OnAnyUnitDeath -= TrackCombatDeath;
+        
+        Debug.Log("✅ Combat state force reset complete");
     }
 
 }

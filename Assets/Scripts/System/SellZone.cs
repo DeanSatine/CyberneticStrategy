@@ -197,11 +197,12 @@ public class SellZone : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
         string unitName = unit.unitName.ToLower();
 
-        if (unitName.Contains("haymaker")) return 5;
-        if (unitName.Contains("killswitch")) return 4;
-        if (unitName.Contains("manadrive")) return 3;
-        if (unitName.Contains("needlebot")) return 1;
-        if (unitName.Contains("b.o.p")) return 2;
+        if (unitName.Contains("Haymaker")) return 5;
+        if (unitName.Contains("KillSwitch")) return 4;
+        if (unitName.Contains("ManaDrive")) return 3;
+        if (unitName.Contains("HyperShot")) return 3;
+        if (unitName.Contains("BOP")) return 2;
+        if (unitName.Contains("Needlebot")) return 1;
 
         return unit.starLevel;
     }

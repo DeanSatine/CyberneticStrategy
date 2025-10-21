@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -31,6 +31,15 @@ public class EnemyWaveManager : MonoBehaviour
 
     public void SpawnEnemyWave(int stage, int round)
     {
+        if (StageManager.Instance != null && 
+            StageManager.Instance.currentPhase != StageManager.GamePhase.Prep)
+        {
+            Debug.LogWarning($"⚠️ Attempted to spawn enemy wave during {StageManager.Instance.currentPhase} phase - aborting!");
+            return;
+        }
+        
+        Debug.Log($"🌊 Starting SpawnEnemyWave for Stage {stage} Round {round}");
+        
         ClearEnemies();
         List<HexTile> enemyTiles = BoardManager.Instance.GetEnemyTiles();
         foreach (var tile in enemyTiles)

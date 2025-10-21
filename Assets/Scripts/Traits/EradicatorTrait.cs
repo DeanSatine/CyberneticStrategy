@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class EradicatorTrait : MonoBehaviour
@@ -118,10 +118,7 @@ public class EradicatorTrait : MonoBehaviour
                 Destroy(fx, 2f);
             }
 
-            if (TraitManager.Instance != null)
-            {
-                TraitManager.Instance.PlayEradicatorSlamSound();
-            }
+            // Sound disabled for stuck state recovery
 
             StartCoroutine(CameraShake(cameraShakeIntensity, cameraShakeDuration));
 

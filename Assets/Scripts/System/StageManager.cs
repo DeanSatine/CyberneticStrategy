@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class StageManager : MonoBehaviour
@@ -103,18 +103,21 @@ public class StageManager : MonoBehaviour
 
     private void ResetToPrepPhase()
     {
-        // ✅ Reset Eradicator statics first
+        Debug.Log("🔄 Starting ResetToPrepPhase");
+        
+        CombatManager.Instance.ForceResetCombatState();
+        
+        currentPhase = GamePhase.Prep;
+        Debug.Log("✅ Phase set to Prep");
+        
         EradicatorTrait.ResetAllEradicators();
 
-        // ✅ Clear all leftover projectiles
         CombatManager.Instance.ClearProjectiles();
 
-        // ✅ NEW: Restore player units from pre-combat snapshots (TFT-style)
         CombatManager.Instance.RestorePlayerUnitsFromSnapshots();
-        // Call this when a round ends or starts
+        
         HaymakerAbility.CleanupAllDuplicateClones();
 
-        // ✅ OLD METHOD: Keep as fallback for any units not in snapshots
         foreach (var kvp in CombatManager.Instance.GetSavedPlayerPositions())
         {
             UnitAI unit = kvp.Key;
@@ -126,22 +129,23 @@ public class StageManager : MonoBehaviour
                 unit.AssignToTile(tile);
             }
         }
+        
         if (AugmentManager.Instance != null)
         {
             AugmentManager.Instance.OnCombatEnd();
         }
-        // ✅ Reapply traits after all units are reset
+        
         TraitManager.Instance.EvaluateTraits(GameManager.Instance.playerUnits);
         TraitManager.Instance.ApplyTraits(GameManager.Instance.playerUnits);
 
-        // ✅ Reset shop for new round
         ShopManager.Instance.GenerateShop();
         Debug.Log("🛒 Shop reset for new round!");
 
         EnemyWaveManager.Instance.SpawnEnemyWave(currentStage, roundInStage);
+        
         UIManager.Instance.ShowFightButton(true);
-
-        currentPhase = GamePhase.Prep;
+        
+        Debug.Log("✅ ResetToPrepPhase complete");
     }
 
     private void CheckForAugmentSelection()
