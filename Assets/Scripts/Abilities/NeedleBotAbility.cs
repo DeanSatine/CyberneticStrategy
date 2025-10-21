@@ -147,7 +147,7 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
                     unitAI.firePoint.position :
                     transform.position + Vector3.up * 1.5f;
 
-                if (vfxManager != null && vfxManager.vfxConfig.autoAttackMuzzleFlash != null)
+                if (vfxManager != null && vfxManager.vfxConfig != null && vfxManager.vfxConfig.autoAttackMuzzleFlash != null)
                 {
                     GameObject muzzleFlash = Instantiate(vfxManager.vfxConfig.autoAttackMuzzleFlash, spawnPos, Quaternion.identity);
                     Destroy(muzzleFlash, 0.5f);
@@ -368,7 +368,7 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
             {
                 target.TakeDamage(damage + unitAI.attackDamage);
 
-                if (vfxManager != null && vfxManager.vfxConfig.autoAttackHitEffect != null)
+                if (vfxManager != null && vfxManager.vfxConfig != null && vfxManager.vfxConfig.autoAttackHitEffect != null)
                 {
                     GameObject hitEffect = Instantiate(vfxManager.vfxConfig.autoAttackHitEffect, targetPos, Quaternion.identity);
                     Destroy(hitEffect, 1f);
