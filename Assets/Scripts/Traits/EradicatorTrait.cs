@@ -8,7 +8,7 @@ public class EradicatorTrait : MonoBehaviour
 
     // ✅ Simplified press management - Direct execution only!
     private static GameObject pressInstance;
-    private static Vector3 pressIdlePosition = new Vector3(0, 5f, -12f);
+    private static Vector3 pressIdlePosition = new Vector3(0, 5f, -12.87f);
     private static bool isPressing;
     private static bool isSlammingDown;
     private static bool isCommittedToExecution; // ✅ Once true, NO BACKING DOWN!
