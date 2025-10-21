@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class ClobbertronTrait : MonoBehaviour
@@ -138,7 +138,7 @@ public class ClobbertronTrait : MonoBehaviour
             GameObject fx = Instantiate(slamEffectPrefab, startPos, Quaternion.identity);
             Destroy(fx, 2f);
         }
-        StartCoroutine(CameraShake(cameraShakeIntensity, cameraShakeDuration));
+        CameraShakeManager.Instance.Shake(cameraShakeIntensity, cameraShakeDuration);
 
         // Do AoE crash damage
         Collider[] hits = Physics.OverlapSphere(startPos, crashRadius);
@@ -158,23 +158,6 @@ public class ClobbertronTrait : MonoBehaviour
         isCrashing = false;
     }
 
-    private IEnumerator CameraShake(float intensity, float duration)
-    {
-        if (Camera.main == null) yield break;
-
-        Vector3 originalPos = Camera.main.transform.position;
-        float elapsed = 0f;
-
-        while (elapsed < duration)
-        {
-            elapsed += Time.deltaTime;
-            Vector3 offset = Random.insideUnitSphere * intensity;
-            Camera.main.transform.position = originalPos + offset;
-            yield return null;
-        }
-
-        Camera.main.transform.position = originalPos;
-    }
 
     public void ApplyTraitBonusesPublic()
     {

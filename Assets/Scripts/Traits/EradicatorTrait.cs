@@ -120,7 +120,7 @@ public class EradicatorTrait : MonoBehaviour
 
             // Sound disabled for stuck state recovery
 
-            StartCoroutine(CameraShake(cameraShakeIntensity, cameraShakeDuration));
+            CameraShakeManager.Instance.Shake(cameraShakeIntensity, cameraShakeDuration);
 
             // Find and damage any units in slam area
             Collider[] hits = Physics.OverlapSphere(lockedSlamPosition, 2f);
@@ -237,7 +237,7 @@ public class EradicatorTrait : MonoBehaviour
         }
 
         // ALWAYS trigger camera shake
-        StartCoroutine(CameraShake(cameraShakeIntensity, cameraShakeDuration));
+        CameraShakeManager.Instance.Shake(cameraShakeIntensity, cameraShakeDuration);
 
         // ✅ Try to damage original target if still in range
         if (target != null && target.isAlive)
@@ -352,23 +352,6 @@ public class EradicatorTrait : MonoBehaviour
             pressInstance.transform.position = dest;
     }
 
-    private IEnumerator CameraShake(float intensity, float duration)
-    {
-        if (Camera.main == null) yield break;
-
-        Vector3 originalPos = Camera.main.transform.position;
-        float elapsed = 0f;
-
-        while (elapsed < duration)
-        {
-            elapsed += Time.deltaTime;
-            Vector3 offset = Random.insideUnitSphere * intensity;
-            Camera.main.transform.position = originalPos + offset;
-            yield return null;
-        }
-
-        Camera.main.transform.position = originalPos;
-    }
 
     public static void ResetAllEradicators()
     {
