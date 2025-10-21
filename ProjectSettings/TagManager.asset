@@ -9,6 +9,7 @@ TagManager:
   - BoardTile
   - BenchTile
   - Projectile
+  - HydraulicPress
   layers:
   - Default
   - TransparentFX

@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -38,12 +38,9 @@ public class UnitAI : MonoBehaviour
     public event System.Action<UnitAI> OnAttackEvent;
 
     [Header("Combat VFX")]
-    public GameObject projectilePrefab; // assign for ranged units
-    public Transform firePoint;         // optional: empty child object for projectile spawn
+    public GameObject projectilePrefab;
+    public Transform firePoint;
     public float projectileSpeed = 15f;
-
-    [Header("Portrait & Ability")]
-    public Sprite portraitSprite; // assign in Inspector
 
     [Header("UI")]
     public GameObject unitUIPrefab;

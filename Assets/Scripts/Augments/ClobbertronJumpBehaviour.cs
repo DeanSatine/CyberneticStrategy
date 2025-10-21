@@ -292,11 +292,17 @@ public class ClobbertronJumpBehaviour : MonoBehaviour
             }
             reservedLandingTile = landingTile;
         }
+
         Vector3 startPos = transform.position;
+        float groundHeight = startPos.y;
+        
         Vector3 endPos = targetPosition;
+        endPos.y = groundHeight;
+        
         Vector3 jumpPeakPos = Vector3.Lerp(startPos, endPos, 0.5f) + Vector3.up * jumpHeight;
 
-        // CLEAR MOVEMENT STATE BEFORE JUMPING
+        Debug.Log($"🔨 Jump heights - Start Y: {startPos.y}, End Y: {endPos.y}, Peak Y: {jumpPeakPos.y}");
+
         ClearMovementState();
 
         // Update tile occupancy before jumping
@@ -359,19 +365,19 @@ public class ClobbertronJumpBehaviour : MonoBehaviour
         }
 
         transform.position = endPos;
+        
+        Debug.Log($"🔨 {unitAI.unitName} final landing Y position: {transform.position.y} (expected: {endPos.y})");
 
-        // FIX: COMPREHENSIVE LANDING STATE RESET
         ResetMovementStateAfterLanding(endPos);
 
         // Play landing VFX at FEET (ground level)
         if (jumpVFXPrefab != null)
         {
             Vector3 feetPosition = endPos;
-            feetPosition.y = 0.8f;
+            feetPosition.y = endPos.y + 0.1f;
             
             GameObject landVFX = Instantiate(jumpVFXPrefab, feetPosition, Quaternion.identity);
 
-            // Make landing VFX use augment color
             ParticleSystem particles = landVFX.GetComponent<ParticleSystem>();
             if (particles != null)
             {
@@ -424,14 +430,18 @@ public class ClobbertronJumpBehaviour : MonoBehaviour
     // NEW: Comprehensive state reset after landing
     private void ResetMovementStateAfterLanding(Vector3 landingPosition)
     {
-        // Update tile occupancy after landing
         HexTile landingTile = GetNearestBoardTile(landingPosition);
         if (landingTile != null && landingTile.TryClaim(unitAI))
         {
             Debug.Log($"🔨 {unitAI.unitName} successfully claimed landing tile");
         }
 
-        // FORCE RESET MOVEMENT STATE - Wait one frame then reset
+        Vector3 correctedPosition = transform.position;
+        correctedPosition.y = landingPosition.y;
+        transform.position = correctedPosition;
+        
+        Debug.Log($"🔨 {unitAI.unitName} position corrected to Y: {correctedPosition.y}");
+
         StartCoroutine(DelayedMovementReset());
     }
     private System.Collections.IEnumerator DelayedMovementReset()

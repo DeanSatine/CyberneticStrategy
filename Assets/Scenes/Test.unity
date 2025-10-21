@@ -2005,7 +2005,8 @@ MonoBehaviour:
   owner: 0
   occupyingUnit: {fileID: 0}
   gridPosition: {x: 0, y: 0}
-  highlightPrefab: {fileID: 0}
+  highlightPrefab: {fileID: 870665762132505868, guid: 14936caed66bde74ba179abd59db473b,
+    type: 3}
 --- !u!1 &40543149
 GameObject:
   m_ObjectHideFlags: 0
@@ -8756,7 +8757,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxAugments: 3
   augmentRounds: 04000000070000000a000000
-  showOnFirstRound: 0
+  showOnFirstRound: 1
   augmentSelectSound: {fileID: 0}
   audioSource: {fileID: 0}
 --- !u!1 &159670006
@@ -14799,7 +14800,8 @@ MonoBehaviour:
   owner: 0
   occupyingUnit: {fileID: 0}
   gridPosition: {x: 0, y: 0}
-  highlightPrefab: {fileID: 0}
+  highlightPrefab: {fileID: 870665762132505868, guid: 14936caed66bde74ba179abd59db473b,
+    type: 3}
 --- !u!1 &270219346
 GameObject:
   m_ObjectHideFlags: 0
@@ -18166,7 +18168,6 @@ GameObject:
   - component: {fileID: 330585545}
   - component: {fileID: 330585544}
   - component: {fileID: 330585547}
-  - component: {fileID: 330585548}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -18292,24 +18293,6 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
---- !u!114 &330585548
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 330585543}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7987029fbe1497c4fb42c7e8634ced18, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  zoomSpeed: 2
-  minZoom: 3
-  maxZoom: 10
-  zoomSmoothTime: 0.2
-  moveSpeed: 5
-  returnSmoothTime: 1
 --- !u!1 &331389692
 GameObject:
   m_ObjectHideFlags: 0
@@ -45321,7 +45304,8 @@ MonoBehaviour:
   owner: 0
   occupyingUnit: {fileID: 0}
   gridPosition: {x: 0, y: 0}
-  highlightPrefab: {fileID: 0}
+  highlightPrefab: {fileID: 870665762132505868, guid: 14936caed66bde74ba179abd59db473b,
+    type: 3}
 --- !u!1 &833589474
 GameObject:
   m_ObjectHideFlags: 0
@@ -49407,7 +49391,8 @@ MonoBehaviour:
   owner: 0
   occupyingUnit: {fileID: 0}
   gridPosition: {x: 0, y: 0}
-  highlightPrefab: {fileID: 0}
+  highlightPrefab: {fileID: 870665762132505868, guid: 14936caed66bde74ba179abd59db473b,
+    type: 3}
 --- !u!1 &915196874
 GameObject:
   m_ObjectHideFlags: 0
@@ -51971,7 +51956,8 @@ MonoBehaviour:
   owner: 0
   occupyingUnit: {fileID: 0}
   gridPosition: {x: 0, y: 0}
-  highlightPrefab: {fileID: 0}
+  highlightPrefab: {fileID: 870665762132505868, guid: 14936caed66bde74ba179abd59db473b,
+    type: 3}
 --- !u!1 &978892978
 GameObject:
   m_ObjectHideFlags: 0
@@ -60262,7 +60248,8 @@ MonoBehaviour:
   owner: 0
   occupyingUnit: {fileID: 0}
   gridPosition: {x: 0, y: 0}
-  highlightPrefab: {fileID: 0}
+  highlightPrefab: {fileID: 870665762132505868, guid: 14936caed66bde74ba179abd59db473b,
+    type: 3}
 --- !u!1 &1145285893
 GameObject:
   m_ObjectHideFlags: 0
@@ -74478,7 +74465,8 @@ MonoBehaviour:
   owner: 0
   occupyingUnit: {fileID: 0}
   gridPosition: {x: 0, y: 0}
-  highlightPrefab: {fileID: 0}
+  highlightPrefab: {fileID: 870665762132505868, guid: 14936caed66bde74ba179abd59db473b,
+    type: 3}
 --- !u!1 &1464028171
 GameObject:
   m_ObjectHideFlags: 0
@@ -97207,7 +97195,8 @@ MonoBehaviour:
   owner: 0
   occupyingUnit: {fileID: 0}
   gridPosition: {x: 0, y: 0}
-  highlightPrefab: {fileID: 0}
+  highlightPrefab: {fileID: 870665762132505868, guid: 14936caed66bde74ba179abd59db473b,
+    type: 3}
 --- !u!1 &1900273538
 GameObject:
   m_ObjectHideFlags: 0
@@ -102098,7 +102087,8 @@ MonoBehaviour:
   owner: 0
   occupyingUnit: {fileID: 0}
   gridPosition: {x: 0, y: 0}
-  highlightPrefab: {fileID: 0}
+  highlightPrefab: {fileID: 870665762132505868, guid: 14936caed66bde74ba179abd59db473b,
+    type: 3}
 --- !u!1 &2001475846
 GameObject:
   m_ObjectHideFlags: 0

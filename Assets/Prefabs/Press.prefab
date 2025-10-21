@@ -212,6 +212,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Press
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: ae210a14b459c0a419cf03e62f8129f5,
+        type: 3}
+      propertyPath: m_TagString
+      value: HydraulicPress
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:

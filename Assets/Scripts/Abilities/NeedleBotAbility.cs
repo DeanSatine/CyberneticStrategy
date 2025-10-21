@@ -7,6 +7,8 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
 {
     private UnitAI unitAI;
     private CyberneticVFX vfxManager;
+    private Coroutine castRoutine;
+    private readonly List<Coroutine> projectileCoroutines = new();
 
     [Header("Ability Stats")]
     public int baseNeedleCount = 3;
@@ -62,29 +64,20 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
 
     public void Cast(UnitAI target)
     {
-        if (!unitAI.isAlive) return;
-        
-        if (isCastingAbility)
-        {
-            Debug.LogWarning($"⚠️ {unitAI.unitName} tried to cast while already casting - forcing reset!");
-            StopAllCoroutines();
-            EndCast();
-            return;
-        }
+        if (!unitAI.isAlive || isCastingAbility) return;
 
         isCastingAbility = true;
-        unitAI.canAttack = false;
-        unitAI.canMove = false;
+        unitAI.canAttack = unitAI.canMove = false;
 
-        if (unitAI.animator != null)
-            unitAI.animator.SetTrigger("AbilityTrigger");
+        if (unitAI.animator) unitAI.animator.SetTrigger("AbilityTrigger");
         if (target != null && target.currentState == UnitAI.UnitState.Bench)
         {
             EndCast();
             return;
         }
 
-        StartCoroutine(FireNeedlesRoutine());
+        // store reference so we can stop it safely
+        castRoutine = StartCoroutine(FireNeedlesRoutine());
     }
     public void OnRoundEnd()
     {
@@ -103,6 +96,9 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
     }
     private IEnumerator FireNeedlesRoutine()
     {
+        if (!isCastingAbility || unitAI == null || !unitAI.isAlive)
+            yield break;
+
         yield return new WaitForSeconds(startDelay);
 
         CalculateNeedleCount();
@@ -158,7 +154,8 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
                 }
 
                 activeProjectileCount++;
-                StartCoroutine(FireNeedleProjectile(spawnPos, target, damage));
+                Coroutine proj = StartCoroutine(FireNeedleProjectile(spawnPos, target, damage));
+                projectileCoroutines.Add(proj);
 
                 totalNeedlesThrown++;
 
@@ -310,18 +307,31 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
     {
         if (target == null)
         {
-            activeProjectileCount--; // Decrement counter
+            activeProjectileCount--;
             yield break;
         }
 
         GameObject projectilePrefab = null;
         
-        if (vfxManager != null && vfxManager.vfxConfig.abilityProjectile != null)
+        Debug.Log($"🔍 Checking projectile sources for {unitAI.unitName}:");
+        Debug.Log($"   - vfxManager: {(vfxManager != null ? "✅ Found" : "❌ NULL")}");
+        if (vfxManager != null)
+        {
+            Debug.Log($"   - vfxManager.vfxConfig: {(vfxManager.vfxConfig != null ? "✅ Found" : "❌ NULL")}");
+            if (vfxManager.vfxConfig != null)
+            {
+                Debug.Log($"   - vfxConfig.abilityProjectile: {(vfxManager.vfxConfig.abilityProjectile != null ? vfxManager.vfxConfig.abilityProjectile.name : "❌ NULL")}");
+                Debug.Log($"   - vfxConfig.autoAttackProjectile: {(vfxManager.vfxConfig.autoAttackProjectile != null ? vfxManager.vfxConfig.autoAttackProjectile.name : "❌ NULL")}");
+            }
+        }
+        Debug.Log($"   - unitAI.projectilePrefab: {(unitAI.projectilePrefab != null ? unitAI.projectilePrefab.name : "❌ NULL")}");
+        
+        if (vfxManager != null && vfxManager.vfxConfig != null && vfxManager.vfxConfig.abilityProjectile != null)
         {
             projectilePrefab = vfxManager.vfxConfig.abilityProjectile;
             Debug.Log($"🎯 Using abilityProjectile: {projectilePrefab.name}");
         }
-        else if (vfxManager != null && vfxManager.vfxConfig.autoAttackProjectile != null)
+        else if (vfxManager != null && vfxManager.vfxConfig != null && vfxManager.vfxConfig.autoAttackProjectile != null)
         {
             projectilePrefab = vfxManager.vfxConfig.autoAttackProjectile;
             Debug.Log($"🎯 Fallback to autoAttackProjectile: {projectilePrefab.name}");
@@ -329,12 +339,16 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
         else if (unitAI.projectilePrefab != null)
         {
             projectilePrefab = unitAI.projectilePrefab;
-            Debug.Log($"🎯 Fallback to unitAI.projectilePrefab: {projectilePrefab.name}");
+            Debug.Log($"⚠️ {unitAI.unitName} missing VFX config projectile - using unitAI.projectilePrefab: {projectilePrefab.name}");
         }
         else
         {
-            Debug.LogWarning($"⚠️ No projectile prefab found for {unitAI.unitName}, applying damage directly");
-            target.TakeDamage(damage);
+            Debug.LogWarning($"⚠️ No projectile prefab found for {unitAI.unitName}, applying damage directly without visuals");
+            if (target != null && target.isAlive)
+            {
+                target.TakeDamage(damage);
+                Debug.Log($"🎯 {unitAI.unitName} applied {damage} damage directly to {target.unitName} (no projectile visual)");
+            }
             activeProjectileCount--;
             yield break;
         }
@@ -375,14 +389,36 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
 
     private void EndCast()
     {
+        // ✅ Prevent multiple calls
+        if (!isCastingAbility) return;
+
+        // ✅ Stop all our local coroutines safely
+        if (castRoutine != null)
+        {
+            StopCoroutine(castRoutine);
+            castRoutine = null;
+        }
+
+        foreach (var proj in projectileCoroutines)
+        {
+            if (proj != null)
+                StopCoroutine(proj);
+        }
+        projectileCoroutines.Clear();
+
+        // ✅ Reset state
         isCastingAbility = false;
         activeProjectileCount = 0;
+
+        // Reset mana and UI
         unitAI.currentMana = 0f;
         if (unitAI.unitUIPrefab != null)
             unitAI.GetComponentInChildren<UnitUI>()?.UpdateMana(unitAI.currentMana);
 
+        // ✅ Re-enable unit behavior
         unitAI.canAttack = true;
         unitAI.canMove = true;
+        unitAI.isCastingAbility = false;  // ensure UnitAI syncs with our flag
 
         Debug.Log($"🎯 {unitAI.unitName} ability cast complete! Ready to attack again.");
     }

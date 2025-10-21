@@ -1,4 +1,4 @@
-﻿// Complete /Assets/Scripts/Augments/EradicateTheWeakAugment.cs
+// Complete /Assets/Scripts/Augments/EradicateTheWeakAugment.cs
 using UnityEngine;
 using System.Linq;
 using System.Collections;
@@ -186,13 +186,12 @@ public class EradicateTheWeakAugment : BaseAugment
         }
         else
         {
-            // Fallback to Resources
-            manaDrivePrefab = Resources.Load<GameObject>("Prefabs/ManaDrive");
+            manaDrivePrefab = Resources.Load<GameObject>("ManaDrive");
         }
 
         if (manaDrivePrefab == null)
         {
-            Debug.LogWarning("⚠️ ManaDrive prefab not found in configuration or Resources/Prefabs/ManaDrive");
+            Debug.LogWarning("⚠️ ManaDrive prefab not found in configuration or Resources/ManaDrive");
             return;
         }
 

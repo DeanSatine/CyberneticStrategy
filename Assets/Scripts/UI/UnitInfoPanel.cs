@@ -32,7 +32,6 @@ public class UnitInfoPanelUI : MonoBehaviour
         currentUnit = unit;
         gameObject.SetActive(true);
 
-        if (portraitImage) portraitImage.sprite = unit.portraitSprite;
         if (abilityTooltipText != null) abilityTooltipText.text = unit.GetAbilityDescription();
 
         RefreshDynamic();
