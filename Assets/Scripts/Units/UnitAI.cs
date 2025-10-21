@@ -1209,13 +1209,13 @@ public class UnitAI : MonoBehaviour
             switch (unitName)
             {
                 case "Needlebot":
-                    desiredWorldScale = new Vector3(1.25f, 1.25f, 1.25f);
+                    desiredWorldScale = new Vector3(1f, 1f, 1f);
                     break;
                 case "Bop":
                     desiredWorldScale = new Vector3(1.25f, 1.25f, 1.25f);
                     break;
                 case "ManaDrive":
-                    desiredWorldScale = new Vector3(1.30f, 1.30f, 1.30f);
+                    desiredWorldScale = new Vector3(1f, 1f, 1f);
                     break;
                 case "KillSwitch":
                     desiredWorldScale = new Vector3(1.3f, 1.3f, 1.3f);

@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using static UnitAI;
@@ -62,7 +62,15 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
 
     public void Cast(UnitAI target)
     {
-        if (!unitAI.isAlive || isCastingAbility) return;
+        if (!unitAI.isAlive) return;
+        
+        if (isCastingAbility)
+        {
+            Debug.LogWarning($"⚠️ {unitAI.unitName} tried to cast while already casting - forcing reset!");
+            StopAllCoroutines();
+            EndCast();
+            return;
+        }
 
         isCastingAbility = true;
         unitAI.canAttack = false;
@@ -80,6 +88,18 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
     }
     public void OnRoundEnd()
     {
+    }
+
+    private void OnDisable()
+    {
+        StopAllCoroutines();
+        isCastingAbility = false;
+        activeProjectileCount = 0;
+        if (unitAI != null)
+        {
+            unitAI.canAttack = true;
+            unitAI.canMove = true;
+        }
     }
     private IEnumerator FireNeedlesRoutine()
     {
@@ -103,9 +123,24 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
         // ✅ Reset projectile counter
         activeProjectileCount = 0;
 
-        // Fire all needles
         for (int needleIndex = 0; needleIndex < needlesPerCast; needleIndex++)
         {
+            targets.RemoveAll(t => t == null || !t.isAlive || t.currentState == UnitState.Bench);
+
+            if (targets.Count == 0)
+            {
+                Debug.Log($"🎯 {unitAI.unitName} retargeting - all targets died!");
+                targets = FindHexBasedTargets();
+                
+                if (targets.Count == 0)
+                {
+                    Debug.Log($"🎯 {unitAI.unitName} no valid retarget found, ending ability early.");
+                    break;
+                }
+                
+                Debug.Log($"🎯 {unitAI.unitName} retargeted to: {string.Join(", ", targets.ConvertAll(t => t.unitName))}");
+            }
+
             UnitAI target = targets[needleIndex % targets.Count];
 
             if (target != null && target.isAlive && target.currentState != UnitState.Bench)
@@ -116,14 +151,12 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
                     unitAI.firePoint.position :
                     transform.position + Vector3.up * 1.5f;
 
-                // Muzzle flash
                 if (vfxManager != null && vfxManager.vfxConfig.autoAttackMuzzleFlash != null)
                 {
                     GameObject muzzleFlash = Instantiate(vfxManager.vfxConfig.autoAttackMuzzleFlash, spawnPos, Quaternion.identity);
                     Destroy(muzzleFlash, 0.5f);
                 }
 
-                // ✅ NEW: Track each projectile
                 activeProjectileCount++;
                 StartCoroutine(FireNeedleProjectile(spawnPos, target, damage));
 
@@ -142,18 +175,27 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
         StartCoroutine(WaitForAllProjectilesToComplete());
     }
 
-    // ✅ NEW: Wait until all projectiles have hit before allowing attacks
     private IEnumerator WaitForAllProjectilesToComplete()
     {
         Debug.Log($"🎯 Waiting for {activeProjectileCount} projectiles to complete...");
+        
+        float timeout = 5f;
+        float elapsed = 0f;
 
-        while (activeProjectileCount > 0)
+        while (activeProjectileCount > 0 && elapsed < timeout)
         {
-            yield return new WaitForSeconds(0.1f); // Check every 0.1 seconds
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+        
+        if (activeProjectileCount > 0)
+        {
+            Debug.LogWarning($"⚠️ TIMEOUT! {activeProjectileCount} projectiles stuck, forcing ability end");
+            activeProjectileCount = 0;
         }
 
         Debug.Log($"🎯 All projectiles completed! Ending cast.");
-        yield return new WaitForSeconds(0.2f); // Small buffer
+        yield return new WaitForSeconds(0.2f);
         EndCast();
     }
 
@@ -273,20 +315,27 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
         }
 
         GameObject projectilePrefab = null;
-
-        if (vfxManager != null && vfxManager.vfxConfig.autoAttackProjectile != null)
+        
+        if (vfxManager != null && vfxManager.vfxConfig.abilityProjectile != null)
+        {
+            projectilePrefab = vfxManager.vfxConfig.abilityProjectile;
+            Debug.Log($"🎯 Using abilityProjectile: {projectilePrefab.name}");
+        }
+        else if (vfxManager != null && vfxManager.vfxConfig.autoAttackProjectile != null)
         {
             projectilePrefab = vfxManager.vfxConfig.autoAttackProjectile;
+            Debug.Log($"🎯 Fallback to autoAttackProjectile: {projectilePrefab.name}");
         }
         else if (unitAI.projectilePrefab != null)
         {
             projectilePrefab = unitAI.projectilePrefab;
+            Debug.Log($"🎯 Fallback to unitAI.projectilePrefab: {projectilePrefab.name}");
         }
         else
         {
-            Debug.LogWarning($"No projectile prefab found for {unitAI.unitName}, applying damage directly");
+            Debug.LogWarning($"⚠️ No projectile prefab found for {unitAI.unitName}, applying damage directly");
             target.TakeDamage(damage);
-            activeProjectileCount--; // Decrement counter
+            activeProjectileCount--;
             yield break;
         }
 
@@ -324,10 +373,10 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
         activeProjectileCount--; // ✅ Decrement when projectile destroyed/missed
     }
 
-    // ✅ UPDATED: Only end cast when all projectiles complete
     private void EndCast()
     {
         isCastingAbility = false;
+        activeProjectileCount = 0;
         unitAI.currentMana = 0f;
         if (unitAI.unitUIPrefab != null)
             unitAI.GetComponentInChildren<UnitUI>()?.UpdateMana(unitAI.currentMana);

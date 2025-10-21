@@ -566,7 +566,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c888a8dfa38ace347b3fe4c991254d6b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  originalUnitName: 
+  originalUnitName: Haymaker
   canBeSold: 0
   showInUI: 1
   masterHaymaker: {fileID: 0}
