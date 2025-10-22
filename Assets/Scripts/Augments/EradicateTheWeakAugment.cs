@@ -9,7 +9,6 @@ public class EradicateTheWeakAugment : BaseAugment
 {
     private UnitAI linkedUnit;
     private GameObject linkVFX;
-    private LineRenderer linkLine;
 
     [Header("Augment Stats")]
     public float bonusAttackDamage = 10f;
@@ -340,7 +339,6 @@ public class EradicateTheWeakAugment : BaseAugment
         buffsApplied = false;
 
         linkedUnit = targetUnit;
-        CreateVisualLink();
         CreateLinkedUnitVFX();
         ApplyLinkedUnitBuffs();
 
@@ -389,38 +387,7 @@ public class EradicateTheWeakAugment : BaseAugment
         return result;
     }
 
-    private void CreateVisualLink()
-    {
-        if (linkedUnit == null) return;
-
-        // Clean up existing link
-        if (linkLine != null)
-        {
-            Object.Destroy(linkLine.gameObject);
-        }
-
-        // Create link line renderer
-        GameObject linkObject = new GameObject("EradicatorLink");
-        linkLine = linkObject.AddComponent<LineRenderer>();
-        linkLine.material = new Material(Shader.Find("Sprites/Default"));
-
-        // Fix LineRenderer color access
-        if (linkLine.material != null)
-        {
-            linkLine.material.color = augmentColor;
-        }
-
-        linkLine.startWidth = 0.1f;
-        linkLine.endWidth = 0.1f;
-        linkLine.positionCount = 2;
-
-        // Start coroutine to update link position
-        if (AugmentManager.Instance != null)
-        {
-            AugmentManager.Instance.StartCoroutine(UpdateLinkPosition());
-        }
-    }
-
+    
     private void CreateLinkedUnitVFX()
     {
         if (linkedUnit == null) return;
@@ -511,29 +478,7 @@ public class EradicateTheWeakAugment : BaseAugment
             yield return null;
         }
     }
-
-    private IEnumerator UpdateLinkPosition()
-    {
-        while (linkedUnit != null && linkLine != null)
-        {
-            Vector3 pressPosition = new Vector3(0, 5f, -12f); // Default hydraulic press position
-            GameObject press = GameObject.FindWithTag("HydraulicPress");
-            if (press == null)
-            {
-                press = GameObject.Find("HydraulicPress") ?? GameObject.Find("Hydraulic Press");
-            }
-
-            if (press != null)
-            {
-                pressPosition = press.transform.position;
-            }
-
-            linkLine.SetPosition(0, linkedUnit.transform.position + Vector3.up * 2f);
-            linkLine.SetPosition(1, pressPosition + Vector3.up * 1f);
-
-            yield return null;
-        }
-    }
+    
     private void ApplyLinkedUnitBuffs()
     {
         if (linkedUnit == null) return;
@@ -778,12 +723,6 @@ public class EradicateTheWeakAugment : BaseAugment
 
         // Remove from active instances
         activeInstances.Remove(this);
-
-        // Clean up visual link
-        if (linkLine != null)
-        {
-            Object.Destroy(linkLine.gameObject);
-        }
 
         // Clean up VFX
         if (linkedUnitVFX != null)
