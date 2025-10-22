@@ -145,6 +145,22 @@ PrefabInstance:
       propertyPath: m_Name
       value: Cobaltine
       objectReference: {fileID: 0}
+    - target: {fileID: 5866666021909216657, guid: 2e919a5c60706684498f988842e847a4,
+        type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: d0657e4cc29bba749b4b10809fd69a7a, type: 2}
+    - target: {fileID: 5866666021909216657, guid: 2e919a5c60706684498f988842e847a4,
+        type: 3}
+      propertyPath: m_WarningMessage
+      value: "\nBinding warning: Some generic clip(s) animate transforms that are
+        already bound by a Humanoid avatar. These transforms can only be changed
+        by Humanoid clips.\n\tTransform 'mixamorig:Hips'\n\tTransform 'mixamorig:LeftFoot'\n\tTransform
+        'mixamorig:RightHandRing2'\n\tTransform 'mixamorig:Spine1'\n\tTransform 'mixamorig:LeftToeBase'\n\tTransform
+        'mixamorig:RightArm'\n\tTransform 'mixamorig:LeftLeg'\n\tTransform 'mixamorig:LeftShoulder'\n\tTransform
+        'mixamorig:RightHandRing1'\n\tTransform 'mixamorig:RightHandIndex3'\n\tand
+        more ...\n\tFrom animation clip 'CobaltineAA2'"
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -165,6 +181,22 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: -8105998211757595911}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 2e919a5c60706684498f988842e847a4,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -1696118659097453097}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 2e919a5c60706684498f988842e847a4,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3690395284106606213}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 2e919a5c60706684498f988842e847a4,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 249146752775006803}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 2e919a5c60706684498f988842e847a4,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -8759121988477300665}
   m_SourcePrefab: {fileID: 100100000, guid: 2e919a5c60706684498f988842e847a4, type: 3}
 --- !u!1 &839920199163136382 stripped
 GameObject:
@@ -265,6 +297,112 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isDragging: 0
+--- !u!114 &-1696118659097453097
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 839920199163136382}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd8f808b7f3ba42429d3283f9c240bd9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  healToDamageConversion: 0.5
+  healingPerSecond:
+  - 30
+  - 90
+  - 500
+  armorDrainPerSecond: 5
+  cloudRadius: 2
+  cloudDuration: 5
+  healVFX: {fileID: 8593464584776411535, guid: b21d155ec7ea5a349a0e36106f913148, type: 3}
+  cloudVFX: {fileID: 6126188424833946103, guid: a58aa9a78f2b45b45bb0f3e2e1e3ad3c,
+    type: 3}
+  passiveReadyVFX: {fileID: 1947871717301538, guid: a990e3ac1318b834488c784d851f42a9,
+    type: 3}
+  abilityStartSound: {fileID: 0}
+  cloudTickSound: {fileID: 0}
+  passiveProcSound: {fileID: 0}
+  audioVolume: 0.7
+--- !u!65 &3690395284106606213
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 839920199163136382}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.49988997, y: 1.8110772, z: 0.4889507}
+  m_Center: {x: -0.004036869, y: 0.9048938, z: 0.016166758}
+--- !u!54 &249146752775006803
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 839920199163136382}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 36
+  m_CollisionDetection: 0
+--- !u!114 &-8759121988477300665
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 839920199163136382}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7771fb580d6217a4da3ee7324885b101, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  vfxConfig:
+    autoAttackProjectile: {fileID: 8443315704496310910, guid: 6ef35fa36e3a65043b2d800600204bdd,
+      type: 3}
+    autoAttackMuzzleFlash: {fileID: 0}
+    autoAttackHitEffect: {fileID: 0}
+    abilityEffect: {fileID: 0}
+    abilityProjectile: {fileID: 0}
+    abilityImpactEffect: {fileID: 0}
+    autoAttackSound: {fileID: 0}
+    abilitySound: {fileID: 0}
+    volume: 0.7
+  deathVFX: {fileID: 0}
+  levelUpVFX: {fileID: 0}
+  damageNumbersPrefab: {fileID: 0}
+  firePoint: {fileID: 0}
+  chestPoint: {fileID: 0}
+  weaponPoint: {fileID: 0}
 --- !u!4 &6704420166065629245 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6515712193588681746, guid: 2e919a5c60706684498f988842e847a4,
@@ -292,22 +430,22 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 7dafb5c09a9a70047b5b3fd051db57ac,
         type: 3}
       propertyPath: m_LocalScale.z
-      value: 30.568329
+      value: 96.80532
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 7dafb5c09a9a70047b5b3fd051db57ac,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.019978637
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 7dafb5c09a9a70047b5b3fd051db57ac,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.15007593
+      value: -0.453
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 7dafb5c09a9a70047b5b3fd051db57ac,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.15490691
+      value: -0.155
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 7dafb5c09a9a70047b5b3fd051db57ac,
         type: 3}
