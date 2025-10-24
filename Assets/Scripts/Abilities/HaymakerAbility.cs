@@ -131,9 +131,6 @@ public class HaymakerAbility : MonoBehaviour, IUnitAbility
             ResetAbilityState();
         }
 
-        // Reset soul count for new round (optional - remove if you want souls to persist)
-        soulCount = 0;
-
         // Ensure clone state is properly managed
         if (unitAI.currentState == UnitState.Bench)
         {

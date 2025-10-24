@@ -30,6 +30,8 @@ public static class UnitAbilityDescriptions
 
             case "BOP":
                 return GetBOPDescription(unit, maxHp, star);
+            case "Cobaltine":
+                return GetCobaltineDescription(unit, ad, star);
 
             default:
                 return "This unit has no ability description yet.";
@@ -48,6 +50,17 @@ public static class UnitAbilityDescriptions
         return $"Active: Rapidly shoot {ability.needlesPerCast}{bonusText} needles split between the nearest 2 enemies within 2 hexes, each dealing {dmg + (ad * 0.6f)} damage.\n\n" +
                $"Every 10 needles shot, increase the needle count by 1 permanently.\n\n" +
                $"Bonus Needle Count: {bonusNeedles}";
+    }
+    private static string GetCobaltineDescription(UnitAI unit, float ad, int star)
+    {
+        var ability = unit.GetComponent<CobaltineAbility>();
+        if (ability == null) return "Cobaltine ability missing.";
+
+        float healing = ability.healingPerSecond[Mathf.Clamp(star - 1, 0, ability.healingPerSecond.Length - 1)];
+        float passiveConversion = ability.healToDamageConversion * 100f;
+
+        return $"Passive: Whenever Cobaltine heals, {passiveConversion:F0}% of the healed amount is converted to bonus damage on Cobaltine's next auto attack.\n\n" +
+               $"Active: Cast a cloud above Cobaltine in a {ability.cloudRadius} hex radius. The cloud drains {ability.armorDrainPerSecond} armor split between all enemies in the radius every second and heals Cobaltine for {healing} health every second for {ability.cloudDuration} seconds.";
     }
 
     private static string GetManaDriveDescription(UnitAI unit, float ad, int star)

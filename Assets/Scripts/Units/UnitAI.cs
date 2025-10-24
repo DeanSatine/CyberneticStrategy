@@ -361,14 +361,20 @@ public class UnitAI : MonoBehaviour
     private void FaceTarget(Vector3 targetPos)
     {
         Vector3 direction = (targetPos - transform.position).normalized;
-        direction.y = 0f; // keep upright
+        direction.y = 0f;
 
         if (direction != Vector3.zero)
         {
             Quaternion lookRotation = Quaternion.LookRotation(direction);
-            transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 10f);
+
+            // Instant snap for melee, smooth for ranged
+            if (attackRange <= 2f)
+                transform.rotation = lookRotation;  // Instant
+            else
+                transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 10f);  // Smooth
         }
     }
+
 
     // 🔹 Call this from the auto attack animation (Animation Event)
     public void DealAutoAttackDamage()
