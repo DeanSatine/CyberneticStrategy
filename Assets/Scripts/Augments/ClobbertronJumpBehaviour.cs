@@ -539,20 +539,11 @@ public class ClobbertronJumpBehaviour : MonoBehaviour
 
     private IEnumerator CameraShake(float intensity, float duration)
     {
-        if (Camera.main == null) yield break;
-
-        Vector3 originalPos = Camera.main.transform.position;
-        float elapsed = 0f;
-
-        while (elapsed < duration)
+        if (CameraShakeManager.Instance != null)
         {
-            elapsed += Time.deltaTime;
-            Vector3 offset = Random.insideUnitSphere * intensity;
-            Camera.main.transform.position = originalPos + offset;
-            yield return null;
+            CameraShakeManager.Instance.Shake(intensity, duration);
         }
-
-        Camera.main.transform.position = originalPos;
+        yield break;
     }
 
     // Reset for new combat

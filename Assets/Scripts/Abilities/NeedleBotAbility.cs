@@ -15,7 +15,6 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
     [SerializeField] public int needlesPerCast;
     public float[] damagePerStar = { 100f, 150f, 175f };
 
-    // ✅ Needle stacking progress (persistent across rounds)
     [Header("Needle Stacking Progress")]
     [SerializeField] private int totalNeedlesThrown = 0;
     [SerializeField] private int stackingThreshold = 10;
@@ -31,9 +30,8 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
     public float abilityDuration = 1.5f;
 
     [Header("Targeting")]
-    public int maxHexRange = 6; // ✅ NEW: Max hex distance for secondary targets
+    public int maxHexRange = 6;
 
-    // ✅ NEW: Projectile completion tracking
     private int activeProjectileCount = 0;
     private bool isCastingAbility = false;
 
@@ -44,7 +42,6 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
 
         CalculateNeedleCount();
 
-        // Setup audio source
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null)
         {
@@ -64,50 +61,89 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
 
     public void Cast(UnitAI target)
     {
-        if (!unitAI.isAlive || isCastingAbility) return;
+        if (!unitAI.isAlive)
+        {
+            Debug.Log($"🎯 {unitAI.unitName} cannot cast - unit is dead");
+            return;
+        }
+
+        if (isCastingAbility)
+        {
+            Debug.Log($"🎯 {unitAI.unitName} already casting ability, ignoring new cast request");
+            return;
+        }
 
         isCastingAbility = true;
-        unitAI.canAttack = unitAI.canMove = false;
+        unitAI.isCastingAbility = true;
+        unitAI.canAttack = false;
+        unitAI.canMove = false;
 
         if (unitAI.animator) unitAI.animator.SetTrigger("AbilityTrigger");
+
         if (target != null && target.currentState == UnitAI.UnitState.Bench)
         {
+            Debug.Log($"🎯 {unitAI.unitName} target is on bench, ending cast");
             EndCast();
             return;
         }
 
-        // store reference so we can stop it safely
         castRoutine = StartCoroutine(FireNeedlesRoutine());
     }
+
     public void OnRoundEnd()
     {
+        if (isCastingAbility)
+        {
+            Debug.Log($"🎯 Round ended while {unitAI.unitName} was casting");
+            ForceEndCast();
+        }
     }
 
     private void OnDisable()
     {
+        ForceEndCast();
+    }
+
+    private void ForceEndCast()
+    {
         StopAllCoroutines();
         isCastingAbility = false;
         activeProjectileCount = 0;
+
+        if (castRoutine != null)
+        {
+            castRoutine = null;
+        }
+
+        projectileCoroutines.Clear();
+
         if (unitAI != null)
         {
+            unitAI.isCastingAbility = false;
             unitAI.canAttack = true;
             unitAI.canMove = true;
         }
+
+        Debug.Log($"🎯 Force ended cast for {unitAI?.unitName}");
     }
+
     private IEnumerator FireNeedlesRoutine()
     {
         if (!isCastingAbility || unitAI == null || !unitAI.isAlive)
+        {
+            Debug.Log($"🎯 FireNeedlesRoutine early exit - isCasting: {isCastingAbility}, unitAI: {unitAI != null}, isAlive: {unitAI?.isAlive}");
+            EndCast();
             yield break;
+        }
 
         yield return new WaitForSeconds(startDelay);
 
         CalculateNeedleCount();
 
-        // ✅ IMPROVED: Get hex-based targets
         List<UnitAI> targets = FindHexBasedTargets();
         if (targets.Count == 0)
         {
-            Debug.Log($"{unitAI.unitName} tried to cast but found no enemies within range!");
+            Debug.Log($"🎯 {unitAI.unitName} tried to cast but found no enemies within range!");
             EndCast();
             yield break;
         }
@@ -116,24 +152,29 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
 
         Debug.Log($"🎯 {unitAI.unitName} firing {needlesPerCast} needles at targets: {string.Join(", ", targets.ConvertAll(t => t.unitName))}");
 
-        // ✅ Reset projectile counter
         activeProjectileCount = 0;
 
         for (int needleIndex = 0; needleIndex < needlesPerCast; needleIndex++)
         {
+            if (!unitAI.isAlive)
+            {
+                Debug.Log($"🎯 {unitAI.unitName} died mid-cast, stopping needles");
+                break;
+            }
+
             targets.RemoveAll(t => t == null || !t.isAlive || t.currentState == UnitState.Bench);
 
             if (targets.Count == 0)
             {
                 Debug.Log($"🎯 {unitAI.unitName} retargeting - all targets died!");
                 targets = FindHexBasedTargets();
-                
+
                 if (targets.Count == 0)
                 {
                     Debug.Log($"🎯 {unitAI.unitName} no valid retarget found, ending ability early.");
                     break;
                 }
-                
+
                 Debug.Log($"🎯 {unitAI.unitName} retargeted to: {string.Join(", ", targets.ConvertAll(t => t.unitName))}");
             }
 
@@ -168,14 +209,13 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
             yield return new WaitForSeconds(throwInterval);
         }
 
-        // ✅ NEW: Wait for all projectiles to complete before ending cast
         StartCoroutine(WaitForAllProjectilesToComplete());
     }
 
     private IEnumerator WaitForAllProjectilesToComplete()
     {
         Debug.Log($"🎯 Waiting for {activeProjectileCount} projectiles to complete...");
-        
+
         float timeout = 5f;
         float elapsed = 0f;
 
@@ -184,7 +224,7 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
             elapsed += Time.deltaTime;
             yield return null;
         }
-        
+
         if (activeProjectileCount > 0)
         {
             Debug.LogWarning($"⚠️ TIMEOUT! {activeProjectileCount} projectiles stuck, forcing ability end");
@@ -196,22 +236,19 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
         EndCast();
     }
 
-    // ✅ NEW: Hex-based targeting system
     private List<UnitAI> FindHexBasedTargets()
     {
         List<UnitAI> targets = new List<UnitAI>();
 
-        // Get NeedleBot's current tile
         HexTile needleBotTile = BoardManager.Instance.GetTileFromWorld(transform.position);
         if (needleBotTile == null)
         {
             Debug.LogWarning($"🎯 {unitAI.unitName} not on a valid hex tile! Using fallback targeting.");
-            return FindNearestEnemies(2); // Fallback to distance-based
+            return FindNearestEnemies(2);
         }
 
-        // Priority 1: Current target (if within hex range)
         UnitAI currentTarget = unitAI.GetCurrentTarget();
-        if (currentTarget != null && currentTarget.isAlive && currentTarget.team != unitAI.team)
+        if (currentTarget != null && currentTarget.isAlive && currentTarget.team != unitAI.team && currentTarget.currentState != UnitState.Bench)
         {
             HexTile targetTile = BoardManager.Instance.GetTileFromWorld(currentTarget.transform.position);
             if (targetTile != null)
@@ -229,13 +266,12 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
             }
         }
 
-        // Priority 2: Find all enemies within hex range
         UnitAI[] allUnits = FindObjectsOfType<UnitAI>();
         List<UnitAI> enemiesInRange = new List<UnitAI>();
 
         foreach (var unit in allUnits)
         {
-            if (unit == unitAI || !unit.isAlive || unit.team == unitAI.team || targets.Contains(unit))
+            if (unit == unitAI || !unit.isAlive || unit.team == unitAI.team || unit.currentState == UnitState.Bench || targets.Contains(unit))
                 continue;
 
             HexTile unitTile = BoardManager.Instance.GetTileFromWorld(unit.transform.position);
@@ -250,7 +286,6 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
             }
         }
 
-        // Sort enemies by hex distance (closest first)
         enemiesInRange.Sort((a, b) => {
             HexTile tileA = BoardManager.Instance.GetTileFromWorld(a.transform.position);
             HexTile tileB = BoardManager.Instance.GetTileFromWorld(b.transform.position);
@@ -259,7 +294,6 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
             return distA.CompareTo(distB);
         });
 
-        // Add enemies to targets (up to 2 total targets)
         foreach (var enemy in enemiesInRange)
         {
             if (targets.Count >= 2) break;
@@ -273,11 +307,8 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
         return targets;
     }
 
-    // ✅ NEW: Calculate hex distance using axial coordinates
     private int CalculateHexDistance(Vector2Int a, Vector2Int b)
     {
-        // Convert axial to cube coordinates for distance calculation
-        // Axial (q, r) -> Cube (x, y, z) where x = q, z = r, y = -x-z
         int x1 = a.x;
         int z1 = a.y;
         int y1 = -x1 - z1;
@@ -286,7 +317,6 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
         int z2 = b.y;
         int y2 = -x2 - z2;
 
-        // Hex distance = max(|dx|, |dy|, |dz|)
         return Mathf.Max(Mathf.Abs(x1 - x2), Mathf.Abs(y1 - y2), Mathf.Abs(z1 - z2));
     }
 
@@ -296,58 +326,43 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
         {
             audioSource.PlayOneShot(needleThrowSound, volume);
         }
-        else if (vfxManager != null && vfxManager.vfxConfig.autoAttackSound != null)
+        else if (vfxManager != null && vfxManager.vfxConfig != null && vfxManager.vfxConfig.autoAttackSound != null)
         {
             audioSource.PlayOneShot(vfxManager.vfxConfig.autoAttackSound, volume);
         }
     }
 
-    // ✅ UPDATED: Notify when projectile completes
     private IEnumerator FireNeedleProjectile(Vector3 startPos, UnitAI target, float damage)
     {
-        if (target == null)
+        if (target == null || !target.isAlive)
         {
+            Debug.Log($"🎯 Projectile target invalid at fire time, decrementing counter");
             activeProjectileCount--;
             yield break;
         }
 
         GameObject projectilePrefab = null;
-        
-        Debug.Log($"🔍 Checking projectile sources for {unitAI.unitName}:");
-        Debug.Log($"   - vfxManager: {(vfxManager != null ? "✅ Found" : "❌ NULL")}");
-        if (vfxManager != null)
-        {
-            Debug.Log($"   - vfxManager.vfxConfig: {(vfxManager.vfxConfig != null ? "✅ Found" : "❌ NULL")}");
-            if (vfxManager.vfxConfig != null)
-            {
-                Debug.Log($"   - vfxConfig.abilityProjectile: {(vfxManager.vfxConfig.abilityProjectile != null ? vfxManager.vfxConfig.abilityProjectile.name : "❌ NULL")}");
-                Debug.Log($"   - vfxConfig.autoAttackProjectile: {(vfxManager.vfxConfig.autoAttackProjectile != null ? vfxManager.vfxConfig.autoAttackProjectile.name : "❌ NULL")}");
-            }
-        }
-        Debug.Log($"   - unitAI.projectilePrefab: {(unitAI.projectilePrefab != null ? unitAI.projectilePrefab.name : "❌ NULL")}");
-        
+
         if (vfxManager != null && vfxManager.vfxConfig != null && vfxManager.vfxConfig.abilityProjectile != null)
         {
             projectilePrefab = vfxManager.vfxConfig.abilityProjectile;
-            Debug.Log($"🎯 Using abilityProjectile: {projectilePrefab.name}");
         }
         else if (vfxManager != null && vfxManager.vfxConfig != null && vfxManager.vfxConfig.autoAttackProjectile != null)
         {
             projectilePrefab = vfxManager.vfxConfig.autoAttackProjectile;
-            Debug.Log($"🎯 Fallback to autoAttackProjectile: {projectilePrefab.name}");
         }
         else if (unitAI.projectilePrefab != null)
         {
             projectilePrefab = unitAI.projectilePrefab;
-            Debug.Log($"⚠️ {unitAI.unitName} missing VFX config projectile - using unitAI.projectilePrefab: {projectilePrefab.name}");
+            Debug.LogWarning($"⚠️ {unitAI.unitName} missing VFX config projectile - using unitAI.projectilePrefab: {projectilePrefab.name}");
         }
         else
         {
-            Debug.LogWarning($"⚠️ No projectile prefab found for {unitAI.unitName}, applying damage directly without visuals");
+            Debug.LogError($"❌ No projectile prefab found for {unitAI.unitName}!");
             if (target != null && target.isAlive)
             {
-                target.TakeDamage(damage);
-                Debug.Log($"🎯 {unitAI.unitName} applied {damage} damage directly to {target.unitName} (no projectile visual)");
+                target.TakeDamage(damage + unitAI.attackDamage);
+                Debug.Log($"🎯 {unitAI.unitName} applied {damage + unitAI.attackDamage} damage directly to {target.unitName} (no projectile visual)");
             }
             activeProjectileCount--;
             yield break;
@@ -355,9 +370,19 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
 
         GameObject needle = Instantiate(projectilePrefab, startPos, Quaternion.identity);
         float speed = 20f;
+        float maxTravelTime = 3f;
+        float travelTime = 0f;
 
-        while (needle != null && target != null && target.isAlive && target.currentState != UnitState.Bench)
+        while (needle != null && travelTime < maxTravelTime)
         {
+            if (target == null || !target.isAlive || target.currentState == UnitState.Bench)
+            {
+                Debug.Log($"🎯 Target became invalid mid-flight, destroying projectile");
+                if (needle != null) Destroy(needle);
+                activeProjectileCount--;
+                yield break;
+            }
+
             Vector3 targetPos = target.transform.position + Vector3.up * 1.2f;
             Vector3 direction = (targetPos - needle.transform.position).normalized;
 
@@ -376,23 +401,30 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
 
                 Debug.Log($"🎯 {unitAI.unitName} needle hit {target.unitName} for {damage + unitAI.attackDamage} dmg!");
                 Destroy(needle);
-                activeProjectileCount--; // ✅ Decrement when hit
+                activeProjectileCount--;
                 yield break;
             }
 
+            travelTime += Time.deltaTime;
             yield return null;
         }
 
-        if (needle != null) Destroy(needle);
-        activeProjectileCount--; // ✅ Decrement when projectile destroyed/missed
+        if (needle != null)
+        {
+            Debug.LogWarning($"⚠️ Needle timeout after {travelTime}s, destroying");
+            Destroy(needle);
+        }
+        activeProjectileCount--;
     }
 
     private void EndCast()
     {
-        // ✅ Prevent multiple calls
-        if (!isCastingAbility) return;
+        if (!isCastingAbility)
+        {
+            Debug.Log($"🎯 EndCast called but already ended for {unitAI.unitName}");
+            return;
+        }
 
-        // ✅ Stop all our local coroutines safely
         if (castRoutine != null)
         {
             StopCoroutine(castRoutine);
@@ -406,29 +438,26 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
         }
         projectileCoroutines.Clear();
 
-        // ✅ Reset state
         isCastingAbility = false;
+        unitAI.isCastingAbility = false;
         activeProjectileCount = 0;
 
-        // Reset mana and UI
         unitAI.currentMana = 0f;
-        if (unitAI.unitUIPrefab != null)
-            unitAI.GetComponentInChildren<UnitUI>()?.UpdateMana(unitAI.currentMana);
+        if (unitAI.ui != null)
+        {
+            unitAI.ui.UpdateMana(unitAI.currentMana);
+        }
 
-        // ✅ Re-enable unit behavior
         unitAI.canAttack = true;
         unitAI.canMove = true;
-        unitAI.isCastingAbility = false;  // ensure UnitAI syncs with our flag
 
         Debug.Log($"🎯 {unitAI.unitName} ability cast complete! Ready to attack again.");
     }
 
-    // Public methods for debugging/UI
     public int GetCurrentNeedleCount() => needlesPerCast;
     public int GetTotalNeedlesThrown() => totalNeedlesThrown;
     public int GetNextStackAt() => ((totalNeedlesThrown / stackingThreshold) + 1) * stackingThreshold;
 
-    // Fallback method for non-hex targeting
     private List<UnitAI> FindNearestEnemies(int count)
     {
         UnitAI[] allUnits = FindObjectsOfType<UnitAI>();
@@ -436,7 +465,7 @@ public class NeedleBotAbility : MonoBehaviour, IUnitAbility
 
         foreach (var u in allUnits)
         {
-            if (u != unitAI && u.isAlive && u.team != unitAI.team)
+            if (u != unitAI && u.isAlive && u.team != unitAI.team && u.currentState != UnitState.Bench)
                 enemies.Add(u);
         }
 

@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 
 public class CameraShakeManager : MonoBehaviour
@@ -21,6 +21,7 @@ public class CameraShakeManager : MonoBehaviour
     private Vector3 originalCameraPosition;
     private bool isShaking = false;
     private Coroutine currentShake;
+    private bool hasStoredOriginalPosition = false;
 
     private void Awake()
     {
@@ -37,9 +38,16 @@ public class CameraShakeManager : MonoBehaviour
 
     private void Start()
     {
-        if (Camera.main != null)
+        StoreOriginalCameraPosition();
+    }
+
+    private void StoreOriginalCameraPosition()
+    {
+        if (Camera.main != null && !hasStoredOriginalPosition)
         {
             originalCameraPosition = Camera.main.transform.position;
+            hasStoredOriginalPosition = true;
+            Debug.Log($"📷 Camera original position stored: {originalCameraPosition}");
         }
     }
 
@@ -49,7 +57,7 @@ public class CameraShakeManager : MonoBehaviour
 
         if (!isShaking)
         {
-            originalCameraPosition = Camera.main.transform.position;
+            StoreOriginalCameraPosition();
         }
 
         if (currentShake != null)
@@ -69,8 +77,10 @@ public class CameraShakeManager : MonoBehaviour
         {
             elapsed += Time.deltaTime;
             float strength = Mathf.Lerp(intensity, 0f, elapsed / duration);
+
             Vector3 offset = Random.insideUnitSphere * strength;
-            offset.y = Mathf.Abs(offset.y);
+            offset.y = 0f;
+
             Camera.main.transform.position = originalCameraPosition + offset;
             yield return null;
         }
@@ -78,6 +88,8 @@ public class CameraShakeManager : MonoBehaviour
         Camera.main.transform.position = originalCameraPosition;
         isShaking = false;
         currentShake = null;
+
+        Debug.Log($"📷 Camera shake complete, returned to: {Camera.main.transform.position}");
     }
 
     public void ResetCamera()
@@ -86,6 +98,24 @@ public class CameraShakeManager : MonoBehaviour
         {
             Camera.main.transform.position = originalCameraPosition;
             isShaking = false;
+
+            if (currentShake != null)
+            {
+                StopCoroutine(currentShake);
+                currentShake = null;
+            }
+
+            Debug.Log($"📷 Camera forcefully reset to: {originalCameraPosition}");
+        }
+    }
+
+    public void UpdateOriginalPosition()
+    {
+        if (Camera.main != null && !isShaking)
+        {
+            originalCameraPosition = Camera.main.transform.position;
+            hasStoredOriginalPosition = true;
+            Debug.Log($"📷 Camera original position updated to: {originalCameraPosition}");
         }
     }
 }
