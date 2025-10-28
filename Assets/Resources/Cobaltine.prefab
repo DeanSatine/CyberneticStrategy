@@ -538,7 +538,7 @@ MonoBehaviour:
   attackDamage: 50
   attackSpeed: 0.6
   armor: 65
-  attackRange: 1.5
+  attackRange: 1.8
   mana: 0
   maxMana: 80
   currentMana: 0

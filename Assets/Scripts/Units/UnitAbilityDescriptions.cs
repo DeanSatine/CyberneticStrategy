@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public static class UnitAbilityDescriptions
 {
@@ -31,7 +31,10 @@ public static class UnitAbilityDescriptions
             case "BOP":
                 return GetBOPDescription(unit, maxHp, star);
             case "Cobaltine":
+
                 return GetCobaltineDescription(unit, ad, star);
+            case "Kurōmushadō":
+                return GetKuromushadoDescription(unit, ad, star);
 
             default:
                 return "This unit has no ability description yet.";
@@ -61,6 +64,17 @@ public static class UnitAbilityDescriptions
 
         return $"Passive: Whenever Cobaltine heals, {passiveConversion:F0}% of the healed amount is converted to bonus damage on Cobaltine's next auto attack.\n\n" +
                $"Active: Cast a cloud above Cobaltine in a {ability.cloudRadius} hex radius. The cloud drains {ability.armorDrainPerSecond} armor split between all enemies in the radius every second and heals Cobaltine for {healing} health every second for {ability.cloudDuration} seconds.";
+    }
+    private static string GetKuromushadoDescription(UnitAI unit, float ad, int star)
+    {
+        var ability = unit.GetComponent<KuromushadoAbility>();
+        if (ability == null) return "Kurōmushadō ability missing.";
+
+        int coneSize = ability.coneSizePerStar[Mathf.Clamp(star - 1, 0, ability.coneSizePerStar.Length - 1)];
+        float kickDamage = ability.jumpKickDamage[Mathf.Clamp(star - 1, 0, ability.jumpKickDamage.Length - 1)];
+
+        return $"Passive: Auto Attacks sweep in a {coneSize} hex cone, hitting all enemies within {ability.coneAngle}° of the target.\n\n" +
+               $"Active: Jump Kick the target, dealing {kickDamage} damage and knocking them back {ability.knockbackDistance} hexes.";
     }
 
     private static string GetManaDriveDescription(UnitAI unit, float ad, int star)
