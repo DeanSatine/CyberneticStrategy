@@ -413,6 +413,7 @@ MonoBehaviour:
   projectilePrefab: {fileID: 0}
   firePoint: {fileID: 0}
   projectileSpeed: 15
+  facingReference: {fileID: 0}
   unitUIPrefab: {fileID: 6939982145822855837, guid: 63931d92c48ef65418d45ec02069a522,
     type: 3}
   ui: {fileID: 0}
@@ -455,7 +456,8 @@ MonoBehaviour:
   vfxConfig:
     autoAttackProjectile: {fileID: 0}
     autoAttackMuzzleFlash: {fileID: 0}
-    autoAttackHitEffect: {fileID: 0}
+    autoAttackHitEffect: {fileID: 2060900179291159282, guid: ca6705a3f9070d14d819d179493bcfa0,
+      type: 3}
     abilityEffect: {fileID: 0}
     abilityProjectile: {fileID: 0}
     abilityImpactEffect: {fileID: 0}
@@ -465,7 +467,7 @@ MonoBehaviour:
   deathVFX: {fileID: 0}
   levelUpVFX: {fileID: 0}
   damageNumbersPrefab: {fileID: 0}
-  firePoint: {fileID: 0}
+  firePoint: {fileID: 6186877330651627644}
   chestPoint: {fileID: 0}
   weaponPoint: {fileID: 0}
 --- !u!65 &-4039280149588296880
@@ -556,9 +558,8 @@ MonoBehaviour:
   - 300
   - 450
   - 850
-  knockbackDistance: 2
+  knockbackDistance: 4
   knockbackSpeed: 8
-  abilityDamageDelay: 0.5
   sweepVFX: {fileID: 0}
   jumpKickVFX: {fileID: 0}
   knockbackVFX: {fileID: 0}
@@ -579,3 +580,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isDragging: 0
+--- !u!4 &6186877330651627644 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 608321761475470972, guid: 030a51e2cee8a36499cce93b0b64a7fa,
+    type: 3}
+  m_PrefabInstance: {fileID: 6750057242076833280}
+  m_PrefabAsset: {fileID: 0}

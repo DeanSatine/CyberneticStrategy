@@ -43,6 +43,9 @@ public class UnitAI : MonoBehaviour
     public Transform firePoint;
     public float projectileSpeed = 15f;
 
+    [Tooltip("Define custom forward direction for this unit. Leave empty for default forward.")]
+    public Transform facingReference;
+
     [Header("UI")]
     public GameObject unitUIPrefab;
     public UnitUI ui;
@@ -368,6 +371,14 @@ public class UnitAI : MonoBehaviour
         {
             Quaternion lookRotation = Quaternion.LookRotation(direction);
 
+            // If there's a facing reference, apply the offset
+            if (facingReference != null)
+            {
+                // Calculate the offset between the unit's forward and the reference's forward
+                Quaternion offset = Quaternion.Inverse(transform.rotation) * facingReference.rotation;
+                lookRotation = lookRotation * Quaternion.Inverse(offset);
+            }
+
             // Instant snap for melee, smooth for ranged
             if (attackRange <= 2f)
                 transform.rotation = lookRotation;  // Instant
@@ -375,6 +386,7 @@ public class UnitAI : MonoBehaviour
                 transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 10f);  // Smooth
         }
     }
+
     public void RaiseHealReceivedEvent(float healAmount)
     {
         OnHealReceived?.Invoke(healAmount);
