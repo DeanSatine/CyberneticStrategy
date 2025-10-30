@@ -9,25 +9,24 @@ public class CobaltineAbility : MonoBehaviour, IUnitAbility
     private CyberneticVFX vfxManager;
     private Coroutine cloudRoutine;
 
-    [Header("Passive: Healing → Damage Conversion")]
-    [Tooltip("Percentage of healing converted to next auto attack bonus damage")]
-    [Range(0f, 1f)]
-    public float healToDamageConversion = 0.5f;
+    [Header("Passive: All Healing → Damage Conversion")]
+    [Tooltip("Percentage of ALL healing received converted to next auto attack bonus damage (per star level)")]
+    public float[] healToDamageConversion = { 0.5f, 0.75f, 1f };
 
-    private float storedPassiveDamage = 0f;
+    private float totalHealingReceived = 0f;
 
     [Header("Active: Armor Drain Cloud")]
+    [Tooltip("Armor drained per enemy per second at 1/2/3 stars")]
+    public float[] armorDrainPerSecond = { 3f, 5f, 100f };
+
     [Tooltip("Healing per second at 1/2/3 stars")]
     public float[] healingPerSecond = { 30f, 90f, 500f };
 
-    [Tooltip("Armor drained total per second (split between enemies)")]
-    public float armorDrainPerSecond = 5f;
+    [Tooltip("Duration of the cloud at 1/2/3 stars")]
+    public float[] cloudDuration = { 4f, 5f, 30f };
 
     [Tooltip("Cloud radius in hex tiles")]
-    public float cloudRadius = 2f;
-
-    [Tooltip("How long the cloud lasts")]
-    public float cloudDuration = 5f;
+    public int cloudRadius = 2;
 
     [Header("VFX")]
     [Tooltip("VFX to play on body when Cobaltine receives healing")]
@@ -49,6 +48,19 @@ public class CobaltineAbility : MonoBehaviour, IUnitAbility
     private AudioSource audioSource;
     private GameObject activeCloudVFX;
     private GameObject passiveVFXInstance;
+    private List<ArmorDebuff> activeDebuffs = new List<ArmorDebuff>();
+
+    private class ArmorDebuff
+    {
+        public UnitAI target;
+        public float armorReduction;
+
+        public ArmorDebuff(UnitAI target, float armorReduction)
+        {
+            this.target = target;
+            this.armorReduction = armorReduction;
+        }
+    }
 
     private void Awake()
     {
@@ -67,6 +79,7 @@ public class CobaltineAbility : MonoBehaviour, IUnitAbility
     private void Start()
     {
         unitAI.OnAttackEvent += OnAutoAttack;
+        unitAI.OnHealReceived += OnHealReceived;
     }
 
     private void OnDestroy()
@@ -74,12 +87,15 @@ public class CobaltineAbility : MonoBehaviour, IUnitAbility
         if (unitAI != null)
         {
             unitAI.OnAttackEvent -= OnAutoAttack;
+            unitAI.OnHealReceived -= OnHealReceived;
         }
 
         if (cloudRoutine != null)
         {
             StopCoroutine(cloudRoutine);
         }
+
+        CleanupActiveDebuffs();
 
         if (activeCloudVFX != null)
         {
@@ -116,13 +132,14 @@ public class CobaltineAbility : MonoBehaviour, IUnitAbility
 
     private IEnumerator CloudEffectRoutine()
     {
+        float duration = cloudDuration[Mathf.Clamp(unitAI.starLevel - 1, 0, cloudDuration.Length - 1)];
         float elapsed = 0f;
         float tickRate = 1f;
         float nextTick = 0f;
 
-        Debug.Log($"☁️ {unitAI.unitName} cloud active for {cloudDuration}s!");
+        Debug.Log($"☁️ {unitAI.unitName} cloud active for {duration}s!");
 
-        while (elapsed < cloudDuration && unitAI != null && unitAI.isAlive)
+        while (elapsed < duration && unitAI != null && unitAI.isAlive)
         {
             elapsed += Time.deltaTime;
 
@@ -135,6 +152,8 @@ public class CobaltineAbility : MonoBehaviour, IUnitAbility
             yield return null;
         }
 
+        CleanupActiveDebuffs();
+
         if (activeCloudVFX != null)
         {
             Destroy(activeCloudVFX);
@@ -146,7 +165,7 @@ public class CobaltineAbility : MonoBehaviour, IUnitAbility
             unitAI.ui.UpdateMana(unitAI.currentMana);
         }
 
-        Debug.Log($"☁️ {unitAI.unitName} cloud expired!");
+        Debug.Log($"☁️ {unitAI.unitName} cloud expired! Total healing during duration: {totalHealingReceived}");
     }
 
     private void ProcessCloudTick()
@@ -154,16 +173,23 @@ public class CobaltineAbility : MonoBehaviour, IUnitAbility
         PlayAbilityAudio(cloudTickSound);
 
         List<UnitAI> enemiesInCloud = FindEnemiesInCloud();
+        float armorDrain = armorDrainPerSecond[Mathf.Clamp(unitAI.starLevel - 1, 0, armorDrainPerSecond.Length - 1)];
 
-        if (enemiesInCloud.Count > 0)
+        foreach (UnitAI enemy in enemiesInCloud)
         {
-            float armorDrainPerEnemy = armorDrainPerSecond / enemiesInCloud.Count;
+            enemy.armor = Mathf.Max(0, enemy.armor - armorDrain);
 
-            foreach (UnitAI enemy in enemiesInCloud)
+            ArmorDebuff existingDebuff = activeDebuffs.Find(d => d.target == enemy);
+            if (existingDebuff != null)
             {
-                enemy.armor = Mathf.Max(0, enemy.armor - armorDrainPerEnemy);
-                Debug.Log($"☁️ {unitAI.unitName} drained {armorDrainPerEnemy} armor from {enemy.unitName} (now: {enemy.armor})");
+                existingDebuff.armorReduction += armorDrain;
             }
+            else
+            {
+                activeDebuffs.Add(new ArmorDebuff(enemy, armorDrain));
+            }
+
+            Debug.Log($"☁️ {unitAI.unitName} drained {armorDrain} armor from {enemy.unitName} (now: {enemy.armor})");
         }
 
         float healing = healingPerSecond[Mathf.Clamp(unitAI.starLevel - 1, 0, healingPerSecond.Length - 1)];
@@ -173,14 +199,21 @@ public class CobaltineAbility : MonoBehaviour, IUnitAbility
     private List<UnitAI> FindEnemiesInCloud()
     {
         List<UnitAI> enemies = new List<UnitAI>();
-        UnitAI[] allUnits = FindObjectsOfType<UnitAI>();
 
-        foreach (UnitAI unit in allUnits)
+        if (BoardManager.Instance == null || unitAI.currentTile == null)
         {
-            if (unit != unitAI && unit.isAlive && unit.team != unitAI.team && unit.currentState != UnitState.Bench)
+            return enemies;
+        }
+
+        HexTile centerTile = unitAI.currentTile;
+        HashSet<HexTile> tilesInRadius = GetTilesInHexRadius(centerTile, cloudRadius);
+
+        foreach (HexTile tile in tilesInRadius)
+        {
+            if (tile.occupyingUnit != null)
             {
-                float distance = Vector3.Distance(transform.position, unit.transform.position);
-                if (distance <= cloudRadius)
+                UnitAI unit = tile.occupyingUnit;
+                if (unit != unitAI && unit.isAlive && unit.team != unitAI.team && unit.currentState != UnitState.Bench)
                 {
                     enemies.Add(unit);
                 }
@@ -188,6 +221,41 @@ public class CobaltineAbility : MonoBehaviour, IUnitAbility
         }
 
         return enemies;
+    }
+
+    private HashSet<HexTile> GetTilesInHexRadius(HexTile centerTile, int radius)
+    {
+        HashSet<HexTile> tiles = new HashSet<HexTile>();
+        if (centerTile == null || BoardManager.Instance == null) return tiles;
+
+        Queue<HexTile> toProcess = new Queue<HexTile>();
+        Dictionary<HexTile, int> distances = new Dictionary<HexTile, int>();
+
+        tiles.Add(centerTile);
+        toProcess.Enqueue(centerTile);
+        distances[centerTile] = 0;
+
+        while (toProcess.Count > 0)
+        {
+            HexTile current = toProcess.Dequeue();
+            int currentDist = distances[current];
+
+            if (currentDist >= radius)
+                continue;
+
+            List<HexTile> neighbors = BoardManager.Instance.GetNeighbors(current);
+            foreach (var neighbor in neighbors)
+            {
+                if (!tiles.Contains(neighbor) && neighbor.tileType == TileType.Board)
+                {
+                    tiles.Add(neighbor);
+                    toProcess.Enqueue(neighbor);
+                    distances[neighbor] = currentDist + 1;
+                }
+            }
+        }
+
+        return tiles;
     }
 
     public void HealSelf(float healAmount)
@@ -211,25 +279,34 @@ public class CobaltineAbility : MonoBehaviour, IUnitAbility
             Destroy(healEffect, 1.5f);
         }
 
-        float passiveDamageGain = actualHealing * healToDamageConversion;
-        storedPassiveDamage += passiveDamageGain;
+        unitAI.RaiseHealReceivedEvent(actualHealing);
+
+        Debug.Log($"💚 {unitAI.unitName} healed {actualHealing} HP!");
+    }
+
+    private void OnHealReceived(float healAmount)
+    {
+        totalHealingReceived += healAmount;
 
         UpdatePassiveVFX();
 
-        Debug.Log($"💚 {unitAI.unitName} healed {actualHealing} HP! Stored passive damage: {storedPassiveDamage}");
+        Debug.Log($"💚 {unitAI.unitName} tracked {healAmount} healing! Total: {totalHealingReceived}");
     }
 
     private void OnAutoAttack(UnitAI target)
     {
-        if (storedPassiveDamage > 0 && target != null && target.isAlive)
+        if (totalHealingReceived > 0 && target != null && target.isAlive)
         {
             PlayAbilityAudio(passiveProcSound);
 
-            target.TakeDamage(storedPassiveDamage);
+            float conversionRate = healToDamageConversion[Mathf.Clamp(unitAI.starLevel - 1, 0, healToDamageConversion.Length - 1)];
+            float bonusDamage = totalHealingReceived * conversionRate;
 
-            Debug.Log($"⚡ {unitAI.unitName} dealt {storedPassiveDamage} bonus passive damage to {target.unitName}!");
+            target.TakeDamage(bonusDamage);
 
-            storedPassiveDamage = 0f;
+            Debug.Log($"⚡ {unitAI.unitName} dealt {bonusDamage} bonus passive damage ({totalHealingReceived} healing × {conversionRate * 100}%) to {target.unitName}!");
+
+            totalHealingReceived = 0f;
             UpdatePassiveVFX();
         }
     }
@@ -238,16 +315,29 @@ public class CobaltineAbility : MonoBehaviour, IUnitAbility
     {
         if (passiveReadyVFX == null) return;
 
-        if (storedPassiveDamage > 0 && passiveVFXInstance == null)
+        if (totalHealingReceived > 0 && passiveVFXInstance == null)
         {
             Transform handPoint = unitAI.firePoint != null ? unitAI.firePoint : transform;
             passiveVFXInstance = Instantiate(passiveReadyVFX, handPoint.position, Quaternion.identity, handPoint);
         }
-        else if (storedPassiveDamage <= 0 && passiveVFXInstance != null)
+        else if (totalHealingReceived <= 0 && passiveVFXInstance != null)
         {
             Destroy(passiveVFXInstance);
             passiveVFXInstance = null;
         }
+    }
+
+    private void CleanupActiveDebuffs()
+    {
+        foreach (ArmorDebuff debuff in activeDebuffs)
+        {
+            if (debuff.target != null && debuff.target.isAlive)
+            {
+                debuff.target.armor += debuff.armorReduction;
+                Debug.Log($"🔄 Restored {debuff.armorReduction} armor to {debuff.target.unitName}");
+            }
+        }
+        activeDebuffs.Clear();
     }
 
     private void PlayAbilityAudio(AudioClip clip)
@@ -258,6 +348,11 @@ public class CobaltineAbility : MonoBehaviour, IUnitAbility
         }
     }
 
+    public AudioClip GetAbilityAudio()
+    {
+        return abilityStartSound;
+    }
+
     public void OnRoundEnd()
     {
         if (cloudRoutine != null)
@@ -266,12 +361,14 @@ public class CobaltineAbility : MonoBehaviour, IUnitAbility
             cloudRoutine = null;
         }
 
+        CleanupActiveDebuffs();
+
         if (activeCloudVFX != null)
         {
             Destroy(activeCloudVFX);
         }
 
-        storedPassiveDamage = 0f;
+        totalHealingReceived = 0f;
 
         if (passiveVFXInstance != null)
         {

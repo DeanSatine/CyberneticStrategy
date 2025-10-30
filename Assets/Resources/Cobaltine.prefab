@@ -602,14 +602,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd8f808b7f3ba42429d3283f9c240bd9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  healToDamageConversion: 0.5
+  healToDamageConversion:
+  - 0.5
+  - 0.75
+  - 1
+  armorDrainPerSecond:
+  - 3
+  - 5
+  - 50
   healingPerSecond:
   - 30
   - 90
   - 500
-  armorDrainPerSecond: 5
+  cloudDuration:
+  - 4
+  - 5
+  - 30
   cloudRadius: 2
-  cloudDuration: 5
   healVFX: {fileID: 8593464584776411535, guid: b21d155ec7ea5a349a0e36106f913148, type: 3}
   cloudVFX: {fileID: 6126188424833946103, guid: a58aa9a78f2b45b45bb0f3e2e1e3ad3c,
     type: 3}

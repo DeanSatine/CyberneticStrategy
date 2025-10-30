@@ -59,12 +59,30 @@ public static class UnitAbilityDescriptions
         var ability = unit.GetComponent<CobaltineAbility>();
         if (ability == null) return "Cobaltine ability missing.";
 
-        float healing = ability.healingPerSecond[Mathf.Clamp(star - 1, 0, ability.healingPerSecond.Length - 1)];
-        float passiveConversion = ability.healToDamageConversion * 100f;
+        int starIndex = Mathf.Clamp(star - 1, 0, 2);
 
-        return $"Passive: Whenever Cobaltine heals, {passiveConversion:F0}% of the healed amount is converted to bonus damage on Cobaltine's next auto attack.\n\n" +
-               $"Active: Cast a cloud above Cobaltine in a {ability.cloudRadius} hex radius. The cloud drains {ability.armorDrainPerSecond} armor split between all enemies in the radius every second and heals Cobaltine for {healing} health every second for {ability.cloudDuration} seconds.";
+        float healing = 30f;
+        float armorDrain = 3f;
+        float duration = 4f;
+        float passiveConversion = 50f;
+
+        if (ability.healingPerSecond != null && ability.healingPerSecond.Length > starIndex)
+            healing = ability.healingPerSecond[starIndex];
+
+        if (ability.armorDrainPerSecond != null && ability.armorDrainPerSecond.Length > starIndex)
+            armorDrain = ability.armorDrainPerSecond[starIndex];
+
+        if (ability.cloudDuration != null && ability.cloudDuration.Length > starIndex)
+            duration = ability.cloudDuration[starIndex];
+
+        if (ability.healToDamageConversion != null && ability.healToDamageConversion.Length > starIndex)
+            passiveConversion = ability.healToDamageConversion[starIndex] * 100f;
+
+        return $"Cast a spell in a 2 hex radius above Cobaltine, lowering all enemy armour by {armorDrain} and healing Cobaltine for {healing} health every second for {duration} seconds.\n\n" +
+               $"Afterwards, Cobaltine's next auto attack deals {passiveConversion:F0}% of ALL healing received as bonus damage.";
     }
+
+
     private static string GetKuromushadoDescription(UnitAI unit, float ad, int star)
     {
         var ability = unit.GetComponent<KuromushadoAbility>();

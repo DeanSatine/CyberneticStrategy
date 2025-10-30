@@ -36,6 +36,7 @@ public class UnitAI : MonoBehaviour
     [HideInInspector] public bool isCastingAbility = false;
     public delegate void AttackEvent(UnitAI target);
     public event System.Action<UnitAI> OnAttackEvent;
+    public event System.Action<float> OnHealReceived;
 
     [Header("Combat VFX")]
     public GameObject projectilePrefab;
@@ -374,9 +375,11 @@ public class UnitAI : MonoBehaviour
                 transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 10f);  // Smooth
         }
     }
+    public void RaiseHealReceivedEvent(float healAmount)
+    {
+        OnHealReceived?.Invoke(healAmount);
+    }
 
-
-    // 🔹 Call this from the auto attack animation (Animation Event)
     public void DealAutoAttackDamage()
     {
         Debug.Log($"🎯 [ATTACK EVENT] {unitName} (⭐{starLevel}) FIRING auto attack event! Current target: {(currentTarget != null ? currentTarget.name : "NULL")}");
