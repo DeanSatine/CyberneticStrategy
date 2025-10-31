@@ -677,7 +677,7 @@ public class UnitAI : MonoBehaviour
         }
     }
 
-    private void GainMana(float amount)
+    public void GainMana(float amount)
     {
         currentMana += amount;
 

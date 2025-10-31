@@ -142,4 +142,30 @@ public class BoardManager : MonoBehaviour
         }
         return best;
     }
+    public bool IsPositionOnBoard(Vector3 worldPosition, out Vector3 clampedPosition)
+    {
+        clampedPosition = worldPosition;
+
+        if (allTiles.Count == 0) return true;
+
+        // Find the closest tile to this position
+        HexTile closestTile = GetTileFromWorld(worldPosition);
+
+        if (closestTile == null) return false;
+
+        // Check if position is within reasonable distance of any board tile
+        float maxDistanceFromBoard = 2f; // Units can be this far from nearest tile
+        float distanceToClosestTile = Vector3.Distance(worldPosition, closestTile.transform.position);
+
+        if (distanceToClosestTile > maxDistanceFromBoard)
+        {
+            // Clamp to the closest tile position plus some offset
+            Vector3 directionToPosition = (worldPosition - closestTile.transform.position).normalized;
+            clampedPosition = closestTile.transform.position + directionToPosition * maxDistanceFromBoard;
+            return false;
+        }
+
+        return true;
+    }
+
 }

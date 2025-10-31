@@ -33,8 +33,12 @@ public static class UnitAbilityDescriptions
             case "Cobaltine":
 
                 return GetCobaltineDescription(unit, ad, star);
+
             case "Kurōmushadō":
                 return GetKuromushadoDescription(unit, ad, star);
+
+            case "Coreweaver":
+                return GetCoreweaverDescription(unit, ad, star);
 
             default:
                 return "This unit has no ability description yet.";
@@ -81,8 +85,6 @@ public static class UnitAbilityDescriptions
         return $"Cast a spell in a 2 hex radius above Cobaltine, lowering all enemy armour by {armorDrain} and healing Cobaltine for {healing} health every second for {duration} seconds.\n\n" +
                $"Afterwards, Cobaltine's next auto attack deals {passiveConversion:F0}% of ALL healing received as bonus damage.";
     }
-
-
     private static string GetKuromushadoDescription(UnitAI unit, float ad, int star)
     {
         var ability = unit.GetComponent<KuromushadoAbility>();
@@ -93,6 +95,23 @@ public static class UnitAbilityDescriptions
 
         return $"Passive: Auto Attacks sweep in a {coneSize} hex cone, hitting all enemies within {ability.coneAngle}° of the target.\n\n" +
                $"Active: Jump Kick the target, dealing {kickDamage} damage and knocking them back {ability.knockbackDistance} hexes.";
+    }
+    private static string GetCoreweaverDescription(UnitAI unit, float ad, int star)
+    {
+        var ability = unit.GetComponent<CoreweaverAbility>();
+        if (ability == null) return "Coreweaver ability missing.";
+
+        int starIndex = Mathf.Clamp(star - 1, 0, 2);
+
+        float duration = ability.stormDuration[starIndex];
+        float meteorDmg = ability.meteorDamage[starIndex];
+        float tornadoDmg = ability.tornadoDamage[starIndex];
+        float manaPerSec = ability.baseManaPerSecond + (unit.attackSpeed * ability.attackSpeedToManaConversion);
+
+        return $"<b>Passive:</b> Coreweaver cannot move or auto attack. Generates <color=#00BFFF>{manaPerSec:F1}</color> mana per second.\n\n" +
+               $"<b>Active - Unleash a storm of lightning strikes that orbit for <color=#FFD700>{duration}</color> seconds.\n" +
+               $"• <color=#FF4500>Strikes</color> deal <color=#FF4500>{meteorDmg}</color> damage\n" +
+               $"• <color=#00CED1>Orbits</color> deal <color=#00CED1>{tornadoDmg}</color> damage and stun for 1 second.";
     }
 
     private static string GetManaDriveDescription(UnitAI unit, float ad, int star)
