@@ -8,8 +8,8 @@ public class CoreweaverAbility : MonoBehaviour, IUnitAbility
     private UnitAI unitAI;
 
     [Header("Passive: Stationary Mana Generator")]
-    [Tooltip("Base mana regenerated per second")]
-    public float baseManaPerSecond = 5f;
+    [Tooltip("Mana regenerated per second")]
+    public float[] baseManaPerSecond = { 5f, 6f, 12f };
 
     [Tooltip("How much attack speed converts to mana regen (0.5 AS = 1 mana/sec)")]
     public float attackSpeedToManaConversion = 2f;
@@ -38,6 +38,10 @@ public class CoreweaverAbility : MonoBehaviour, IUnitAbility
 
     [Tooltip("Radius of tornado orbit (in hex tiles)")]
     public float tornadoOrbitRadius = 14f;
+
+    [Tooltip("Height offset for tornados above ground")]
+    public float tornadoHeightOffset = 1.5f;
+
 
     [Header("AOE Damage Radius")]
     [Tooltip("AOE radius for meteor impact damage")]
@@ -73,6 +77,7 @@ public class CoreweaverAbility : MonoBehaviour, IUnitAbility
     private Coroutine manaRegenCoroutine;
     private bool isStormActive = false;
     private List<GameObject> activeTornados = new List<GameObject>();
+    private List<GameObject> activeMeteors = new List<GameObject>();
 
     private void Awake()
     {
@@ -136,7 +141,9 @@ public class CoreweaverAbility : MonoBehaviour, IUnitAbility
         {
             if (unitAI.currentState == UnitState.Combat)
             {
-                float manaPerSecond = baseManaPerSecond + (unitAI.attackSpeed * attackSpeedToManaConversion);
+                int starIndex = Mathf.Clamp(unitAI.starLevel - 1, 0, 2);
+                float baseMana = baseManaPerSecond[starIndex];
+                float manaPerSecond = baseMana + (unitAI.attackSpeed * attackSpeedToManaConversion);
                 float manaGained = manaPerSecond * Time.deltaTime;
                 unitAI.GainMana(manaGained);
             }
@@ -180,13 +187,22 @@ public class CoreweaverAbility : MonoBehaviour, IUnitAbility
             StopCoroutine(stormCoroutine);
             stormCoroutine = null;
         }
-        CleanupTornados();
+
+        CleanupAllVFX();
         isStormActive = false;
 
+        if (unitAI != null)
+        {
+            unitAI.isCastingAbility = false;
+        }
+
         StartManaRegeneration();
+
+        Debug.Log($"🔋 {unitAI?.unitName} ability reset for new round");
     }
 
-    private void CleanupTornados()
+
+    private void CleanupAllVFX()
     {
         foreach (GameObject tornado in activeTornados)
         {
@@ -196,7 +212,17 @@ public class CoreweaverAbility : MonoBehaviour, IUnitAbility
             }
         }
         activeTornados.Clear();
+
+        foreach (GameObject meteor in activeMeteors)
+        {
+            if (meteor != null)
+            {
+                Destroy(meteor);
+            }
+        }
+        activeMeteors.Clear();
     }
+
 
     private IEnumerator MeteorTornadoStorm(float duration)
     {
@@ -209,7 +235,7 @@ public class CoreweaverAbility : MonoBehaviour, IUnitAbility
         Vector3 initialBoardCenter = GetBoardCenter();
         SpawnOrbitingTornados(initialBoardCenter, duration);
 
-        while (elapsed < duration && unitAI.isAlive)
+        while (elapsed < duration && unitAI != null && unitAI.isAlive && unitAI.currentState == UnitState.Combat)
         {
             elapsed += Time.deltaTime;
             nextMeteor -= Time.deltaTime;
@@ -230,14 +256,32 @@ public class CoreweaverAbility : MonoBehaviour, IUnitAbility
             yield return null;
         }
 
-        CleanupTornados();
+        CleanupAllVFX();
         isStormActive = false;
         unitAI.isCastingAbility = false;
-        Debug.Log($"⚡ {unitAI.unitName}'s storm has ended.");
+
+        if (unitAI.currentState != UnitState.Combat)
+        {
+            Debug.Log($"⚡ {unitAI.unitName}'s storm cancelled - round ended.");
+        }
+        else
+        {
+            Debug.Log($"⚡ {unitAI.unitName}'s storm has ended.");
+        }
     }
+
 
     private Vector3 GetBoardCenter()
     {
+        if (unitAI.currentTarget != null)
+        {
+            UnitAI targetUnit = unitAI.currentTarget.GetComponent<UnitAI>();
+            if (targetUnit != null && targetUnit.isAlive)
+            {
+                return unitAI.currentTarget.position;
+            }
+        }
+
         if (BoardManager.Instance == null) return Vector3.zero;
 
         List<HexTile> enemyTiles = BoardManager.Instance.GetEnemyTiles();
@@ -263,14 +307,9 @@ public class CoreweaverAbility : MonoBehaviour, IUnitAbility
             return center;
         }
 
-        Vector3 fallbackCenter = Vector3.zero;
-        foreach (HexTile tile in enemyTiles)
-        {
-            fallbackCenter += tile.transform.position;
-        }
-        fallbackCenter /= enemyTiles.Count;
-        return fallbackCenter;
+        return Vector3.zero;
     }
+
 
     private void SpawnOrbitingTornados(Vector3 center, float duration)
     {
@@ -314,7 +353,7 @@ public class CoreweaverAbility : MonoBehaviour, IUnitAbility
             float angleRad = currentAngle * Mathf.Deg2Rad;
             Vector3 offset = new Vector3(
                 Mathf.Cos(angleRad) * tornadoOrbitRadius,
-                0f,
+                tornadoHeightOffset,
                 Mathf.Sin(angleRad) * tornadoOrbitRadius
             );
 
@@ -353,8 +392,7 @@ public class CoreweaverAbility : MonoBehaviour, IUnitAbility
             UnitAI enemy = col.GetComponent<UnitAI>();
             if (enemy != null && enemy.teamID != unitAI.teamID && enemy.isAlive && !hitEnemies.Contains(enemy))
             {
-                enemy.TakeDamage(damage);
-                StartCoroutine(StunEnemy(enemy, tornadoStunDuration));
+                unitAI.DealMagicDamageWithAP(enemy, damage, 1.5f); StartCoroutine(StunEnemy(enemy, tornadoStunDuration));
                 hitEnemies.Add(enemy);
             }
         }
@@ -390,12 +428,13 @@ public class CoreweaverAbility : MonoBehaviour, IUnitAbility
         if (meteorVFX != null)
         {
             meteor = Instantiate(meteorVFX, startPos, Quaternion.identity);
+            activeMeteors.Add(meteor);
         }
 
         float duration = 0.8f;
         float elapsed = 0f;
 
-        while (elapsed < duration)
+        while (elapsed < duration && unitAI != null && unitAI.isAlive && unitAI.currentState == UnitState.Combat)
         {
             elapsed += Time.deltaTime;
             float t = elapsed / duration;
@@ -408,15 +447,27 @@ public class CoreweaverAbility : MonoBehaviour, IUnitAbility
             yield return null;
         }
 
+        if (unitAI == null || !unitAI.isAlive || unitAI.currentState != UnitState.Combat)
+        {
+            if (meteor != null)
+            {
+                activeMeteors.Remove(meteor);
+                Destroy(meteor);
+            }
+            yield break;
+        }
+
         PlaySound(meteorImpactSound);
 
         if (meteor != null)
         {
+            activeMeteors.Remove(meteor);
             Destroy(meteor, 2f);
         }
 
         ApplyMeteorDamageAOE(targetPos);
     }
+
 
     private void ApplyMeteorDamageAOE(Vector3 impactPos)
     {
@@ -432,7 +483,7 @@ public class CoreweaverAbility : MonoBehaviour, IUnitAbility
             UnitAI enemy = col.GetComponent<UnitAI>();
             if (enemy != null && enemy.teamID != unitAI.teamID && enemy.isAlive && !hitEnemies.Contains(enemy))
             {
-                enemy.TakeDamage(damage);
+                unitAI.DealMagicDamageWithAP(enemy, damage, 1.5f);
                 hitEnemies.Add(enemy);
                 hitCount++;
             }

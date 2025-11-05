@@ -20,12 +20,31 @@ public class UnitAI : MonoBehaviour
     public float maxHealth = 100;
     public float currentHealth;
     public float attackDamage = 10;
-    public float attackSpeed = 1.0f; // attacks per second
+    public float attackSpeed = 1.0f;
+
+    [Header("Defensive Stats")]
+    [Tooltip("Armor reduces physical damage. Formula: damage * (100 / (100 + armor))")]
     public float armor = 0;
+
+    [Tooltip("Magic Resist reduces magic damage. Formula: damage * (100 / (100 + magicResist))")]
+    public float magicResist = 0;
+
+    [Tooltip("Percent-based damage reduction (0-100). Applied after armor/MR.")]
+    [Range(0f, 100f)]
+    public float damageReduction = 0f;
+
+    [Header("Offensive Stats")]
+    [Tooltip("What type of damage this unit deals with basic attacks")]
+    public DamageType attackDamageType = DamageType.Physical;
+
+    [Tooltip("Ability Power - scales magic damage abilities")]
+    public float abilityPower = 0f;
+
     public float attackRange = 1.5f;
     public float mana = 0f;
     public float maxMana = 50f;
     [HideInInspector] public float currentMana = 0f;
+
     [Header("Traits")]
     public List<Trait> traits = new List<Trait>();
 
@@ -319,7 +338,7 @@ public class UnitAI : MonoBehaviour
 
             if (dir.magnitude < 0.2f)
             {
-                target.TakeDamage(attackDamage);
+                this.DealDamage(target, attackDamage, attackDamageType);
                 activeProjectiles.Remove(proj);
                 Destroy(proj);
                 yield break;
@@ -418,7 +437,7 @@ public class UnitAI : MonoBehaviour
                 Debug.Log($"⚡ [{unitName}] Dealing IMMEDIATE damage: {attackDamage} to {enemy.unitName} (⭐{enemy.starLevel})");
                 Debug.Log($"💥 [BEFORE] {enemy.unitName} health: {enemy.currentHealth}/{enemy.maxHealth}");
 
-                enemy.TakeDamage(attackDamage);
+                this.DealDamage(enemy, attackDamage, attackDamageType);
 
                 Debug.Log($"💗 [AFTER] {enemy.unitName} health: {enemy.currentHealth}/{enemy.maxHealth}");
             }
@@ -435,20 +454,29 @@ public class UnitAI : MonoBehaviour
 
     public void TakeDamage(float damage)
     {
-        Debug.Log($"💥 [TAKE DAMAGE] {unitName} (⭐{starLevel}) receiving {damage} damage (current state: {currentState})");
+        TakeDamage(DamageInfo.Physical(damage));
+    }
 
-        // ✅ Benched units cannot take damage
+    public void TakeDamage(DamageInfo damageInfo)
+    {
         if (currentState == UnitState.Bench)
         {
             Debug.Log($"🚫 {unitName} is benched and ignored damage.");
             return;
         }
 
-        float reducedDamage = damage * (1f - (armor * 0.005f));
-        currentHealth -= reducedDamage;
+        float finalDamage = DamageCalculator.CalculateDamageReduction(
+            damageInfo,
+            armor,
+            magicResist,
+            damageReduction
+        );
+
+        currentHealth -= finalDamage;
         GainMana(1);
 
-        Debug.Log($"💗 {unitName} took {reducedDamage} damage. HP: {currentHealth}/{maxHealth}");
+        string damageTypeIcon = DamageCalculator.GetDamageTypeIcon(damageInfo.type);
+        Debug.Log($"{damageTypeIcon} {unitName} took {finalDamage:F1} {damageInfo.type} damage (from {damageInfo.amount:F1}). HP: {currentHealth:F0}/{maxHealth:F0}");
 
         if (ui != null)
             ui.UpdateHealth(currentHealth);
@@ -458,6 +486,17 @@ public class UnitAI : MonoBehaviour
             Die();
         }
     }
+
+    public float GetPhysicalDamageReduction()
+    {
+        return DamageCalculator.GetPhysicalDamageReduction(armor, damageReduction);
+    }
+
+    public float GetMagicDamageReduction()
+    {
+        return DamageCalculator.GetMagicDamageReduction(magicResist, damageReduction);
+    }
+
 
     public void ClearTile()
     {

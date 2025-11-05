@@ -302,7 +302,7 @@ public class CobaltineAbility : MonoBehaviour, IUnitAbility
             float conversionRate = healToDamageConversion[Mathf.Clamp(unitAI.starLevel - 1, 0, healToDamageConversion.Length - 1)];
             float bonusDamage = totalHealingReceived * conversionRate;
 
-            target.TakeDamage(bonusDamage);
+            unitAI.DealMagicDamageWithAP(target, bonusDamage, 0.5f);
 
             Debug.Log($"⚡ {unitAI.unitName} dealt {bonusDamage} bonus passive damage ({totalHealingReceived} healing × {conversionRate * 100}%) to {target.unitName}!");
 

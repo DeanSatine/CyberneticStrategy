@@ -45,127 +45,135 @@ public static class UnitAbilityDescriptions
         }
     }
 
-    private static string GetNeedlebotDescription(UnitAI unit, float ad, int star)
-    {
-        var ability = unit.GetComponent<NeedleBotAbility>();
-        if (ability == null) return "Needlebot ability missing.";
+private static string GetNeedlebotDescription(UnitAI unit, float ad, int star)
+{
+    var ability = unit.GetComponent<NeedleBotAbility>();
+    if (ability == null) return "Needlebot ability missing.";
 
-        float dmg = ability.damagePerStar[Mathf.Clamp(star - 1, 0, ability.damagePerStar.Length - 1)];
-        int bonusNeedles = ability.needlesPerCast - ability.baseNeedleCount;
-        string bonusText = bonusNeedles > 0 ? $" (+{bonusNeedles})" : "";
+    float dmg = ability.damagePerStar[Mathf.Clamp(star - 1, 0, ability.damagePerStar.Length - 1)];
+    int bonusNeedles = ability.needlesPerCast - ability.baseNeedleCount;
+    string bonusText = bonusNeedles > 0 ? $" (+{bonusNeedles})" : "";
 
-        return $"Active: Rapidly shoot {ability.needlesPerCast}{bonusText} needles split between the nearest 2 enemies within 2 hexes, each dealing {dmg + (ad * 0.6f)} damage.\n\n" +
-               $"Every 10 needles shot, increase the needle count by 1 permanently.\n\n" +
-               $"Bonus Needle Count: {bonusNeedles}";
-    }
-    private static string GetCobaltineDescription(UnitAI unit, float ad, int star)
-    {
-        var ability = unit.GetComponent<CobaltineAbility>();
-        if (ability == null) return "Cobaltine ability missing.";
+    return $"Active: Rapidly shoot {ability.needlesPerCast}{bonusText} needles split between the nearest 2 enemies within 2 hexes, each dealing {dmg + (ad * 0.6f)} <color=#FF6600>physical damage</color>.\n\n" +
+           $"Every 10 needles shot, increase the needle count by 1 permanently.\n\n" +
+           $"Bonus Needle Count: {bonusNeedles}";
+}
 
-        int starIndex = Mathf.Clamp(star - 1, 0, 2);
+private static string GetCobaltineDescription(UnitAI unit, float ad, int star)
+{
+    var ability = unit.GetComponent<CobaltineAbility>();
+    if (ability == null) return "Cobaltine ability missing.";
 
-        float healing = 30f;
-        float armorDrain = 3f;
-        float duration = 4f;
-        float passiveConversion = 50f;
+    int starIndex = Mathf.Clamp(star - 1, 0, 2);
 
-        if (ability.healingPerSecond != null && ability.healingPerSecond.Length > starIndex)
-            healing = ability.healingPerSecond[starIndex];
+    float healing = 30f;
+    float armorDrain = 3f;
+    float duration = 4f;
+    float passiveConversion = 50f;
 
-        if (ability.armorDrainPerSecond != null && ability.armorDrainPerSecond.Length > starIndex)
-            armorDrain = ability.armorDrainPerSecond[starIndex];
+    if (ability.healingPerSecond != null && ability.healingPerSecond.Length > starIndex)
+        healing = ability.healingPerSecond[starIndex];
 
-        if (ability.cloudDuration != null && ability.cloudDuration.Length > starIndex)
-            duration = ability.cloudDuration[starIndex];
+    if (ability.armorDrainPerSecond != null && ability.armorDrainPerSecond.Length > starIndex)
+        armorDrain = ability.armorDrainPerSecond[starIndex];
 
-        if (ability.healToDamageConversion != null && ability.healToDamageConversion.Length > starIndex)
-            passiveConversion = ability.healToDamageConversion[starIndex] * 100f;
+    if (ability.cloudDuration != null && ability.cloudDuration.Length > starIndex)
+        duration = ability.cloudDuration[starIndex];
 
-        return $"Cast a spell in a 2 hex radius above Cobaltine, lowering all enemy armour by {armorDrain} and healing Cobaltine for {healing} health every second for {duration} seconds.\n\n" +
-               $"Afterwards, Cobaltine's next auto attack deals {passiveConversion:F0}% of ALL healing received as bonus damage.";
-    }
-    private static string GetKuromushadoDescription(UnitAI unit, float ad, int star)
-    {
-        var ability = unit.GetComponent<KuromushadoAbility>();
-        if (ability == null) return "Kurōmushadō ability missing.";
+    if (ability.healToDamageConversion != null && ability.healToDamageConversion.Length > starIndex)
+        passiveConversion = ability.healToDamageConversion[starIndex] * 100f;
 
-        int coneSize = ability.coneSizePerStar[Mathf.Clamp(star - 1, 0, ability.coneSizePerStar.Length - 1)];
-        float kickDamage = ability.jumpKickDamage[Mathf.Clamp(star - 1, 0, ability.jumpKickDamage.Length - 1)];
+    return $"Cast a spell in a 2 hex radius above Cobaltine, lowering all enemy armour by {armorDrain} and healing Cobaltine for {healing} health every second for {duration} seconds.\n\n" +
+           $"Afterwards, Cobaltine's next auto attack deals {passiveConversion:F0}% of ALL healing received as bonus <color=#00BFFF>magic damage</color> (scales with {unit.abilityPower * 0.5f:F0} AP).";
+}
 
-        return $"Passive: Auto Attacks sweep in a {coneSize} hex cone, hitting all enemies within {ability.coneAngle}° of the target.\n\n" +
-               $"Active: Jump Kick the target, dealing {kickDamage} damage and knocking them back {ability.knockbackDistance} hexes.";
-    }
-    private static string GetCoreweaverDescription(UnitAI unit, float ad, int star)
-    {
-        var ability = unit.GetComponent<CoreweaverAbility>();
-        if (ability == null) return "Coreweaver ability missing.";
+private static string GetKuromushadoDescription(UnitAI unit, float ad, int star)
+{
+    var ability = unit.GetComponent<KuromushadoAbility>();
+    if (ability == null) return "Kurōmushadō ability missing.";
 
-        int starIndex = Mathf.Clamp(star - 1, 0, 2);
+    int coneSize = ability.coneSizePerStar[Mathf.Clamp(star - 1, 0, ability.coneSizePerStar.Length - 1)];
+    float kickDamage = ability.jumpKickDamage[Mathf.Clamp(star - 1, 0, ability.jumpKickDamage.Length - 1)];
 
-        float duration = ability.stormDuration[starIndex];
-        float meteorDmg = ability.meteorDamage[starIndex];
-        float tornadoDmg = ability.tornadoDamage[starIndex];
-        float manaPerSec = ability.baseManaPerSecond + (unit.attackSpeed * ability.attackSpeedToManaConversion);
+    return $"Passive: Auto Attacks sweep in a {coneSize} hex cone, hitting all enemies within {ability.coneAngle}° of the target.\n\n" +
+           $"Active: Jump Kick the target, dealing {kickDamage} <color=#FF6600>physical damage</color> and knocking them back {ability.knockbackDistance} hexes.";
+}
 
-        return $"<b>Passive:</b> Coreweaver cannot move or auto attack. Generates <color=#00BFFF>{manaPerSec:F1}</color> mana per second.\n\n" +
-               $"<b>Active - Unleash a storm of lightning strikes that orbit for <color=#FFD700>{duration}</color> seconds.\n" +
-               $"• <color=#FF4500>Strikes</color> deal <color=#FF4500>{meteorDmg}</color> damage\n" +
-               $"• <color=#00CED1>Orbits</color> deal <color=#00CED1>{tornadoDmg}</color> damage and stun for 1 second.";
-    }
+private static string GetCoreweaverDescription(UnitAI unit, float ad, int star)
+{
+    var ability = unit.GetComponent<CoreweaverAbility>();
+    if (ability == null) return "Coreweaver ability missing.";
 
-    private static string GetManaDriveDescription(UnitAI unit, float ad, int star)
-    {
-        var ability = unit.GetComponent<ManaDriveAbility>();
-        if (ability == null) return "ManaDrive ability missing.";
+    int starIndex = Mathf.Clamp(star - 1, 0, 2);
 
-        float dmg = ability.damagePerStar[Mathf.Clamp(star - 1, 0, ability.damagePerStar.Length - 1)];
+    float duration = ability.stormDuration[starIndex];
+    float meteorDmg = ability.meteorDamage[starIndex];
+    float tornadoDmg = ability.tornadoDamage[starIndex];
+    
+    float baseMana = ability.baseManaPerSecond.Length > starIndex ? ability.baseManaPerSecond[starIndex] : 5f;
+    float manaPerSec = baseMana + (unit.attackSpeed * ability.attackSpeedToManaConversion);
 
-        return $"Hurl a massive bomb towards the largest group of enemies, dealing {dmg + (ad * 1.5f)} damage.\n\n" +
-               $"If the bomb kills a target, ManaDrive gains {ability.attackSpeedGain * 100:F0}% attack speed for the rest of combat and casts again, at {(1f - ability.recursiveDamageReduction) * 100:F0}% effectiveness.";
-    }
+    float meteorWithAP = meteorDmg + (unit.abilityPower * 1.5f);
+    float tornadoWithAP = tornadoDmg + (unit.abilityPower * 1.5f);
 
-    private static string GetHyperShotDescription(UnitAI unit, float ad, int star)
-    {
-        var ability = unit.GetComponent<HyperShotAbility>();
-        if (ability == null) return "HyperShot ability missing.";
+    return $"<b>Passive:</b> Coreweaver cannot move or auto attack. Generates <color=#00BFFF>{manaPerSec:F1}</color> mana per second.\n\n" +
+           $"<b>Active:</b> Unleash a storm of meteors and lightning in a large area around the current target for <color=#FFD700>{duration}</color> seconds.\n" +
+           $"• <color=#FF4500>Meteors</color> deal <color=#FF4500>{meteorWithAP:F0}</color> <color=#00BFFF>magic damage</color> ({meteorDmg} + 150% AP)\n" +
+           $"• <color=#00CED1>Lightning</color> deals <color=#00CED1>{tornadoWithAP:F0}</color> <color=#00BFFF>magic damage</color> ({tornadoDmg} + 150% AP) and stuns for 1 second.";
+}
 
-        int starIndex = Mathf.Clamp(star - 1, 0, ability.aoeDamagePerStar.Length - 1);
-        float aoeDamage = ability.aoeDamagePerStar[starIndex];
+private static string GetManaDriveDescription(UnitAI unit, float ad, int star)
+{
+    var ability = unit.GetComponent<ManaDriveAbility>();
+    if (ability == null) return "ManaDrive ability missing.";
 
-        return $"Passive: Every {ability.attacksToTrigger} attacks, trigger an explosion dealing {aoeDamage + (ad * 0.75f)} damage to all enemies in a {ability.aoeRadius} hex radius.\n\n" +
-               $"Active: Gain +{ability.attackSpeedBonus * 100:F0}% attack speed for {ability.buffDuration} seconds. \n\nThis effect stacks!";
-    }
+    float dmg = ability.damagePerStar[Mathf.Clamp(star - 1, 0, ability.damagePerStar.Length - 1)];
+    float totalDamage = dmg + (unit.abilityPower * 1.0f);
 
+    return $"Hurl a massive bomb towards the largest group of enemies, dealing {totalDamage:F0} <color=#00BFFF>magic damage</color> ({dmg} + 100% AP).\n\n" +
+           $"If the bomb kills a target, ManaDrive gains {ability.attackSpeedGain * 100:F0}% attack speed for the rest of combat and casts again, at {(1f - ability.recursiveDamageReduction) * 100:F0}% effectiveness.";
+}
 
-    private static string GetKillSwitchDescription(UnitAI unit, float ad, int star)
-    {
-        var ability = unit.GetComponent<KillSwitchAbility>();
-        if (ability == null) return "KillSwitch ability missing.";
+private static string GetHyperShotDescription(UnitAI unit, float ad, int star)
+{
+    var ability = unit.GetComponent<HyperShotAbility>();
+    if (ability == null) return "HyperShot ability missing.";
 
-        float slamDmg = ability.slamDamagePerStar[Mathf.Clamp(star - 1, 0, ability.slamDamagePerStar.Length - 1)];
+    int starIndex = Mathf.Clamp(star - 1, 0, ability.aoeDamagePerStar.Length - 1);
+    float aoeDamage = ability.aoeDamagePerStar[starIndex];
+    float totalDamage = aoeDamage + (unit.abilityPower * 1.0f);
 
-        return $"Passive: Every other attack lowers the target's armour by {ability.armorShred}.\n\n" +
-               $"Active: Leap to the farthest enemy within 4 hexes, heal {ability.healOnTargetSwap} hp and slam them for {slamDmg + (ad * 0.4f)} damage. Grant KillSwitch 50% attack speed for 4 seconds.";
-    }
+    return $"Passive: Every {ability.attacksToTrigger} attacks, trigger an explosion dealing {totalDamage:F0} <color=#00BFFF>magic damage</color> ({aoeDamage} + 100% AP) to all enemies in a {ability.aoeRadius} hex radius.\n\n" +
+           $"Active: Gain +{ability.attackSpeedBonus * 100:F0}% attack speed for {ability.buffDuration} seconds. \n\nThis effect stacks!";
+}
 
-    private static string GetHaymakerDescription(UnitAI unit, float ad, int star)
-    {
-        var ability = unit.GetComponent<HaymakerAbility>();
-        if (ability == null) return "Haymaker ability missing.";
+private static string GetKillSwitchDescription(UnitAI unit, float ad, int star)
+{
+    var ability = unit.GetComponent<KillSwitchAbility>();
+    if (ability == null) return "KillSwitch ability missing.";
 
-        float slashDmg = ability.slashDamage[Mathf.Clamp(star - 1, 0, ability.slashDamage.Length - 1)];
-        float slamDmg = ability.slamDamage[Mathf.Clamp(star - 1, 0, ability.slamDamage.Length - 1)];
+    float slamDmg = ability.slamDamagePerStar[Mathf.Clamp(star - 1, 0, ability.slamDamagePerStar.Length - 1)];
 
-        int starIndex = Mathf.Clamp(star - 1, 0, ability.temporaryArmor.Length - 1);
-        int damageReductionPercent = 80 + (starIndex * 10);
+    return $"Passive: Every other attack lowers the target's armour by {ability.armorShred}.\n\n" +
+           $"Active: Leap to the farthest enemy within 4 hexes, heal {ability.healOnTargetSwap} hp and slam them for {slamDmg + (ad * 0.4f)} <color=#FF6600>physical damage</color>. Grant KillSwitch 50% attack speed for 4 seconds.";
+}
 
-        return $"Passive: Summon a clone of Haymaker with 25% health and damage. The clone does not benefit from traits.\n\n" +
-               $"When units on the board die, Haymaker absorbs their soul. The clone gains 1% health and damage for every 5 souls absorbed.\n\n" +
-               $"Active: Dash to the center clump of enemies and unleash a fury of slashes within 3 hexes that each do {slashDmg + (ad * 1.2f)} damage for 3 seconds. While slashing take {damageReductionPercent}% reduced damage. Then dash back to original position.\n\n" +
-               $"Then, the clone will slam onto the final target, dealing {slamDmg + (ad * 1.2f)} damage. ";
-    }
+private static string GetHaymakerDescription(UnitAI unit, float ad, int star)
+{
+    var ability = unit.GetComponent<HaymakerAbility>();
+    if (ability == null) return "Haymaker ability missing.";
 
+    float slashDmg = ability.slashDamage[Mathf.Clamp(star - 1, 0, ability.slashDamage.Length - 1)];
+    float slamDmg = ability.slamDamage[Mathf.Clamp(star - 1, 0, ability.slamDamage.Length - 1)];
+
+    int starIndex = Mathf.Clamp(star - 1, 0, ability.temporaryArmor.Length - 1);
+    int damageReductionPercent = 80 + (starIndex * 10);
+
+    return $"Passive: Summon a clone of Haymaker with 25% health and damage. The clone does not benefit from traits.\n\n" +
+           $"When units on the board die, Haymaker absorbs their soul. The clone gains 1% health and damage for every 5 souls absorbed.\n\n" +
+           $"Active: Dash to the center clump of enemies and unleash a fury of slashes within 3 hexes that each do {slashDmg + (ad * 1.2f)} <color=#FF6600>physical damage</color> for 3 seconds. While slashing take {damageReductionPercent}% reduced damage. Then dash back to original position.\n\n" +
+           $"Then, the clone will slam onto the final target, dealing {slamDmg + (ad * 1.2f)} <color=#FF6600>physical damage</color>. ";
+}
     private static string GetHaymakerCloneDescription(UnitAI unit)
     {
         var cloneComponent = unit.GetComponent<HaymakerClone>();
@@ -181,17 +189,17 @@ public static class UnitAbilityDescriptions
 
         return "Slams down at the last hit target when Haymaker finishes casting.";
     }
-
     private static string GetBOPDescription(UnitAI unit, float maxHp, int star)
-    {
-        var ability = unit.GetComponent<BOPAbility>();
-        if (ability == null) return "B.O.P ability missing.";
+{
+    var ability = unit.GetComponent<BOPAbility>();
+    if (ability == null) return "B.O.P ability missing.";
 
-        float buffPercent = ability.chestBuffPercent[Mathf.Clamp(star - 1, 0, ability.chestBuffPercent.Length - 1)];
-        float dmgAmp = ability.damageAmpPerStar[Mathf.Clamp(star - 1, 0, ability.damageAmpPerStar.Length - 1)];
-        float bonkDmg = (maxHp * 0.2f) + dmgAmp;
+    float buffPercent = ability.chestBuffPercent[Mathf.Clamp(star - 1, 0, ability.chestBuffPercent.Length - 1)];
+    float dmgAmp = ability.damageAmpPerStar[Mathf.Clamp(star - 1, 0, ability.damageAmpPerStar.Length - 1)];
+    float bonkDmg = (maxHp * 0.2f) + dmgAmp;
 
-        return $"B.O.P. pounds its chest, granting itself +{buffPercent * 100:F0}% max health.\n\n" +
-               $"Then bonk the target, dealing 20% of B.O.P.'s max health + Attack Damage as damage ({bonkDmg:F0} damage).";
-    }
+    return $"B.O.P. pounds its chest, granting itself +{buffPercent * 100:F0}% max health.\n\n" +
+           $"Then bonk the target, dealing 20% of B.O.P.'s max health + Attack Damage as <color=#FF6600>physical damage</color> ({bonkDmg:F0} damage).";
+}
+
 }

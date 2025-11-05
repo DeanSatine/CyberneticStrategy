@@ -194,7 +194,7 @@ public class ManaDriveAbility : MonoBehaviour, IUnitAbility
                 if (distance <= splashRadius)
                 {
                     float healthBeforeHit = enemy.currentHealth;
-                    enemy.TakeDamage(damage);
+                    unitAI.DealMagicDamageWithAP(enemy, damage, 1.0f);
 
                     if (healthBeforeHit > 0 && enemy.currentHealth <= 0)
                     {

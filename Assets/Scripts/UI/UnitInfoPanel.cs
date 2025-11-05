@@ -6,16 +6,25 @@ public class UnitInfoPanelUI : MonoBehaviour
 {
     [Header("References")]
     public Image portraitImage;
+
+    [Header("Offensive Stats")]
     public TMP_Text adText;
+    public TMP_Text apText;
     public TMP_Text asText;
+
+    [Header("Defensive Stats")]
     public TMP_Text hpText;
     public TMP_Text armorText;
+    public TMP_Text magicResistText;
+    public TMP_Text damageReductionText;
+
+    [Header("Resource")]
     public TMP_Text manaText;
 
     [Header("Ability")]
     public Image abilityIcon;
-    public GameObject abilityTooltip;       // tooltip panel
-    public TMP_Text abilityTooltipText;     // description text
+    public GameObject abilityTooltip;
+    public TMP_Text abilityTooltipText;
 
     private UnitAI currentUnit;
     public bool IsShowingUnit(UnitAI unit) => currentUnit == unit;
@@ -24,7 +33,7 @@ public class UnitInfoPanelUI : MonoBehaviour
     {
         Hide();
         if (abilityTooltip != null)
-            abilityTooltip.SetActive(false); // start hidden
+            abilityTooltip.SetActive(false);
     }
 
     public void Show(UnitAI unit)
@@ -32,7 +41,8 @@ public class UnitInfoPanelUI : MonoBehaviour
         currentUnit = unit;
         gameObject.SetActive(true);
 
-        if (abilityTooltipText != null) abilityTooltipText.text = unit.GetAbilityDescription();
+        if (abilityTooltipText != null)
+            abilityTooltipText.text = unit.GetAbilityDescription();
 
         RefreshDynamic();
     }
@@ -48,24 +58,43 @@ public class UnitInfoPanelUI : MonoBehaviour
         if (currentUnit != null)
             RefreshDynamic();
     }
+
     public void ForceRefresh()
     {
         if (currentUnit != null)
-            RefreshDynamic(); // (RefreshDynamic() in your current script is private; make it internal/private/protected as needed)
+            RefreshDynamic();
     }
 
     private void RefreshDynamic()
     {
         if (currentUnit == null) return;
 
-        adText.text = $"AD: {currentUnit.attackDamage:F0}";
-        asText.text = $"AS: {currentUnit.attackSpeed:F2}";
-        hpText.text = $"HP: {currentUnit.currentHealth:F0}/{currentUnit.maxHealth:F0}";
-        armorText.text = $"Armor: {currentUnit.armor:F0}";
-        manaText.text = $"Mana: {currentUnit.currentMana:F0}/{currentUnit.maxMana:F0}";
+        if (adText != null)
+            adText.text = $"AD: {currentUnit.attackDamage:F0}";
+
+        if (apText != null)
+            apText.text = $"AP: {currentUnit.abilityPower:F0}";
+
+        if (asText != null)
+            asText.text = $"AS: {currentUnit.attackSpeed:F2}";
+
+        if (hpText != null)
+            hpText.text = $"HP: {currentUnit.currentHealth:F0}/{currentUnit.maxHealth:F0}";
+
+        if (armorText != null)
+            armorText.text = $"Armor: {currentUnit.armor:F0}";
+
+        if (magicResistText != null)
+            magicResistText.text = $"MR: {currentUnit.magicResist:F0}";
+
+        if (damageReductionText != null)
+            damageReductionText.text = $"Dmg Reduction: {currentUnit.damageReduction:F0}%";
+
+        if (manaText != null)
+            manaText.text = $"Mana: {currentUnit.currentMana:F0}/{currentUnit.maxMana:F0}";
     }
 
-    // === Tooltip Hover ===
+
     public void OnAbilityIconEnter()
     {
         if (abilityTooltip != null)

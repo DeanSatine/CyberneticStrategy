@@ -688,6 +688,10 @@ MonoBehaviour:
   attackDamage: 50
   attackSpeed: 0.5
   armor: 75
+  magicResist: 0
+  damageReduction: 0
+  attackDamageType: 0
+  abilityPower: 100
   attackRange: 15
   mana: 0
   maxMana: 120
@@ -740,7 +744,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6e2522af48943540a141ad32c4a2430, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseManaPerSecond: 5
+  baseManaPerSecond:
+  - 5
+  - 6
+  - 30
   attackSpeedToManaConversion: 2
   stormDuration:
   - 4
@@ -759,13 +766,16 @@ MonoBehaviour:
   tornadoCount: 3
   tornadoOrbitSpeed: 60
   tornadoOrbitRadius: 5
+  tornadoHeightOffset: 1.5
   meteorAOERadius: 2
   tornadoAOERadius: 2
   meteorStartRadius: 2
   meteorEndRadius: 10
-  meteorVFX: {fileID: 100010, guid: c3680525f45d82543be3d8c94fe9b19f, type: 3}
-  tornadoVFX: {fileID: 100002, guid: 0b6e1ebc5f3b9a641854a0be50cef7f0, type: 3}
-  castVFX: {fileID: 0}
+  meteorsPerWave: 2
+  meteorVFX: {fileID: 100010, guid: 4c95c351eec90e4449d9ec2e753e1bfa, type: 3}
+  tornadoVFX: {fileID: 7314526620251459061, guid: ccf28ea29cf499744ac31bab90073aba,
+    type: 3}
+  castVFX: {fileID: 4212237911574779972, guid: f34d53a9f8cd409428b8d1e3addf4807, type: 3}
   castSound: {fileID: 0}
   meteorImpactSound: {fileID: 0}
   tornadoSound: {fileID: 0}

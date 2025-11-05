@@ -136,7 +136,7 @@ public class HyperShotAbility : MonoBehaviour, IUnitAbility
 
             if (Vector3.Distance(projectile.transform.position, targetPos) < 0.3f)
             {
-                target.TakeDamage(damage);
+                unitAI.DealMagicDamageWithAP(target, damage, 0.8f);
 
                 // Spawn hit effect
                 if (vfxManager != null && vfxManager.vfxConfig.autoAttackHitEffect != null)
@@ -201,7 +201,7 @@ public class HyperShotAbility : MonoBehaviour, IUnitAbility
             float distance = Vector3.Distance(epicenter, unit.transform.position);
             if (distance <= aoeRadius)
             {
-                unit.TakeDamage(damage);
+                unitAI.DealMagicDamageWithAP(unit, damage, 1.0f);
                 hitTargets.Add(unit);
                 Debug.Log($"💥 Explosion hit {unit.unitName} for {damage} damage");
             }
