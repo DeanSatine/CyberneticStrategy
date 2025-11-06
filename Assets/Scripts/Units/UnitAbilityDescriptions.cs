@@ -40,6 +40,11 @@ public static class UnitAbilityDescriptions
             case "Coreweaver":
                 return GetCoreweaverDescription(unit, ad, star);
 
+            case "BackSlash":
+                return GetBackSlashDescription(unit, ad, star);
+
+            case "SteelGuard":
+                return GetSteelGuardDescription(unit, ad, star);
             default:
                 return "This unit has no ability description yet.";
         }
@@ -146,8 +151,31 @@ private static string GetHyperShotDescription(UnitAI unit, float ad, int star)
     return $"Passive: Every {ability.attacksToTrigger} attacks, trigger an explosion dealing {totalDamage:F0} <color=#00BFFF>magic damage</color> ({aoeDamage} + 100% AP) to all enemies in a {ability.aoeRadius} hex radius.\n\n" +
            $"Active: Gain +{ability.attackSpeedBonus * 100:F0}% attack speed for {ability.buffDuration} seconds. \n\nThis effect stacks!";
 }
+    private static string GetSteelGuardDescription(UnitAI unit, float ad, int star)
+    {
+        var ability = unit.GetComponent<SteelGuardAbility>();
+        if (ability == null) return "SteelGuard ability missing.";
 
-private static string GetKillSwitchDescription(UnitAI unit, float ad, int star)
+        int starIndex = Mathf.Clamp(star - 1, 0, ability.shieldValue.Length - 1);
+        float shieldAmount = ability.shieldValue[starIndex];
+        float allyShieldAmount = shieldAmount * 0.5f;
+
+        return $"Scream, gaining a <color=#FFD700>{shieldAmount}</color> shield for {ability.shieldDuration} seconds and granting a <color=#FFD700>{allyShieldAmount}</color> shield to the nearest ally.\n\n";
+    }
+    private static string GetBackSlashDescription(UnitAI unit, float ad, int star)
+    {
+        var ability = unit.GetComponent<BackSlashAbility>();
+        if (ability == null) return "BackSlash ability missing.";
+
+        int starIndex = Mathf.Clamp(star - 1, 0, ability.slashDamage.Length - 1);
+        float slashDmg = ability.slashDamage[starIndex];
+        float slamDmg = ability.slamDamage[starIndex];
+
+        return $"Slash 1 hex in front of BackSlash, dealing {slashDmg:F0} <color=#00BFFF>magic damage</color>.\n\n" +
+               $"Every 3rd cast, slam down dealing {slamDmg:F0} <color=#00BFFF>magic damage</color> in a {ability.slamRadius / 3f:F0} hex radius.";
+    }
+
+    private static string GetKillSwitchDescription(UnitAI unit, float ad, int star)
 {
     var ability = unit.GetComponent<KillSwitchAbility>();
     if (ability == null) return "KillSwitch ability missing.";

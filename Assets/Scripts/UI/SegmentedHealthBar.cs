@@ -4,9 +4,10 @@ using UnityEngine.UI;
 public class SegmentedHealthBar : MonoBehaviour
 {
     [Header("References")]
-    public Image healthFillImage; // Your existing HealthBarFill
-    public Transform segmentDividerContainer; // Container for divider lines
-    public GameObject segmentDividerPrefab; // The SegmentDivider prefab you just created
+    public Image healthFillImage;
+    public Image shieldFillImage;
+    public Transform segmentDividerContainer;
+    public GameObject segmentDividerPrefab;
 
     [Header("Settings")]
     public int healthPerSegment = 150;
@@ -16,28 +17,29 @@ public class SegmentedHealthBar : MonoBehaviour
     public Color mediumHealthColor = Color.yellow;
     public Color lowHealthColor = Color.red;
     public Color overhealColor = Color.cyan;
+    public Color shieldColor = new Color(0.3f, 0.7f, 1f, 0.8f);
 
     private float currentHealth;
     private float maxHealth;
+    private float currentShield;
 
     public void Init(float maxHp)
     {
         maxHealth = maxHp;
         currentHealth = maxHp;
+        currentShield = 0f;
         CreateSegmentDividers();
-        UpdateHealthDisplay(maxHp);
+        UpdateHealthDisplay(maxHp, 0f);
     }
 
     private void CreateSegmentDividers()
     {
-        // Skip if no container or prefab is set
         if (segmentDividerContainer == null || segmentDividerPrefab == null)
         {
             Debug.Log("Segmented dividers skipped - missing container or prefab reference");
             return;
         }
 
-        // Clear existing dividers
         foreach (Transform child in segmentDividerContainer)
         {
             if (Application.isPlaying)
@@ -48,23 +50,19 @@ public class SegmentedHealthBar : MonoBehaviour
 
         int totalSegments = Mathf.CeilToInt(maxHealth / healthPerSegment);
 
-        // Don't create dividers if only 1 segment
         if (totalSegments <= 1) return;
 
-        // Create divider lines between segments
         for (int i = 1; i < totalSegments; i++)
         {
             GameObject divider = Instantiate(segmentDividerPrefab, segmentDividerContainer);
             RectTransform dividerRect = divider.GetComponent<RectTransform>();
 
-            // Position divider at segment boundary
             float xPosition = (float)i / totalSegments;
 
-            // Set anchors to position along the width
             dividerRect.anchorMin = new Vector2(xPosition, 0);
             dividerRect.anchorMax = new Vector2(xPosition, 1);
             dividerRect.anchoredPosition = Vector2.zero;
-            dividerRect.sizeDelta = new Vector2(2, 0); // 2px wide, full height
+            dividerRect.sizeDelta = new Vector2(2, 0);
         }
     }
 
@@ -75,32 +73,50 @@ public class SegmentedHealthBar : MonoBehaviour
         if (newMaxHealth > 0 && newMaxHealth != maxHealth)
         {
             maxHealth = newMaxHealth;
-            CreateSegmentDividers(); // Recreate dividers if max health changed
+            CreateSegmentDividers();
         }
 
-        UpdateHealthDisplay(currentHealth);
+        UpdateHealthDisplay(currentHealth, currentShield);
     }
 
-    private void UpdateHealthDisplay(float health)
+    public void UpdateShield(float shieldAmount)
+    {
+        currentShield = shieldAmount;
+        UpdateHealthDisplay(currentHealth, currentShield);
+    }
+
+    private void UpdateHealthDisplay(float health, float shield)
     {
         if (healthFillImage == null) return;
 
-        // ✅ FIX: Always calculate fill based on actual health percentage
-        float fillAmount = Mathf.Clamp01(health / maxHealth);
+        float healthFillAmount = Mathf.Clamp01(health / maxHealth);
+        healthFillImage.fillAmount = healthFillAmount;
 
-        healthFillImage.fillAmount = fillAmount;
-
-        // Set color based on health
         bool isOverhealing = health > maxHealth;
         healthFillImage.color = GetHealthColor(health, isOverhealing);
 
-        // Debug for high HP units
+        if (shieldFillImage != null)
+        {
+            if (shield > 0)
+            {
+                float totalHealthWithShield = health + shield;
+                float shieldFillAmount = Mathf.Clamp01(totalHealthWithShield / maxHealth);
+
+                shieldFillImage.fillAmount = shieldFillAmount;
+                shieldFillImage.color = shieldColor;
+                shieldFillImage.gameObject.SetActive(true);
+            }
+            else
+            {
+                shieldFillImage.gameObject.SetActive(false);
+            }
+        }
+
         if (maxHealth > 800)
         {
-            Debug.Log($"🔧 High HP Unit: {health:F0}/{maxHealth:F0} = {fillAmount:F3} fill amount");
+            Debug.Log($"🔧 High HP Unit: {health:F0}/{maxHealth:F0} (Shield: {shield:F0}) = {healthFillAmount:F3} fill amount");
         }
     }
-
 
     private Color GetHealthColor(float health, bool isOverhealing)
     {

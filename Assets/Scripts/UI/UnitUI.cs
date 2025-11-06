@@ -4,17 +4,17 @@ using UnityEngine.UI;
 public class UnitUI : MonoBehaviour
 {
     [Header("Bars")]
-    public Image healthFill; // Keep for backwards compatibility
+    public Image healthFill;
     public Image manaFill;
 
     [Header("Segmented Health Bar")]
     public SegmentedHealthBar segmentedHealthBar;
     public bool useSegmentedHealthBar = true;
 
-    private Transform target; // unit to follow
+    private Transform target;
     private float maxHealth;
     private float maxMana;
-    private Vector3 offset = new Vector3(0, 2f, 0); // base offset for 1-star units
+    private Vector3 offset = new Vector3(0, 2f, 0);
 
     public void Init(Transform followTarget, float maxHp, float maxMp)
     {
@@ -22,7 +22,6 @@ public class UnitUI : MonoBehaviour
         maxHealth = maxHp;
         maxMana = maxMp;
 
-        // Initialize segmented health bar if enabled
         if (useSegmentedHealthBar && segmentedHealthBar != null)
         {
             segmentedHealthBar.Init(maxHp);
@@ -39,7 +38,6 @@ public class UnitUI : MonoBehaviour
     {
         if (target == null) return;
 
-        // Get the unit's star level and adjust offset
         Vector3 adjustedOffset = offset;
         UnitAI unitAI = target.GetComponent<UnitAI>();
 
@@ -47,18 +45,22 @@ public class UnitUI : MonoBehaviour
         {
             if (unitAI.starLevel == 2)
             {
-                adjustedOffset.y += 0.4f; // Extra height for 2-star
+                adjustedOffset.y += 0.4f;
             }
             else if (unitAI.starLevel == 3)
             {
-                adjustedOffset.y += 0.8f; // Extra height for 3-star
+                adjustedOffset.y += 0.8f;
+            }
+
+            ShieldComponent shield = unitAI.GetComponent<ShieldComponent>();
+            if (shield != null && useSegmentedHealthBar && segmentedHealthBar != null)
+            {
+                segmentedHealthBar.UpdateShield(shield.CurrentShield);
             }
         }
 
-        // Follow above unit's head with adjusted offset
         transform.position = target.position + adjustedOffset;
 
-        // Face the camera
         if (Camera.main != null)
             transform.rotation = Camera.main.transform.rotation;
     }
@@ -81,18 +83,15 @@ public class UnitUI : MonoBehaviour
         }
         else if (healthFill != null)
         {
-            // Fallback to old system
             float healthPercentage = currentHealth / maxHealth;
 
             if (currentHealth > maxHealth)
             {
-                // Show overheal - fill bar completely and change color
                 healthFill.fillAmount = 1f;
                 healthFill.color = Color.yellow;
             }
             else
             {
-                // Normal health display
                 healthFill.fillAmount = Mathf.Clamp01(healthPercentage);
                 healthFill.color = Color.green;
             }

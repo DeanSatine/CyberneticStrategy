@@ -472,8 +472,18 @@ public class UnitAI : MonoBehaviour
             damageReduction
         );
 
+        ShieldComponent shield = GetComponent<ShieldComponent>();
+        if (shield != null && shield.CurrentShield > 0f)
+        {
+            finalDamage = shield.AbsorbDamage(finalDamage);
+        }
+
         currentHealth -= finalDamage;
-        GainMana(1);
+
+        if (finalDamage > 0)
+        {
+            GainMana(1);
+        }
 
         string damageTypeIcon = DamageCalculator.GetDamageTypeIcon(damageInfo.type);
         Debug.Log($"{damageTypeIcon} {unitName} took {finalDamage:F1} {damageInfo.type} damage (from {damageInfo.amount:F1}). HP: {currentHealth:F0}/{maxHealth:F0}");
@@ -486,6 +496,7 @@ public class UnitAI : MonoBehaviour
             Die();
         }
     }
+
 
     public float GetPhysicalDamageReduction()
     {

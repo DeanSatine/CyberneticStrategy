@@ -79,7 +79,20 @@ public class UnitInfoPanelUI : MonoBehaviour
             asText.text = $"AS: {currentUnit.attackSpeed:F2}";
 
         if (hpText != null)
-            hpText.text = $"HP: {currentUnit.currentHealth:F0}/{currentUnit.maxHealth:F0}";
+        {
+            ShieldComponent shield = currentUnit.GetComponent<ShieldComponent>();
+            float shieldAmount = (shield != null) ? shield.CurrentShield : 0f;
+
+            if (shieldAmount > 0)
+            {
+                float effectiveHP = currentUnit.currentHealth + shieldAmount;
+                hpText.text = $"HP: <color=#00BFFF>{effectiveHP:F0}</color>/{currentUnit.maxHealth:F0}";
+            }
+            else
+            {
+                hpText.text = $"HP: {currentUnit.currentHealth:F0}/{currentUnit.maxHealth:F0}";
+            }
+        }
 
         if (armorText != null)
             armorText.text = $"Armor: {currentUnit.armor:F0}";
