@@ -320,7 +320,7 @@ MonoBehaviour:
   mana: 2
   maxMana: 30
   currentMana: 0
-  traits: 000000000100000003000000
+  traits: 010000000200000004000000
   canMove: 1
   canAttack: 1
   isAlive: 1

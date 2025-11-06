@@ -365,8 +365,8 @@ MonoBehaviour:
   unitName: SteelGuard
   starLevel: 1
   team: 0
-  maxHealth: 450
-  currentHealth: 450
+  maxHealth: 650
+  currentHealth: 650
   attackDamage: 45
   attackSpeed: 0.7
   armor: 40
@@ -378,7 +378,7 @@ MonoBehaviour:
   mana: 0
   maxMana: 70
   currentMana: 0
-  traits: 
+  traits: 0000000002000000
   canMove: 1
   canAttack: 1
   isAlive: 1
