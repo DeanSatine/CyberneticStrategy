@@ -45,8 +45,13 @@ public static class UnitAbilityDescriptions
 
             case "SteelGuard":
                 return GetSteelGuardDescription(unit, ad, star);
+
+            case "Sightline":
+                return GetSightlineDescription(unit, ad, star);
+                
             default:
                 return "This unit has no ability description yet.";
+
         }
     }
 
@@ -91,8 +96,28 @@ private static string GetCobaltineDescription(UnitAI unit, float ad, int star)
     return $"Cast a spell in a 2 hex radius above Cobaltine, lowering all enemy armour by {armorDrain} and healing Cobaltine for {healing} health every second for {duration} seconds.\n\n" +
            $"Afterwards, Cobaltine's next auto attack deals {passiveConversion:F0}% of ALL healing received as bonus <color=#00BFFF>magic damage</color> (scales with {unit.abilityPower * 0.5f:F0} AP).";
 }
+    private static string GetSightlineDescription(UnitAI unit, float ad, int star)
+    {
+        var ability = unit.GetComponent<SightlineAbility>();
+        if (ability == null) return "Sightline ability missing.";
 
-private static string GetKuromushadoDescription(UnitAI unit, float ad, int star)
+        int starIndex = Mathf.Clamp(star - 1, 0, 2);
+        float damagePerShot = ability.damagePerShot[starIndex];
+        float duration = ability.durationPerStar[starIndex];
+        int stacks = ability.GetCurrentStacks();
+        float asBonus = stacks * ability.attackSpeedPerStack * 100f;
+        int turretCount = ability.GetActiveTurretCount();
+
+        string turretStatus = turretCount > 0 ? $" (Currently {turretCount} active)" : "";
+
+        return $"Passive: Attacks grant {ability.attackSpeedPerStack * 100:F0}% stacking attack speed. " +
+               $"(Current: +{asBonus:F0}% from {stacks} stacks)\n\n" +
+               $"Active: Summon a laser turret that shoots for {damagePerShot:F0} <color=#FF6600>physical damage</color> " +
+               $"per shot for {duration} seconds. Subsequent casts summon another turret.{turretStatus}";
+    }
+
+
+    private static string GetKuromushadoDescription(UnitAI unit, float ad, int star)
 {
     var ability = unit.GetComponent<KuromushadoAbility>();
     if (ability == null) return "Kurōmushadō ability missing.";

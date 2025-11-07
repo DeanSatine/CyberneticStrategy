@@ -429,6 +429,10 @@ MonoBehaviour:
   attackDamage: 16
   attackSpeed: 0.8
   armor: 45
+  magicResist: 45
+  damageReduction: 0
+  attackDamageType: 0
+  abilityPower: 0
   attackRange: 1.8
   mana: 0
   maxMana: 50
@@ -441,7 +445,7 @@ MonoBehaviour:
   projectilePrefab: {fileID: 0}
   firePoint: {fileID: 0}
   projectileSpeed: 15
-  portraitSprite: {fileID: 0}
+  facingReference: {fileID: 0}
   unitUIPrefab: {fileID: 6939982145822855837, guid: 63931d92c48ef65418d45ec02069a522,
     type: 3}
   ui: {fileID: 0}
