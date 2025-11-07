@@ -111,7 +111,7 @@ public class StageManager : MonoBehaviour
         Debug.Log("✅ Phase set to Prep");
         
         EradicatorTrait.ResetAllEradicators();
-
+        HyperdriveTrait.ResetAllHyperdriveStacks();
         CombatManager.Instance.ClearProjectiles();
 
         CombatManager.Instance.RestorePlayerUnitsFromSnapshots();

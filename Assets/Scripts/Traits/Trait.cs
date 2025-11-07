@@ -6,5 +6,7 @@ public enum Trait
     Eradicator,
     Bulkhead,
     Clobbertron,
-    Strikebyte
+    Strikebyte,
+    Hyperdrive,
+    Overmind
 }

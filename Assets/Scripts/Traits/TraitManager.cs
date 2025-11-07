@@ -69,6 +69,24 @@ public class TraitManager : MonoBehaviour
     public int strikebyteThreshold3 = 3;
     public int strikebyteThreshold4 = 4;
 
+    [Header("Hyperdrive")]
+    public int hyperdriveThreshold2 = 2;
+    public int hyperdriveThreshold4 = 4;
+    public int hyperdriveThreshold6 = 6;
+    public int hyperdriveThreshold8 = 8;
+
+    public float hyperdriveAttackSpeedPerStack2 = 0.04f;  // 4%
+    public float hyperdriveAttackSpeedPerStack4 = 0.08f;  // 8%
+    public float hyperdriveAttackSpeedPerStack6 = 0.16f;  // 16%
+    public float hyperdriveAttackSpeedPerStack8 = 0.20f;  // 20%
+
+    public float hyperdriveBonusAttackSpeed2 = 0.02f;  // 2%
+    public float hyperdriveBonusAttackSpeed4 = 0.04f;  // 4%
+    public float hyperdriveBonusAttackSpeed6 = 0.06f;  // 6%
+    public float hyperdriveBonusAttackSpeed8 = 0.08f;  // 8%
+
+    public int hyperdriveMaxStacks = 10;
+
     // --- Damage Ramping ---
     public float strikebyteRampDamageAmp2 = 1f;
     public float strikebyteRampDamageAmp3 = 2f;
@@ -155,6 +173,9 @@ public class TraitManager : MonoBehaviour
 
             case Trait.Strikebyte:
                 return (count >= strikebyteThreshold2 || count >= strikebyteThreshold3 || count >= strikebyteThreshold4);
+            case Trait.Hyperdrive:
+                return (count >= hyperdriveThreshold2 || count >= hyperdriveThreshold4 ||
+                        count >= hyperdriveThreshold6 || count >= hyperdriveThreshold8);
         }
         return false;
     }
@@ -179,6 +200,13 @@ public class TraitManager : MonoBehaviour
                 if (count >= strikebyteThreshold4) return 4;
                 if (count >= strikebyteThreshold3) return 3;
                 if (count >= strikebyteThreshold2) return 2;
+                break;
+
+            case Trait.Hyperdrive:
+                if (count >= hyperdriveThreshold8) return 8;
+                if (count >= hyperdriveThreshold6) return 6;
+                if (count >= hyperdriveThreshold4) return 4;
+                if (count >= hyperdriveThreshold2) return 2;
                 break;
         }
         return 0;
@@ -205,6 +233,13 @@ public class TraitManager : MonoBehaviour
                 if (count >= strikebyteThreshold3) return (strikebyteThreshold3, strikebyteThreshold4);
                 if (count >= strikebyteThreshold2) return (strikebyteThreshold2, strikebyteThreshold3);
                 return (0, strikebyteThreshold2);
+
+            case Trait.Hyperdrive:
+                if (count >= hyperdriveThreshold8) return (hyperdriveThreshold8, 0);
+                if (count >= hyperdriveThreshold6) return (hyperdriveThreshold6, hyperdriveThreshold8);
+                if (count >= hyperdriveThreshold4) return (hyperdriveThreshold4, hyperdriveThreshold6);
+                if (count >= hyperdriveThreshold2) return (hyperdriveThreshold2, hyperdriveThreshold4);
+                return (0, hyperdriveThreshold2);
         }
         return (0, 0);
     }
@@ -407,6 +442,64 @@ public class TraitManager : MonoBehaviour
                                 }
                             }
                         }
+
+                    }
+
+                    break;
+
+                // =====================
+                // HYPERDRIVE
+                // =====================
+                case Trait.Hyperdrive:
+                    if (count >= hyperdriveThreshold2)
+                    {
+                        foreach (var unit in playerUnits)
+                        {
+                            if (unit.currentState == UnitAI.UnitState.Bench) continue;
+
+                            if (unit.traits.Contains(Trait.Hyperdrive))
+                            {
+                                var ability = unit.GetComponent<HyperdriveTrait>();
+                                if (ability == null)
+                                {
+                                    ability = unit.gameObject.AddComponent<HyperdriveTrait>();
+                                }
+
+                                // Determine tier
+                                if (count >= hyperdriveThreshold8)
+                                {
+                                    ability.attackSpeedPerStack = hyperdriveAttackSpeedPerStack8;
+                                    ability.bonusAttackSpeedLowEnemies = hyperdriveBonusAttackSpeed8;
+                                    ability.infiniteStacks = true;
+                                    ability.maxStacks = 999;
+                                }
+                                else if (count >= hyperdriveThreshold6)
+                                {
+                                    ability.attackSpeedPerStack = hyperdriveAttackSpeedPerStack6;
+                                    ability.bonusAttackSpeedLowEnemies = hyperdriveBonusAttackSpeed6;
+                                    ability.infiniteStacks = false;
+                                    ability.maxStacks = hyperdriveMaxStacks;
+                                }
+                                else if (count >= hyperdriveThreshold4)
+                                {
+                                    ability.attackSpeedPerStack = hyperdriveAttackSpeedPerStack4;
+                                    ability.bonusAttackSpeedLowEnemies = hyperdriveBonusAttackSpeed4;
+                                    ability.infiniteStacks = false;
+                                    ability.maxStacks = hyperdriveMaxStacks;
+                                }
+                                else
+                                {
+                                    ability.attackSpeedPerStack = hyperdriveAttackSpeedPerStack2;
+                                    ability.bonusAttackSpeedLowEnemies = hyperdriveBonusAttackSpeed2;
+                                    ability.infiniteStacks = false;
+                                    ability.maxStacks = hyperdriveMaxStacks;
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        HyperdriveTrait.ResetAllHyperdrives();
                     }
                     break;
             }

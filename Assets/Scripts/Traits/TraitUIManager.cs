@@ -23,6 +23,9 @@ public class TraitUIManager : MonoBehaviour
     [Header("Ordering")]
     public List<Trait> activeTraitOrder = new List<Trait>();
 
+    [Header("Special Traits")]
+    public List<Trait> specialTraits = new List<Trait> { Trait.Overmind };
+
     private Dictionary<Trait, GameObject> prefabMap = new Dictionary<Trait, GameObject>();
     private Dictionary<Trait, int> lastUpdateCounts = new Dictionary<Trait, int>();
 
@@ -97,7 +100,43 @@ public class TraitUIManager : MonoBehaviour
 
         activeTraitOrder.RemoveAll(t => !newActiveTraits.Contains(t));
 
+        activeTraitOrder = SortTraitsByPriority(activeTraitOrder, traitCounts);
+
         Debug.Log($"[TraitUIManager] Active trait order: {string.Join(", ", activeTraitOrder)}");
+    }
+
+    private List<Trait> SortTraitsByPriority(List<Trait> traits, Dictionary<Trait, int> traitCounts)
+    {
+        List<Trait> specialActive = new List<Trait>();
+        List<Trait> regularActive = new List<Trait>();
+        List<Trait> inactive = new List<Trait>();
+
+        foreach (var trait in traits)
+        {
+            int count = traitCounts.ContainsKey(trait) ? traitCounts[trait] : 0;
+            int activeTier = TraitManager.Instance.GetCurrentTier(trait, count);
+            bool isActive = activeTier > 0;
+
+            if (specialTraits.Contains(trait))
+            {
+                specialActive.Add(trait);
+            }
+            else if (isActive)
+            {
+                regularActive.Add(trait);
+            }
+            else
+            {
+                inactive.Add(trait);
+            }
+        }
+
+        List<Trait> sortedTraits = new List<Trait>();
+        sortedTraits.AddRange(specialActive);
+        sortedTraits.AddRange(regularActive);
+        sortedTraits.AddRange(inactive);
+
+        return sortedTraits;
     }
 
     private void ApplyTraitsToSlots(Dictionary<Trait, int> traitCounts)
@@ -185,6 +224,8 @@ public class TraitUIManager : MonoBehaviour
             Destroy(panelObj);
             return;
         }
+
+        panel.traitType = trait;
 
         slot.AssignPanel(panel, trait);
         Debug.Log($"[TraitUIManager] Successfully created and assigned {trait} panel to slot {slot.slotIndex}");

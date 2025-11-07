@@ -1,4 +1,5 @@
-﻿using TMPro;
+﻿using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -13,7 +14,13 @@ public class TraitUIPanel : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     private CanvasGroup canvasGroup;
 
     [Header("Tooltip Settings")]
-    public GameObject tooltipPrefab;   // Assign the tooltip object already in your scene (disabled by default)
+    public GameObject tooltipPrefab;
+    public Trait traitType = Trait.None;
+
+    [Header("Special Traits")]
+    public List<Trait> specialTraits = new List<Trait> { Trait.Overmind };
+
+    private CanvasGroup tooltipCanvasGroup;
 
     private void Awake()
     {
@@ -22,7 +29,17 @@ public class TraitUIPanel : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
             canvasGroup = gameObject.AddComponent<CanvasGroup>();
 
         if (tooltipPrefab != null)
-            tooltipPrefab.SetActive(false); // ensure it's hidden at start
+        {
+            tooltipPrefab.SetActive(false);
+
+            tooltipCanvasGroup = tooltipPrefab.GetComponent<CanvasGroup>();
+            if (tooltipCanvasGroup == null)
+            {
+                tooltipCanvasGroup = tooltipPrefab.AddComponent<CanvasGroup>();
+            }
+            tooltipCanvasGroup.alpha = 1f;
+            tooltipCanvasGroup.ignoreParentGroups = true;
+        }
     }
 
     public void UpdateTexts(int count, int activeThreshold, int nextThreshold, bool isActive)
@@ -31,8 +48,8 @@ public class TraitUIPanel : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         if (activeBreakpointText) activeBreakpointText.text = activeThreshold > 0 ? activeThreshold.ToString() : "-";
         if (nextBreakpointText) nextBreakpointText.text = nextThreshold > 0 ? nextThreshold.ToString() : "-";
 
-        // fade if not active
-        canvasGroup.alpha = isActive ? 1f : 0.5f;
+        bool isSpecialTrait = specialTraits.Contains(traitType);
+        canvasGroup.alpha = (isActive || isSpecialTrait) ? 1f : 0.5f;
     }
 
     public void OnPointerEnter(PointerEventData eventData)

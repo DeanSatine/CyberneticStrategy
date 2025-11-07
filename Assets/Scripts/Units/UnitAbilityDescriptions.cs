@@ -121,8 +121,8 @@ private static string GetCoreweaverDescription(UnitAI unit, float ad, int star)
     float meteorWithAP = meteorDmg + (unit.abilityPower * 1.5f);
     float tornadoWithAP = tornadoDmg + (unit.abilityPower * 1.5f);
 
-    return $"<b>Passive:</b> Coreweaver cannot move or auto attack. Generates <color=#00BFFF>{manaPerSec:F1}</color> mana per second.\n\n" +
-           $"<b>Active:</b> Unleash a storm of meteors and lightning in a large area around the current target for <color=#FFD700>{duration}</color> seconds.\n" +
+    return
+           $"</b>Unleash a storm of meteors and lightning in a large area around the current target for <color=#FFD700>{duration}</color> seconds.\n" +
            $"• <color=#FF4500>Meteors</color> deal <color=#FF4500>{meteorWithAP:F0}</color> <color=#00BFFF>magic damage</color> ({meteorDmg} + 150% AP)\n" +
            $"• <color=#00CED1>Lightning</color> deals <color=#00CED1>{tornadoWithAP:F0}</color> <color=#00BFFF>magic damage</color> ({tornadoDmg} + 150% AP) and stuns for 1 second.";
 }
