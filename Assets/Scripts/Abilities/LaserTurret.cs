@@ -4,41 +4,108 @@ using UnityEngine;
 public class LaserTurret : MonoBehaviour
 {
     private UnitAI ownerUnit;
-    private float damagePerShot;
-    private float fireRate;
-    private float nextFireTime;
+    private float damagePerSecond;
+    private UnitAI currentTarget;
+    private float damageTimer;
+    private float lifetime;
+    private float lifetimeTimer;
+    private SightlineAbility parentAbility;
 
-    [Header("VFX")]
-    public GameObject laserProjectilePrefab;
-    public GameObject muzzleFlashPrefab;
-    public GameObject hitEffectPrefab;
-    public float projectileSpeed = 30f;
+    [Header("Beam Settings")]
+    public float rotationSpeed = 180f;
+    public float damageTickRate = 0.25f;
+    public float targetAcquisitionRange = 15f;
 
-    public void Initialize(UnitAI owner, float damage, float duration, float fireRate)
+    [Header("VFX Children (optional)")]
+    public Transform beamVisual;
+    public ParticleSystem[] beamParticles;
+
+    private void Awake()
     {
-        this.ownerUnit = owner;
-        this.damagePerShot = damage;
-        this.fireRate = fireRate;
-        this.nextFireTime = Time.time;
+        if (beamVisual == null)
+        {
+            beamVisual = transform.Find("Shoot");
+        }
 
-        StartCoroutine(FireAtTargets());
+        beamParticles = GetComponentsInChildren<ParticleSystem>();
     }
 
-    private IEnumerator FireAtTargets()
+    public void Initialize(UnitAI owner, float dps, float duration, SightlineAbility ability)
     {
-        while (ownerUnit != null && ownerUnit.isAlive)
+        this.ownerUnit = owner;
+        this.damagePerSecond = dps;
+        this.damageTimer = 0f;
+        this.lifetime = duration;
+        this.lifetimeTimer = 0f;
+        this.parentAbility = ability;
+
+        Debug.Log($"⚡ [TURRET] Initialized! DPS: {dps}, Duration: {duration}s");
+
+        StartCoroutine(AcquireAndAttackTargets());
+    }
+
+    private void Update()
+    {
+        lifetimeTimer += Time.deltaTime;
+
+        if (lifetimeTimer >= lifetime)
         {
-            if (Time.time >= nextFireTime)
+            Debug.Log($"⚡ [TURRET] Lifetime expired ({lifetimeTimer:F1}s / {lifetime}s), destroying self");
+
+            if (parentAbility != null)
             {
-                UnitAI target = FindTarget();
-                if (target != null && target.isAlive)
-                {
-                    FireLaser(target);
-                    nextFireTime = Time.time + (1f / fireRate);
-                }
+                parentAbility.OnTurretExpired(this);
             }
 
-            yield return new WaitForSeconds(0.1f);
+            Destroy(gameObject);
+            return;
+        }
+
+        if (currentTarget != null && currentTarget.isAlive)
+        {
+            RotateTowardsTarget(currentTarget);
+        }
+    }
+
+    private IEnumerator AcquireAndAttackTargets()
+    {
+        while (ownerUnit != null && ownerUnit.isAlive && lifetimeTimer < lifetime)
+        {
+            currentTarget = FindTarget();
+
+            if (currentTarget != null && currentTarget.isAlive)
+            {
+                EnableBeam(true);
+                yield return StartCoroutine(DamageTarget(currentTarget));
+            }
+            else
+            {
+                EnableBeam(false);
+                yield return new WaitForSeconds(0.2f);
+            }
+        }
+
+        EnableBeam(false);
+    }
+
+    private IEnumerator DamageTarget(UnitAI target)
+    {
+        damageTimer = 0f;
+
+        while (target != null && target.isAlive && ownerUnit != null && ownerUnit.isAlive && lifetimeTimer < lifetime)
+        {
+            damageTimer += Time.deltaTime;
+
+            if (damageTimer >= damageTickRate)
+            {
+                float damageThisTick = damagePerSecond * damageTickRate;
+                target.TakeDamage(damageThisTick);
+                damageTimer = 0f;
+
+                Debug.Log($"⚡ [TURRET] Dealt {damageThisTick:F1} damage to {target.unitName} ({damagePerSecond} DPS)");
+            }
+
+            yield return null;
         }
     }
 
@@ -57,7 +124,7 @@ public class LaserTurret : MonoBehaviour
                 continue;
 
             float distance = Vector3.Distance(transform.position, unit.transform.position);
-            if (distance < closestDistance)
+            if (distance <= targetAcquisitionRange && distance < closestDistance)
             {
                 closestDistance = distance;
                 closestEnemy = unit;
@@ -67,73 +134,37 @@ public class LaserTurret : MonoBehaviour
         return closestEnemy;
     }
 
-    private void FireLaser(UnitAI target)
+    private void RotateTowardsTarget(UnitAI target)
     {
-        Vector3 startPos = transform.position + Vector3.up * 1f;
-        Vector3 targetPos = target.transform.position + Vector3.up * 1.2f;
-        Vector3 direction = (targetPos - startPos).normalized;
+        if (target == null)
+            return;
 
-        if (muzzleFlashPrefab != null)
+        Vector3 directionToTarget = (target.transform.position - transform.position).normalized;
+        directionToTarget.y = 0f;
+
+        if (directionToTarget != Vector3.zero)
         {
-            GameObject muzzle = Instantiate(muzzleFlashPrefab, startPos, Quaternion.identity);
-            Destroy(muzzle, 0.5f);
+            Quaternion targetRotation = Quaternion.LookRotation(directionToTarget) * Quaternion.Euler(90f, 0f, 0f);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
         }
-
-        StartCoroutine(FireLaserProjectile(startPos, target, direction));
     }
 
-    private IEnumerator FireLaserProjectile(Vector3 startPos, UnitAI target, Vector3 direction)
+    private void EnableBeam(bool enable)
     {
-        GameObject projectile = null;
-
-        if (laserProjectilePrefab != null)
+        if (beamVisual != null)
         {
-            projectile = Instantiate(laserProjectilePrefab, startPos, Quaternion.LookRotation(direction));
+            beamVisual.gameObject.SetActive(enable);
         }
 
-        if (projectile == null)
+        foreach (var ps in beamParticles)
         {
-            target.TakeDamage(damagePerShot);
-            Debug.Log($"⚡ [TURRET] Hit {target.unitName} for {damagePerShot} damage (instant)");
-            yield break;
-        }
-
-        float travelTime = 0f;
-        float maxTravelTime = 2f;
-        bool hasHit = false;
-
-        while (projectile != null && travelTime < maxTravelTime && !hasHit)
-        {
-            projectile.transform.position += direction * projectileSpeed * Time.deltaTime;
-
-            if (target != null && target.isAlive)
+            if (ps != null)
             {
-                float distance = Vector3.Distance(projectile.transform.position, target.transform.position + Vector3.up * 1.2f);
-                if (distance < 0.8f)
-                {
-                    target.TakeDamage(damagePerShot);
-                    hasHit = true;
-
-                    if (hitEffectPrefab != null)
-                    {
-                        GameObject hit = Instantiate(hitEffectPrefab, target.transform.position + Vector3.up * 1.2f, Quaternion.identity);
-                        Destroy(hit, 1f);
-                    }
-
-                    Debug.Log($"⚡ [TURRET] Hit {target.unitName} for {damagePerShot} damage!");
-                    break;
-                }
+                if (enable && !ps.isPlaying)
+                    ps.Play();
+                else if (!enable && ps.isPlaying)
+                    ps.Stop();
             }
-            else
-            {
-                break;
-            }
-
-            travelTime += Time.deltaTime;
-            yield return null;
         }
-
-        if (projectile != null)
-            Destroy(projectile);
     }
 }

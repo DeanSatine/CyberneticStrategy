@@ -944,9 +944,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   portraitImage: {fileID: 1750583037}
   adText: {fileID: 285533234}
+  apText: {fileID: 0}
   asText: {fileID: 1429177598}
   hpText: {fileID: 1814360013}
   armorText: {fileID: 516116780}
+  magicResistText: {fileID: 0}
+  damageReductionText: {fileID: 0}
   manaText: {fileID: 1695687745}
   abilityIcon: {fileID: 609210443}
   abilityTooltip: {fileID: 674082680}
@@ -6504,6 +6507,8 @@ MonoBehaviour:
   activeBreakpointText: {fileID: 364747286}
   nextBreakpointText: {fileID: 1464028173}
   tooltipPrefab: {fileID: 1583542994}
+  traitType: 0
+  specialTraits: 06000000
 --- !u!114 &198316712
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15615,9 +15620,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   portraitImage: {fileID: 559868838}
   adText: {fileID: 1700426681}
+  apText: {fileID: 0}
   asText: {fileID: 2063686826}
   hpText: {fileID: 1754307155}
   armorText: {fileID: 84736928}
+  magicResistText: {fileID: 0}
+  damageReductionText: {fileID: 0}
   manaText: {fileID: 624650404}
   abilityIcon: {fileID: 1927040334}
   abilityTooltip: {fileID: 49674332}
@@ -20063,6 +20071,8 @@ MonoBehaviour:
   activeBreakpointText: {fileID: 1652378379}
   nextBreakpointText: {fileID: 2001475848}
   tooltipPrefab: {fileID: 2044040048}
+  traitType: 0
+  specialTraits: 06000000
 --- !u!114 &587714637
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -28471,9 +28481,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   portraitImage: {fileID: 571182105}
   adText: {fileID: 2086622833}
+  apText: {fileID: 0}
   asText: {fileID: 568690457}
   hpText: {fileID: 392548376}
   armorText: {fileID: 692563753}
+  magicResistText: {fileID: 0}
+  damageReductionText: {fileID: 0}
   manaText: {fileID: 327566428}
   abilityIcon: {fileID: 1180638336}
   abilityTooltip: {fileID: 950064958}
@@ -29498,6 +29511,19 @@ MonoBehaviour:
   strikebyteThreshold2: 2
   strikebyteThreshold3: 3
   strikebyteThreshold4: 4
+  hyperdriveThreshold2: 2
+  hyperdriveThreshold4: 4
+  hyperdriveThreshold6: 6
+  hyperdriveThreshold8: 8
+  hyperdriveAttackSpeedPerStack2: 0.04
+  hyperdriveAttackSpeedPerStack4: 0.08
+  hyperdriveAttackSpeedPerStack6: 0.16
+  hyperdriveAttackSpeedPerStack8: 0.2
+  hyperdriveBonusAttackSpeed2: 0.02
+  hyperdriveBonusAttackSpeed4: 0.04
+  hyperdriveBonusAttackSpeed6: 0.06
+  hyperdriveBonusAttackSpeed8: 0.08
+  hyperdriveMaxStacks: 10
   strikebyteRampDamageAmp2: 1
   strikebyteRampDamageAmp3: 2
   strikebyteRampDamageAmp4: 3
@@ -40979,9 +41005,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   portraitImage: {fileID: 613043399}
   adText: {fileID: 158772545}
+  apText: {fileID: 0}
   asText: {fileID: 1926944298}
   hpText: {fileID: 1556043358}
   armorText: {fileID: 91516453}
+  magicResistText: {fileID: 0}
+  damageReductionText: {fileID: 0}
   manaText: {fileID: 75891040}
   abilityIcon: {fileID: 405345708}
   abilityTooltip: {fileID: 819727330}
@@ -44510,9 +44539,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   portraitImage: {fileID: 272998316}
   adText: {fileID: 1582221107}
+  apText: {fileID: 0}
   asText: {fileID: 1451990322}
   hpText: {fileID: 200706879}
   armorText: {fileID: 1357656376}
+  magicResistText: {fileID: 0}
+  damageReductionText: {fileID: 0}
   manaText: {fileID: 3498685}
   abilityIcon: {fileID: 614731982}
   abilityTooltip: {fileID: 1684265658}
@@ -48178,15 +48210,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7084ef2525233c14a9de940de34800b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  traitPanels:
-  - trait: 0
-    panel: {fileID: 2027986491}
-  - trait: 1
-    panel: {fileID: 198316711}
-  - trait: 2
-    panel: {fileID: 1861207465}
-  - trait: 3
-    panel: {fileID: 587714636}
+  slotsContainer: {fileID: 0}
+  traitSlots: []
+  traitPanelPrefabs: []
+  activeTraitOrder: 
+  specialTraits: 06000000
 --- !u!1 &1637259413
 GameObject:
   m_ObjectHideFlags: 0
@@ -55177,9 +55205,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   portraitImage: {fileID: 1715570285}
   adText: {fileID: 988321047}
+  apText: {fileID: 0}
   asText: {fileID: 1306864042}
   hpText: {fileID: 1882485357}
   armorText: {fileID: 925350777}
+  magicResistText: {fileID: 0}
+  damageReductionText: {fileID: 0}
   manaText: {fileID: 1269882223}
   abilityIcon: {fileID: 1866742576}
   abilityTooltip: {fileID: 201621915}
@@ -55946,6 +55977,8 @@ MonoBehaviour:
   activeBreakpointText: {fileID: 1822649722}
   nextBreakpointText: {fileID: 75028633}
   tooltipPrefab: {fileID: 489711736}
+  traitType: 0
+  specialTraits: 06000000
 --- !u!114 &1861207466
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -59593,6 +59626,8 @@ MonoBehaviour:
   activeBreakpointText: {fileID: 190804455}
   nextBreakpointText: {fileID: 1728188588}
   tooltipPrefab: {fileID: 1646997151}
+  traitType: 0
+  specialTraits: 06000000
 --- !u!114 &2027986492
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -61413,9 +61448,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   portraitImage: {fileID: 2017538144}
   adText: {fileID: 1397308958}
+  apText: {fileID: 0}
   asText: {fileID: 1557685582}
   hpText: {fileID: 1542426021}
   armorText: {fileID: 634365144}
+  magicResistText: {fileID: 0}
+  damageReductionText: {fileID: 0}
   manaText: {fileID: 571123082}
   abilityIcon: {fileID: 1842257170}
   abilityTooltip: {fileID: 483158549}

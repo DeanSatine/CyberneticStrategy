@@ -102,7 +102,7 @@ private static string GetCobaltineDescription(UnitAI unit, float ad, int star)
         if (ability == null) return "Sightline ability missing.";
 
         int starIndex = Mathf.Clamp(star - 1, 0, 2);
-        float damagePerShot = ability.damagePerShot[starIndex];
+        float dps = ability.damagePerSecond[starIndex];
         float duration = ability.durationPerStar[starIndex];
         int stacks = ability.GetCurrentStacks();
         float asBonus = stacks * ability.attackSpeedPerStack * 100f;
@@ -112,11 +112,9 @@ private static string GetCobaltineDescription(UnitAI unit, float ad, int star)
 
         return $"Passive: Attacks grant {ability.attackSpeedPerStack * 100:F0}% stacking attack speed. " +
                $"(Current: +{asBonus:F0}% from {stacks} stacks)\n\n" +
-               $"Active: Summon a laser turret that shoots for {damagePerShot:F0} <color=#FF6600>physical damage</color> " +
-               $"per shot for {duration} seconds. Subsequent casts summon another turret.{turretStatus}";
+               $"Active: Summon a laser turret that deals {dps:F0} <color=#FF6600>physical damage</color> " +
+               $"per second for {duration} seconds. Subsequent casts summon another turret.{turretStatus}";
     }
-
-
     private static string GetKuromushadoDescription(UnitAI unit, float ad, int star)
 {
     var ability = unit.GetComponent<KuromushadoAbility>();

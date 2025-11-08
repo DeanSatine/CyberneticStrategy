@@ -41,7 +41,7 @@ ParticleSystem:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 264476560152980332}
   serializedVersion: 8
-  lengthInSec: 5
+  lengthInSec: 10
   simulationSpeed: 1
   stopAction: 0
   cullingMode: 0
@@ -4940,7 +4940,7 @@ ParticleSystem:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1849542466362705374}
   serializedVersion: 8
-  lengthInSec: 5
+  lengthInSec: 10
   simulationSpeed: 1
   stopAction: 0
   cullingMode: 0
@@ -9828,10 +9828,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48e63bfa63a087644a6f47c2a63a5aca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  laserProjectilePrefab: {fileID: 2233695659371396749}
-  muzzleFlashPrefab: {fileID: 2919372439287028081}
-  hitEffectPrefab: {fileID: 0}
-  projectileSpeed: 30
+  rotationSpeed: 180
+  damageTickRate: 0.25
+  targetAcquisitionRange: 15
+  beamVisual: {fileID: 2018815738349974138}
+  beamParticles:
+  - {fileID: 7616973954321807254}
 --- !u!1 &2233695659371396749
 GameObject:
   m_ObjectHideFlags: 0
@@ -14763,7 +14765,7 @@ ParticleSystem:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2372919988885119974}
   serializedVersion: 8
-  lengthInSec: 5
+  lengthInSec: 10
   simulationSpeed: 1
   stopAction: 0
   cullingMode: 0
@@ -19799,7 +19801,7 @@ ParticleSystem:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2486316755715517114}
   serializedVersion: 8
-  lengthInSec: 5
+  lengthInSec: 10
   simulationSpeed: 1
   stopAction: 0
   cullingMode: 0
@@ -24687,7 +24689,7 @@ ParticleSystem:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2524053477671443337}
   serializedVersion: 8
-  lengthInSec: 5
+  lengthInSec: 10
   simulationSpeed: 1
   stopAction: 0
   cullingMode: 0
@@ -44266,7 +44268,7 @@ ParticleSystem:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7323049119168766839}
   serializedVersion: 8
-  lengthInSec: 5
+  lengthInSec: 10
   simulationSpeed: 1
   stopAction: 0
   cullingMode: 0
@@ -49136,7 +49138,7 @@ ParticleSystem:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8929627007789923609}
   serializedVersion: 8
-  lengthInSec: 5
+  lengthInSec: 10
   simulationSpeed: 1
   stopAction: 0
   cullingMode: 0
