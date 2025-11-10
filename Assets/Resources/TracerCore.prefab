@@ -254,7 +254,7 @@ MonoBehaviour:
   stoppingDistance: 1.4
   obstacleAvoidance: 2
   moveOffsetRange: 0.2
-  deathAnimLength: 1.2
+  deathAnimLength: 3
   startingTile: {fileID: 0}
   twoStarMultiplier: 1.8
   threeStarMultiplier: 2.5

@@ -189,18 +189,33 @@ public class AugmentViewer : MonoBehaviour
 
     private void CheckForRightClick()
     {
+        if (Camera.main == null)
+        {
+            Debug.LogError("❌ Camera.main is NULL!");
+            return;
+        }
+
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
 
-        if (Physics.Raycast(ray, out hit, 100f))
+        int layerMask = ~(1 << LayerMask.NameToLayer("Wall"));
+
+        if (Physics.Raycast(ray, out hit, 100f, layerMask))
         {
-            if (hit.collider.gameObject == gameObject)
+            Transform checkTransform = hit.collider.transform;
+            while (checkTransform != null)
             {
-                Debug.Log("🔍 Right-clicked on AugmentViewer!");
-                ToggleAugmentViewer();
+                if (checkTransform.gameObject == gameObject)
+                {
+                    Debug.Log("🔍 Right-clicked on AugmentViewer!");
+                    ToggleAugmentViewer();
+                    return;
+                }
+                checkTransform = checkTransform.parent;
             }
         }
     }
+
 
     private void ToggleAugmentViewer()
     {

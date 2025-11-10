@@ -479,7 +479,7 @@ MonoBehaviour:
   stoppingDistance: 1.4
   obstacleAvoidance: 2
   moveOffsetRange: 0.2
-  deathAnimLength: 1.2
+  deathAnimLength: 3
   startingTile: {fileID: 0}
   twoStarMultiplier: 1.8
   threeStarMultiplier: 2.5
@@ -561,8 +561,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isDragging: 0
-  outlineMaterial: {fileID: 2100000, guid: fb8aeb9eedbfac4408523252a81a8405, type: 2}
-  outlineScale: 1.05
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineIntensity: 0.5
 --- !u!54 &-6900644969634144473
 Rigidbody:
   m_ObjectHideFlags: 0

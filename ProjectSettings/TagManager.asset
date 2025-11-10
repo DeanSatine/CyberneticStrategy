@@ -10,18 +10,19 @@ TagManager:
   - BenchTile
   - Projectile
   - HydraulicPress
+  - Character
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Wall
   - Water
   - UI
   - Stage
   - HexGrid
   - CharacterTile
   - FriendlyUnits
-  - 
+  - Player
   - 
   - 
   - 
