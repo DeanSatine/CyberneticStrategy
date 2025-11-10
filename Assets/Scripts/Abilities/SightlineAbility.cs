@@ -18,6 +18,7 @@ public class SightlineAbility : MonoBehaviour, IUnitAbility
     public float attackSpeedPerStack = 0.03f;
     private int currentStacks = 0;
     private float baseAttackSpeed;
+    private int castsThisRound = 0;
 
     private List<LaserTurret> activeTurrets = new List<LaserTurret>();
 
@@ -80,24 +81,23 @@ public class SightlineAbility : MonoBehaviour, IUnitAbility
 
     public void Cast(UnitAI target)
     {
-        Debug.Log($"🔴🔴🔴 [SIGHTLINE] ===== CAST() CALLED ON {gameObject.name}! =====");
-
         if (!unitAI.isAlive)
-        {
-            Debug.LogWarning($"🔴 [SIGHTLINE] Unit is not alive, aborting cast");
             return;
-        }
 
         int starIndex = Mathf.Clamp(unitAI.starLevel - 1, 0, 2);
         float dps = damagePerSecond[starIndex];
         float duration = durationPerStar[starIndex];
 
-        Debug.Log($"🔴 [SIGHTLINE] Star: {unitAI.starLevel}, DPS: {dps}, Duration: {duration}");
-        Debug.Log($"🔴 [SIGHTLINE] Current turrets before spawn: {activeTurrets.Count}");
+        // Increment the cast count
+        castsThisRound++;
 
-        SpawnLaserTurret(dps, duration);
+        Debug.Log($"🔴 [SIGHTLINE] Cast #{castsThisRound}");
 
-        Debug.Log($"🔴 [SIGHTLINE] Current turrets after spawn: {activeTurrets.Count}");
+        // Spawn 'castsThisRound' turrets this time
+        for (int i = 0; i < castsThisRound; i++)
+        {
+            SpawnLaserTurret(dps, duration);
+        }
 
         unitAI.currentMana = 0f;
         if (unitAI.ui != null)
@@ -232,6 +232,8 @@ public class SightlineAbility : MonoBehaviour, IUnitAbility
 
     public void OnRoundEnd()
     {
+        castsThisRound = 0;
+
         Debug.Log($"🔴 [SIGHTLINE] ===== OnRoundEnd called =====");
 
         if (StageManager.Instance != null && StageManager.Instance.currentPhase == StageManager.GamePhase.Prep)

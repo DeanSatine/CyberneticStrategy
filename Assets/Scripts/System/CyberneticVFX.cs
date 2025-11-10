@@ -494,8 +494,8 @@ public class CyberneticVFX : MonoBehaviour
             Vector3 direction = (targetPos - projectile.transform.position).normalized;
 
             projectile.transform.position += direction * speed * Time.deltaTime;
-            projectile.transform.rotation = Quaternion.LookRotation(direction);
-
+            Quaternion baseRotation = projectilePrefab.transform.rotation; 
+            projectile.transform.rotation = Quaternion.LookRotation(direction) * baseRotation;
             if (Vector3.Distance(projectile.transform.position, targetPos) < 0.3f)
             {
                 if (vfxConfig.autoAttackHitEffect != null)

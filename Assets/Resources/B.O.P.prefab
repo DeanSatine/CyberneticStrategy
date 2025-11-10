@@ -270,9 +270,6 @@ Animation:
   - {fileID: 7400000, guid: ca65a696b13bb6e4b95ec3e721dc9bb4, type: 2}
   - {fileID: 7400000, guid: 1d8eff8d445660a43b55aa19432cc2d8, type: 2}
   - {fileID: 7400000, guid: e6a85ab037081e643a8ac4ffa76e8c31, type: 2}
-  - {fileID: -203655887218126122, guid: 0cab101d68803a545abb660619df6e91, type: 3}
-  - {fileID: -203655887218126122, guid: 336d624864c35c646bac71b98980a1c8, type: 3}
-  - {fileID: -203655887218126122, guid: 3983c0f618e9ee84692554a260ae3e58, type: 3}
   m_WrapMode: 0
   m_PlayAutomatically: 0
   m_AnimatePhysics: 0
@@ -404,6 +401,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isDragging: 0
+  outlineMaterial: {fileID: 2100000, guid: fb8aeb9eedbfac4408523252a81a8405, type: 2}
+  outlineScale: 1.05
 --- !u!54 &6702800991294563793
 Rigidbody:
   m_ObjectHideFlags: 0

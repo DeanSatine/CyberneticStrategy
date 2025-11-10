@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2973553999628699564
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3835996791887269748}
+  m_Layer: 9
+  m_Name: Fire
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3835996791887269748
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2973553999628699564}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.03757776, y: -0.25322533, z: 0.038128257, w: 0.96592504}
+  m_LocalPosition: {x: -0.003099995, y: -0.0027999964, z: -0.015200006}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7140604731997724606}
+  m_LocalEulerAnglesHint: {x: 5.273, y: -29.235, z: 3.145}
 --- !u!1 &8982571430926772830
 GameObject:
   m_ObjectHideFlags: 0
@@ -1300,9 +1331,6 @@ Animation:
   - {fileID: 7400000, guid: 737f048753d181d469cb92636727527d, type: 2}
   - {fileID: -203655887218126122, guid: 0a965a66684ee6e438555a54f7af35d9, type: 3}
   - {fileID: 7400000, guid: fbf4043aa3e517a4f847218ebde273e3, type: 2}
-  - {fileID: -203655887218126122, guid: 4102a6a7fd063ba489d9a63a72ac3644, type: 3}
-  - {fileID: -203655887218126122, guid: 9c220bf39c6dc964294c099784692a32, type: 3}
-  - {fileID: -203655887218126122, guid: cba406c3d84f60649b23c989cfb27604, type: 3}
   m_WrapMode: 0
   m_PlayAutomatically: 0
   m_AnimatePhysics: 0
@@ -1341,7 +1369,7 @@ MonoBehaviour:
   isAlive: 1
   isCastingAbility: 0
   projectilePrefab: {fileID: 0}
-  firePoint: {fileID: 2137690019551167009}
+  firePoint: {fileID: 3835996791887269748}
   projectileSpeed: 15
   facingReference: {fileID: 0}
   unitUIPrefab: {fileID: 6939982145822855837, guid: 63931d92c48ef65418d45ec02069a522,
@@ -1409,6 +1437,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isDragging: 0
+  outlineMaterial: {fileID: 2100000, guid: fb8aeb9eedbfac4408523252a81a8405, type: 2}
+  outlineScale: 1.05
 --- !u!54 &7219074895284016499
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1455,8 +1485,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.7309532, y: 1.5861679, z: 1}
-  m_Center: {x: -0.014900565, y: 0.8173303, z: 0}
+  m_Size: {x: 0.7309532, y: 1.6030903, z: 1}
+  m_Center: {x: -0.014900565, y: 0.8088691, z: 0}
 --- !u!114 &4728693570024572540
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1473,7 +1503,8 @@ MonoBehaviour:
     autoAttackProjectile: {fileID: 1354097500924716047, guid: 173ac107d17f0c8468e5e8124cb8c678,
       type: 3}
     autoAttackMuzzleFlash: {fileID: 0}
-    autoAttackHitEffect: {fileID: 0}
+    autoAttackHitEffect: {fileID: 9016892597082127588, guid: f40db358de8027b40a465c9b3026ce5d,
+      type: 3}
     abilityEffect: {fileID: 0}
     abilityProjectile: {fileID: 0}
     abilityImpactEffect: {fileID: 0}
@@ -1897,7 +1928,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: e7c8a4a9060113a4ba253d9858083fda,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3835996791887269748}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e7c8a4a9060113a4ba253d9858083fda, type: 3}
 --- !u!4 &7140604731997724606 stripped

@@ -552,9 +552,6 @@ Animation:
   - {fileID: -203655887218126122, guid: f06ca391c4b744741b422334b2b31924, type: 3}
   - {fileID: 7400000, guid: ae97e234beda8cb4b83646858f5fad0c, type: 2}
   - {fileID: -203655887218126122, guid: 084a337d0af3582468a8b305428a5c3d, type: 3}
-  - {fileID: -203655887218126122, guid: c7e994702a16b4641a1d71575b9d66a7, type: 3}
-  - {fileID: -203655887218126122, guid: 0459e7c5d4121cf4aa006cd5b4da6b67, type: 3}
-  - {fileID: -203655887218126122, guid: a9d4f21bc3dc370408df5e84b8e36589, type: 3}
   m_WrapMode: 0
   m_PlayAutomatically: 0
   m_AnimatePhysics: 0
@@ -572,6 +569,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isDragging: 0
+  outlineMaterial: {fileID: 2100000, guid: fb8aeb9eedbfac4408523252a81a8405, type: 2}
+  outlineScale: 1.05
 --- !u!114 &2743794577559410171
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -600,7 +599,7 @@ MonoBehaviour:
   mana: 2
   maxMana: 50
   currentMana: 0
-  traits: 0300000004000000
+  traits: 070000000300000004000000
   canMove: 1
   canAttack: 1
   isAlive: 1

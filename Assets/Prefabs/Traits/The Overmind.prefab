@@ -141,7 +141,7 @@ MonoBehaviour:
   activeBreakpointText: {fileID: 0}
   nextBreakpointText: {fileID: 0}
   tooltipPrefab: {fileID: 5414683820092311064}
-  traitType: 0
+  traitType: 6
   specialTraits: 06000000
 --- !u!114 &8838439620585051926
 MonoBehaviour:

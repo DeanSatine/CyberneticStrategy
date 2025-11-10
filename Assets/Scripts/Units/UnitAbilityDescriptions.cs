@@ -110,10 +110,9 @@ private static string GetCobaltineDescription(UnitAI unit, float ad, int star)
 
         string turretStatus = turretCount > 0 ? $" (Currently {turretCount} active)" : "";
 
-        return $"Passive: Attacks grant {ability.attackSpeedPerStack * 100:F0}% stacking attack speed. " +
-               $"(Current: +{asBonus:F0}% from {stacks} stacks)\n\n" +
-               $"Active: Summon a laser turret that deals {dps:F0} <color=#FF6600>physical damage</color> " +
-               $"per second for {duration} seconds. Subsequent casts summon another turret.{turretStatus}";
+        return $"Passive: Attacks grant {ability.attackSpeedPerStack * 100:F0}% stacking attack speed.\n\n "+
+               $"Active: Summon a portal that deals {dps:F0} <color=#FF6600>physical damage</color> " +
+               $"per second for {duration} seconds. Subsequent casts summon another portal.{turretStatus}";
     }
     private static string GetKuromushadoDescription(UnitAI unit, float ad, int star)
 {
@@ -220,9 +219,8 @@ private static string GetHaymakerDescription(UnitAI unit, float ad, int star)
     int starIndex = Mathf.Clamp(star - 1, 0, ability.temporaryArmor.Length - 1);
     int damageReductionPercent = 80 + (starIndex * 10);
 
-    return $"Passive: Summon a clone of Haymaker with 25% health and damage. The clone does not benefit from traits.\n\n" +
-           $"When units on the board die, Haymaker absorbs their soul. The clone gains 1% health and damage for every 5 souls absorbed.\n\n" +
-           $"Active: Dash to the center clump of enemies and unleash a fury of slashes within 3 hexes that each do {slashDmg + (ad * 1.2f)} <color=#FF6600>physical damage</color> for 3 seconds. While slashing take {damageReductionPercent}% reduced damage. Then dash back to original position.\n\n" +
+    return 
+           $"Dash to the center clump of enemies and unleash a fury of slashes within 3 hexes that each do {slashDmg + (ad * 1.2f)} <color=#FF6600>physical damage</color> for 3 seconds. While slashing take {damageReductionPercent}% reduced damage. Then dash back to original position.\n\n" +
            $"Then, the clone will slam onto the final target, dealing {slamDmg + (ad * 1.2f)} <color=#FF6600>physical damage</color>. ";
 }
     private static string GetHaymakerCloneDescription(UnitAI unit)

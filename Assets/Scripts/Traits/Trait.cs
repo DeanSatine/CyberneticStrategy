@@ -8,5 +8,6 @@ public enum Trait
     Clobbertron,
     Strikebyte,
     Hyperdrive,
-    Overmind
+    Overmind,
+    ReplicationProtocol
 }

@@ -12,13 +12,74 @@ public class Draggable : MonoBehaviour
     private HexTile originalTile;
     private List<HexTile> highlightedTiles = new List<HexTile>();
 
+    [Header("Hover Outline Settings")]
+    [Tooltip("Outline color when hovering over the unit")]
+    public Color outlineColor = Color.white;
+    [Tooltip("Outline intensity (higher = brighter)")]
+    [Range(0f, 2f)]
+    public float outlineIntensity = 0.5f;
+
+    private Renderer[] renderers;
+    private MaterialPropertyBlock propBlock;
+    private static readonly int EmissionColor = Shader.PropertyToID("_EmissionColor");
+    private bool isHovered = false;
+
     private void Awake()
     {
         unitAI = GetComponent<UnitAI>();
+
+        renderers = GetComponentsInChildren<Renderer>();
+        propBlock = new MaterialPropertyBlock();
+    }
+
+    private void OnMouseEnter()
+    {
+        if (!CanInteractWithUnit()) return;
+        if (isDragging) return;
+
+        isHovered = true;
+        EnableOutline();
+    }
+
+    private void OnMouseExit()
+    {
+        isHovered = false;
+        DisableOutline();
+    }
+
+    private void EnableOutline()
+    {
+        foreach (var rend in renderers)
+        {
+            if (rend == null) continue;
+
+            rend.GetPropertyBlock(propBlock);
+            propBlock.SetColor(EmissionColor, outlineColor * outlineIntensity);
+            rend.SetPropertyBlock(propBlock);
+        }
+    }
+
+    private void DisableOutline()
+    {
+        foreach (var rend in renderers)
+        {
+            if (rend == null) continue;
+
+            rend.GetPropertyBlock(propBlock);
+            propBlock.SetColor(EmissionColor, Color.black);
+            rend.SetPropertyBlock(propBlock);
+        }
     }
 
     private void OnMouseDown()
     {
+        // Disable outline when picking up
+        if (isHovered)
+        {
+            DisableOutline();
+            isHovered = false;
+        }
+
         // ✅ BLOCK INTERACTION DURING COMBAT
         if (!CanInteractWithUnit())
         {
@@ -37,7 +98,7 @@ public class Draggable : MonoBehaviour
         {
             if (currentlyDragging != null && currentlyDragging != this)
             {
-                Debug.Log($"🚫 Already dragging {currentlyDragging.unitAI.unitName}, can’t pick up another.");
+                Debug.Log($"🚫 Already dragging {currentlyDragging.unitAI.unitName}, can't pick up another.");
                 return;
             }
 
@@ -213,7 +274,7 @@ public class Draggable : MonoBehaviour
 
             if (unitAI.team == Team.Player && !CanPlayerPlaceOnTile(tile))
             {
-                continue; // Skip invalid tiles for player units
+                continue;
             }
 
             float distance = Vector3.Distance(transform.position, tile.transform.position);
@@ -238,13 +299,11 @@ public class Draggable : MonoBehaviour
                 unitAI.currentTile.Free(unitAI);
             }
 
-            // Snap to this tile
             transform.position = new Vector3(
                 targetTile.transform.position.x,
                 transform.position.y,
                 targetTile.transform.position.z);
 
-            // ✅ CRITICAL: Update state FIRST, then evaluate traits
             if (targetTile.tileType == TileType.Board)
             {
                 unitAI.currentState = UnitState.BoardIdle;
@@ -256,17 +315,14 @@ public class Draggable : MonoBehaviour
                 GameManager.Instance.UnregisterUnit(unitAI);
             }
 
-            // ✅ NOW evaluate traits AFTER unit state is properly updated
             TraitManager.Instance.EvaluateTraits(GameManager.Instance.playerUnits);
             TraitManager.Instance.ApplyTraits(GameManager.Instance.playerUnits);
 
-            // ✅ Check for merging after moving a unit
             if (unitAI.team == Team.Player)
             {
                 GameManager.Instance.TryMergeUnits(unitAI);
             }
 
-            // ✅ Update fight button after state changes
             if (unitAI.team == Team.Player && UIManager.Instance != null)
             {
                 UIManager.Instance.UpdateFightButtonVisibility();
@@ -275,19 +331,16 @@ public class Draggable : MonoBehaviour
             Debug.Log($"✅ {unitAI.unitName} placed successfully at {targetTile.gridPosition}");
             return;
         }
-        // No valid tile found → snap back
+
         Debug.Log($"❌ No valid placement found for {unitAI.unitName}. Returning to original position.");
         transform.position = oldPosition;
 
-        // ✅ CRITICAL: Restore original tile reference to fix movement bug
         if (originalTile != null)
         {
             Debug.Log($"🔄 Restoring {unitAI.unitName} to original tile: {originalTile.gridPosition}");
 
-            // Reclaim the original tile
             if (originalTile.TryClaim(unitAI))
             {
-                // Restore proper state based on tile type
                 if (originalTile.tileType == TileType.Board)
                 {
                     unitAI.currentState = UnitState.BoardIdle;
@@ -307,7 +360,6 @@ public class Draggable : MonoBehaviour
             }
         }
 
-        // ✅ Clear the stored reference
         originalTile = null;
         return;
     }
