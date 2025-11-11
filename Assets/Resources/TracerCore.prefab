@@ -104,6 +104,21 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: f11600e7a2641da43b7fe4d2afc3916b,
         type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.89983
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: f11600e7a2641da43b7fe4d2afc3916b,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.89983
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: f11600e7a2641da43b7fe4d2afc3916b,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.89983
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: f11600e7a2641da43b7fe4d2afc3916b,
+        type: 3}
       propertyPath: m_LocalPosition.x
       value: -1.5871305
       objectReference: {fileID: 0}
@@ -187,6 +202,26 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 94834840416585507}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f11600e7a2641da43b7fe4d2afc3916b,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5428605371239157831}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f11600e7a2641da43b7fe4d2afc3916b,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5269922059996461910}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f11600e7a2641da43b7fe4d2afc3916b,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3904147443582876666}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f11600e7a2641da43b7fe4d2afc3916b,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2266852776222272173}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f11600e7a2641da43b7fe4d2afc3916b,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3498809984832012701}
   m_SourcePrefab: {fileID: 100100000, guid: f11600e7a2641da43b7fe4d2afc3916b, type: 3}
 --- !u!4 &3997567623267588245 stripped
 Transform:
@@ -227,7 +262,7 @@ MonoBehaviour:
   abilityPower: 100
   attackRange: 8
   mana: 0
-  maxMana: 110
+  maxMana: 60
   currentMana: 0
   traits: 
   canMove: 1
@@ -238,7 +273,8 @@ MonoBehaviour:
   firePoint: {fileID: 0}
   projectileSpeed: 15
   facingReference: {fileID: 0}
-  unitUIPrefab: {fileID: 0}
+  unitUIPrefab: {fileID: 6939982145822855837, guid: 63931d92c48ef65418d45ec02069a522,
+    type: 3}
   ui: {fileID: 0}
   animator: {fileID: 0}
   currentTarget: {fileID: 0}
@@ -278,7 +314,7 @@ Animation:
   m_Animation: {fileID: 0}
   m_Animations:
   - {fileID: 7400000, guid: 7685c4f389e2aa5479ac5480bf1de023, type: 2}
-  - {fileID: -203655887218126122, guid: 3847ce1597571a14d81f77bf4963c7e7, type: 3}
+  - {fileID: 7400000, guid: c1d029a224446914882abc8a9361eda3, type: 2}
   - {fileID: -203655887218126122, guid: 4424582bdb136db4889eaba607fcd027, type: 3}
   - {fileID: -203655887218126122, guid: ced41b311e4e6a745bf77ff2880935aa, type: 3}
   - {fileID: -203655887218126122, guid: 4a66d95a7609114438139bdab41d6f1f, type: 3}
@@ -287,6 +323,123 @@ Animation:
   m_PlayAutomatically: 1
   m_AnimatePhysics: 0
   m_CullingType: 0
+--- !u!114 &5428605371239157831
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7027651252898508807}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a340f569751fc45468fd6d35fce17d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  damagePerStar:
+  - 400
+  - 900
+  - 1500
+  aimLinePrefab: {fileID: 0}
+  boltPrefab: {fileID: 0}
+  hitVFX: {fileID: 0}
+  aimLineColor: {r: 0, g: 0, b: 0, a: 1}
+  aimLineWidth: 0.1
+  aimSound: {fileID: 0}
+  fireSound: {fileID: 0}
+  hitSound: {fileID: 0}
+  volume: 0.8
+--- !u!65 &5269922059996461910
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7027651252898508807}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.6810249, y: 1.7105598, z: 0.61518383}
+  m_Center: {x: -0.021067798, y: 0.87360334, z: -0.05377102}
+--- !u!54 &3904147443582876666
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7027651252898508807}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 36
+  m_CollisionDetection: 0
+--- !u!114 &2266852776222272173
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7027651252898508807}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b233c290dd868d41b456cc47bcc1a6c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isDragging: 0
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineIntensity: 0.5
+--- !u!114 &3498809984832012701
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7027651252898508807}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7771fb580d6217a4da3ee7324885b101, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  vfxConfig:
+    autoAttackProjectile: {fileID: 8548050680436672203, guid: 7ace9ee1cdd0a964296b35a4bdb957ad,
+      type: 3}
+    autoAttackMuzzleFlash: {fileID: 0}
+    autoAttackHitEffect: {fileID: 0}
+    abilityEffect: {fileID: 0}
+    abilityProjectile: {fileID: 0}
+    abilityImpactEffect: {fileID: 0}
+    autoAttackSound: {fileID: 0}
+    abilitySound: {fileID: 0}
+    volume: 0.7
+  deathVFX: {fileID: 0}
+  levelUpVFX: {fileID: 0}
+  damageNumbersPrefab: {fileID: 0}
+  firePoint: {fileID: 0}
+  chestPoint: {fileID: 0}
+  weaponPoint: {fileID: 0}
 --- !u!4 &8427359218868089502 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1852576806548013000, guid: f11600e7a2641da43b7fe4d2afc3916b,

@@ -48,7 +48,9 @@ public static class UnitAbilityDescriptions
 
             case "Sightline":
                 return GetSightlineDescription(unit, ad, star);
-                
+            case "TracerCore":
+                return GetTracerCoreDescription(unit, ad, star);
+
             default:
                 return "This unit has no ability description yet.";
 
@@ -125,8 +127,17 @@ private static string GetCobaltineDescription(UnitAI unit, float ad, int star)
     return $"Passive: Auto Attacks sweep in a {coneSize} hex cone, hitting all enemies within {ability.coneAngle}° of the target.\n\n" +
            $"Active: Jump Kick the target, dealing {kickDamage} <color=#FF6600>physical damage</color> and knocking them back {ability.knockbackDistance} hexes.";
 }
+    private static string GetTracerCoreDescription(UnitAI unit, float ad, int star)
+    {
+        var ability = unit.GetComponent<TracerCoreAbility>();
+        if (ability == null) return "TracerCore ability missing.";
 
-private static string GetCoreweaverDescription(UnitAI unit, float ad, int star)
+        float damage = ability.damagePerStar[Mathf.Clamp(star - 1, 0, ability.damagePerStar.Length - 1)];
+
+        return $"Aim at the 2 farthest enemies, shooting a devastating bolt to each target dealing {damage:F0} <color=#00BFFF>magic damage</color> to the first enemy it hits.";
+    }
+
+    private static string GetCoreweaverDescription(UnitAI unit, float ad, int star)
 {
     var ability = unit.GetComponent<CoreweaverAbility>();
     if (ability == null) return "Coreweaver ability missing.";
