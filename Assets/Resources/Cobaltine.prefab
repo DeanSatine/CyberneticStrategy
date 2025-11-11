@@ -536,7 +536,7 @@ MonoBehaviour:
   attackDamage: 50
   attackSpeed: 0.6
   armor: 65
-  magicResist: 0
+  magicResist: 65
   damageReduction: 0
   attackDamageType: 0
   abilityPower: 100
@@ -573,13 +573,15 @@ MonoBehaviour:
   moveOffsetRange: 0.2
   deathAnimLength: 3
   startingTile: {fileID: 0}
-  twoStarMultiplier: 1.8
-  threeStarMultiplier: 2.5
+  twoStarHealth: 2100
+  threeStarHealth: 4000
+  twoStarAD: 85
+  threeStarAD: 190
   twoStarScale: 1.1
+  threeStarScale: 1.25
   traitBonusMaxHealth: 0
   baseMaxHealth: 0
   bonusMaxHealth: 0
-  threeStarScale: 1.25
 --- !u!114 &-8105998211757595911
 MonoBehaviour:
   m_ObjectHideFlags: 0

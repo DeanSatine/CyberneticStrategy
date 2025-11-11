@@ -117,25 +117,29 @@ public class UnitAI : MonoBehaviour
     [HideInInspector] public HexTile startingTile; // where the unit was before combat
 
     [Header("Star Upgrade")]
-    [Tooltip("Multiplier applied to stats on 2-star (e.g. 1.8)")]
+    [Tooltip("Total max health at 2-star")]
+    public float twoStarHealth = 650f;
 
-    public float twoStarMultiplier = 1.8f;
+    [Tooltip("Total max health at 3-star")]
+    public float threeStarHealth = 900f;
 
-    [Tooltip("Multiplier applied to stats on 3-star (e.g. 2.5)")]
+    [Tooltip("Total attack damage at 2-star")]
+    public float twoStarAD = 18f;
 
-    public float threeStarMultiplier = 2.5f;
+    [Tooltip("Total attack damage at 3-star")]
+    public float threeStarAD = 27f;
 
     [Tooltip("Scale at 2-star (relative to base)")]
-
     public float twoStarScale = 1.10f;
-    [HideInInspector] public float traitBonusMaxHealth = 0f; // Persistent trait bonuses
 
     [Tooltip("Scale at 3-star (relative to base)")]
-    // runtime baseline + modifiers so buffs persist
+    public float threeStarScale = 1.25f;
+
+    [HideInInspector] public float traitBonusMaxHealth = 0f;
     [HideInInspector] public float baseMaxHealth;
     [HideInInspector] public float bonusMaxHealth;
 
-    public float threeStarScale = 1.25f;
+
     private List<GameObject> activeProjectiles = new List<GameObject>();
 
     private Vector3 baseScale;
@@ -164,7 +168,6 @@ public class UnitAI : MonoBehaviour
             currentState = newState;
             OnStateChanged?.Invoke(newState);
 
-            // ✅ FIX: Ensure proper state transition for movement/attack
             if (newState == UnitState.BoardIdle)
             {
                 // Reset movement and attack capabilities when placed on board
@@ -1207,7 +1210,6 @@ public class UnitAI : MonoBehaviour
         }
     }
 
-    // ⭐ Upgrade Star Level (called from GameManager when merging)
     public void UpgradeStarLevel()
     {
         if (starLevel >= 3)
@@ -1219,22 +1221,23 @@ public class UnitAI : MonoBehaviour
         int oldStar = starLevel;
         starLevel++;
 
-        float multiplier = (starLevel == 2) ? twoStarMultiplier : threeStarMultiplier;
+        float oldHealth = baseMaxHealth;
+        float oldAD = attackDamage;
 
-        // scale base and existing bonus so relative bonuses remain consistent
-        baseMaxHealth = Mathf.Round(baseMaxHealth * multiplier);
-        bonusMaxHealth = Mathf.Round(bonusMaxHealth * multiplier);
+        if (starLevel == 2)
+        {
+            baseMaxHealth = twoStarHealth;
+            attackDamage = twoStarAD;
+        }
+        else if (starLevel == 3)
+        {
+            baseMaxHealth = threeStarHealth;
+            attackDamage = threeStarAD;
+        }
 
-        attackDamage = Mathf.Round(attackDamage * multiplier);
-
-        // recompute effective max and sync UI
         RecalculateMaxHealth();
-
         currentHealth = maxHealth;
 
-
-        // 📏 Force scaling rules by unit name
-        // 📏 Force scaling rules by unit name
         if (starLevel == 2)
         {
             Vector3 desiredWorldScale;
@@ -1256,11 +1259,10 @@ public class UnitAI : MonoBehaviour
                     desiredWorldScale = new Vector3(1.3f, 1.05f, 1.3f);
                     break;
                 default:
-                    desiredWorldScale = baseScale * 1.1f; // fallback for other units
+                    desiredWorldScale = baseScale * twoStarScale;
                     break;
             }
 
-            // ✅ Account for parent scaling (CharacterTile has very small Y scale)
             if (transform.parent != null)
             {
                 Vector3 parentScale = transform.parent.lossyScale;
@@ -1296,11 +1298,10 @@ public class UnitAI : MonoBehaviour
                     desiredWorldScale = new Vector3(1.40f, 1.40f, 1.40f);
                     break;
                 default:
-                    desiredWorldScale = baseScale * 1.25f; // fallback for other units
+                    desiredWorldScale = baseScale * threeStarScale;
                     break;
             }
 
-            // ✅ Account for parent scaling (CharacterTile has very small Y scale)
             if (transform.parent != null)
             {
                 Vector3 parentScale = transform.parent.lossyScale;
@@ -1316,39 +1317,27 @@ public class UnitAI : MonoBehaviour
             }
         }
 
-
-        // Spawn VFX if prefab assigned
         if (GameManager.Instance != null && GameManager.Instance.starUpVFXPrefab != null)
         {
             var vfx = Instantiate(GameManager.Instance.starUpVFXPrefab, transform.position + Vector3.up * 1.2f, Quaternion.identity);
             Destroy(vfx, 0.8f);
         }
 
-        // after this line:
-        currentHealth = maxHealth;
-
-        // ✅ Fix: make sure the UnitUI knows about the new max health
         if (ui != null)
         {
-            // Reset both stored max and current values
             ui.SetMaxHealth(maxHealth);
             ui.UpdateHealth(currentHealth);
         }
 
-        Debug.Log($"[Upgrade] {unitName} {oldStar}★ -> {starLevel}★. HP: {maxHealth}, AD: {attackDamage}");
-
-        // ✅ FIX: Notify HaymakerAbility about star upgrade
         var haymakerAbility = GetComponent<HaymakerAbility>();
         if (haymakerAbility != null)
         {
             haymakerAbility.OnStarLevelUpgraded();
         }
 
-        Debug.Log($"[Upgrade] {unitName} {oldStar}★ -> {starLevel}★. HP: {maxHealth}, AD: {attackDamage}");
+        Debug.Log($"[Upgrade] {unitName} {oldStar}★ → {starLevel}★. HP: {oldHealth} → {baseMaxHealth}, AD: {oldAD} → {attackDamage}");
     }
 
-
-    // ✅ Helper method for alternative movement
     private Vector3 FindAlternativeDirection(Vector3 blockedDirection)
     {
         // Try perpendicular directions

@@ -313,7 +313,7 @@ MonoBehaviour:
   classification: 2
   maxHealth: 800
   currentHealth: 800
-  attackDamage: 40
+  attackDamage: 35
   attackSpeed: 0.7
   armor: 50
   magicResist: 0
@@ -353,13 +353,15 @@ MonoBehaviour:
   moveOffsetRange: 0.2
   deathAnimLength: 3
   startingTile: {fileID: 0}
-  twoStarMultiplier: 1.8
-  threeStarMultiplier: 2.5
+  twoStarHealth: 1400
+  threeStarHealth: 2500
+  twoStarAD: 45
+  threeStarAD: 55
   twoStarScale: 1.1
+  threeStarScale: 1.12
   traitBonusMaxHealth: 0
   baseMaxHealth: 0
   bonusMaxHealth: 0
-  threeStarScale: 1.12
 --- !u!114 &6517958316986358636
 MonoBehaviour:
   m_ObjectHideFlags: 0

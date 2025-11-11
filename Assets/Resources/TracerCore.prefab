@@ -225,7 +225,7 @@ MonoBehaviour:
   damageReduction: 0
   attackDamageType: 0
   abilityPower: 100
-  attackRange: 5
+  attackRange: 8
   mana: 0
   maxMana: 110
   currentMana: 0
@@ -257,13 +257,15 @@ MonoBehaviour:
   moveOffsetRange: 0.2
   deathAnimLength: 3
   startingTile: {fileID: 0}
-  twoStarMultiplier: 1.8
-  threeStarMultiplier: 2.5
+  twoStarHealth: 900
+  threeStarHealth: 1700
+  twoStarAD: 50
+  threeStarAD: 70
   twoStarScale: 1.1
+  threeStarScale: 1.25
   traitBonusMaxHealth: 0
   baseMaxHealth: 0
   bonusMaxHealth: 0
-  threeStarScale: 1.25
 --- !u!111 &94834840416585507
 Animation:
   m_ObjectHideFlags: 0

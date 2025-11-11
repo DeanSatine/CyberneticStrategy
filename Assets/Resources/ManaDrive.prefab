@@ -340,8 +340,8 @@ MonoBehaviour:
   starLevel: 1
   team: 0
   classification: 6
-  maxHealth: 600
-  currentHealth: 600
+  maxHealth: 850
+  currentHealth: 850
   attackDamage: 30
   attackSpeed: 0.8
   armor: 20
@@ -383,13 +383,15 @@ MonoBehaviour:
   moveOffsetRange: 0.2
   deathAnimLength: 3
   startingTile: {fileID: 0}
-  twoStarMultiplier: 1.8
-  threeStarMultiplier: 2.5
+  twoStarHealth: 1500
+  threeStarHealth: 2500
+  twoStarAD: 40
+  threeStarAD: 60
   twoStarScale: 1.1
+  threeStarScale: 1.12
   traitBonusMaxHealth: 0
   baseMaxHealth: 0
   bonusMaxHealth: 0
-  threeStarScale: 1.12
 --- !u!114 &1845309957721737311
 MonoBehaviour:
   m_ObjectHideFlags: 0

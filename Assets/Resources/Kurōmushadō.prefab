@@ -439,13 +439,15 @@ MonoBehaviour:
   moveOffsetRange: 0.2
   deathAnimLength: 3
   startingTile: {fileID: 0}
-  twoStarMultiplier: 1.8
-  threeStarMultiplier: 2.5
+  twoStarHealth: 1400
+  threeStarHealth: 2300
+  twoStarAD: 75
+  threeStarAD: 120
   twoStarScale: 1.1
+  threeStarScale: 1.25
   traitBonusMaxHealth: 0
   baseMaxHealth: 0
   bonusMaxHealth: 0
-  threeStarScale: 1.25
 --- !u!114 &3009157301823552190
 MonoBehaviour:
   m_ObjectHideFlags: 0

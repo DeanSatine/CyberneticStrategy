@@ -1350,6 +1350,7 @@ MonoBehaviour:
   unitName: Sightline
   starLevel: 1
   team: 0
+  classification: 1
   maxHealth: 900
   currentHealth: 900
   attackDamage: 70
@@ -1392,13 +1393,15 @@ MonoBehaviour:
   moveOffsetRange: 0.2
   deathAnimLength: 3
   startingTile: {fileID: 0}
-  twoStarMultiplier: 1.8
-  threeStarMultiplier: 2.5
+  twoStarHealth: 650
+  threeStarHealth: 900
+  twoStarAD: 105
+  threeStarAD: 165
   twoStarScale: 1.1
+  threeStarScale: 1.25
   traitBonusMaxHealth: 0
   baseMaxHealth: 0
   bonusMaxHealth: 0
-  threeStarScale: 1.25
 --- !u!114 &582197855543107401
 MonoBehaviour:
   m_ObjectHideFlags: 0
