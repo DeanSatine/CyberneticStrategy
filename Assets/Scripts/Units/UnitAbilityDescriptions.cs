@@ -111,8 +111,8 @@ private static string GetCobaltineDescription(UnitAI unit, float ad, int star)
         string turretStatus = turretCount > 0 ? $" (Currently {turretCount} active)" : "";
 
         return $"Passive: Attacks grant {ability.attackSpeedPerStack * 100:F0}% stacking attack speed.\n\n "+
-               $"Active: Summon a portal that deals {dps:F0} <color=#FF6600>physical damage</color> " +
-               $"per second for {duration} seconds. Subsequent casts summon another portal.{turretStatus}";
+               $"Active: Summon a portal that shoots piercing lasers {dps:F0} <color=#FF6600>physical damage</color> " +
+               $"every second for {duration} seconds. Subsequent casts summon another portal.{turretStatus}";
     }
     private static string GetKuromushadoDescription(UnitAI unit, float ad, int star)
 {

@@ -16,6 +16,13 @@ public class LaserTurret : MonoBehaviour
     public float damageTickRate = 0.25f;
     public float targetAcquisitionRange = 15f;
 
+    [Header("Piercing Settings")]
+    [Tooltip("Enable piercing damage to units 1 hex behind the primary target")]
+    public bool enablePiercing = true;
+
+    [Tooltip("Maximum distance in world units to consider for piercing (for alignment check)")]
+    public float piercingAlignmentTolerance = 1.5f;
+
     [Header("VFX Children (optional)")]
     public Transform beamVisual;
     public ParticleSystem[] beamParticles;
@@ -39,7 +46,7 @@ public class LaserTurret : MonoBehaviour
         this.lifetimeTimer = 0f;
         this.parentAbility = ability;
 
-        Debug.Log($"⚡ [TURRET] Initialized! DPS: {dps}, Duration: {duration}s");
+        Debug.Log($"⚡ [TURRET] Initialized! DPS: {dps}, Duration: {duration}s, Piercing: {enablePiercing}");
 
         StartCoroutine(AcquireAndAttackTargets());
     }
@@ -103,10 +110,57 @@ public class LaserTurret : MonoBehaviour
                 damageTimer = 0f;
 
                 Debug.Log($"⚡ [TURRET] Dealt {damageThisTick:F1} damage to {target.unitName} ({damagePerSecond} DPS)");
+
+                if (enablePiercing)
+                {
+                    UnitAI piercingTarget = FindPiercingTarget(target);
+                    if (piercingTarget != null)
+                    {
+                        piercingTarget.TakeDamage(damageThisTick);
+                        Debug.Log($"⚡🎯 [TURRET PIERCE] Dealt {damageThisTick:F1} damage to {piercingTarget.unitName} (behind {target.unitName})");
+                    }
+                }
             }
 
             yield return null;
         }
+    }
+
+    private UnitAI FindPiercingTarget(UnitAI primaryTarget)
+    {
+        if (primaryTarget == null || primaryTarget.currentTile == null)
+            return null;
+
+        Vector3 directionToTarget = (primaryTarget.transform.position - transform.position).normalized;
+
+        UnitAI[] allUnits = FindObjectsOfType<UnitAI>();
+        UnitAI piercingTarget = null;
+        float closestDistance = Mathf.Infinity;
+
+        foreach (var unit in allUnits)
+        {
+            if (unit == null || !unit.isAlive || unit == primaryTarget || unit.team == ownerUnit.team || unit.currentState == UnitAI.UnitState.Bench)
+                continue;
+
+            Vector3 directionToUnit = (unit.transform.position - transform.position).normalized;
+            float dotProduct = Vector3.Dot(directionToTarget, directionToUnit);
+
+            if (dotProduct > 0.9f)
+            {
+                float distanceFromTurret = Vector3.Distance(transform.position, unit.transform.position);
+                float distanceFromPrimary = Vector3.Distance(primaryTarget.transform.position, unit.transform.position);
+
+                if (distanceFromTurret > Vector3.Distance(transform.position, primaryTarget.transform.position) &&
+                    distanceFromPrimary < piercingAlignmentTolerance * 2f &&
+                    distanceFromTurret < closestDistance)
+                {
+                    closestDistance = distanceFromTurret;
+                    piercingTarget = unit;
+                }
+            }
+        }
+
+        return piercingTarget;
     }
 
     private UnitAI FindTarget()
