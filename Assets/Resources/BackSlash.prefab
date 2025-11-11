@@ -588,6 +588,7 @@ MonoBehaviour:
   unitName: BackSlash
   starLevel: 1
   team: 0
+  classification: 5
   maxHealth: 600
   currentHealth: 600
   attackDamage: 35

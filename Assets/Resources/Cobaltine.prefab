@@ -530,6 +530,7 @@ MonoBehaviour:
   unitName: Cobaltine
   starLevel: 1
   team: 0
+  classification: 4
   maxHealth: 1300
   currentHealth: 1300
   attackDamage: 50

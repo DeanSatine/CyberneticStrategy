@@ -683,6 +683,7 @@ MonoBehaviour:
   unitName: Coreweaver
   starLevel: 1
   team: 0
+  classification: 6
   maxHealth: 1000
   currentHealth: 1000
   attackDamage: 50

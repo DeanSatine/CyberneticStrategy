@@ -586,6 +586,7 @@ MonoBehaviour:
   unitName: Haymaker
   starLevel: 1
   team: 0
+  classification: 3
   maxHealth: 1100
   currentHealth: 1100
   attackDamage: 65

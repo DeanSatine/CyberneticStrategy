@@ -432,6 +432,7 @@ MonoBehaviour:
   unitName: Haymaker Clone
   starLevel: 1
   team: 0
+  classification: 3
   maxHealth: 275
   currentHealth: 275
   attackDamage: 16

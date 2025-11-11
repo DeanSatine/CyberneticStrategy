@@ -215,18 +215,19 @@ MonoBehaviour:
   unitName: TracerCore
   starLevel: 1
   team: 0
-  maxHealth: 100
-  currentHealth: 0
-  attackDamage: 10
-  attackSpeed: 1
-  armor: 0
-  magicResist: 0
+  classification: 6
+  maxHealth: 650
+  currentHealth: 650
+  attackDamage: 30
+  attackSpeed: 0.65
+  armor: 15
+  magicResist: 15
   damageReduction: 0
   attackDamageType: 0
   abilityPower: 100
-  attackRange: 1.5
+  attackRange: 5
   mana: 0
-  maxMana: 50
+  maxMana: 110
   currentMana: 0
   traits: 
   canMove: 1

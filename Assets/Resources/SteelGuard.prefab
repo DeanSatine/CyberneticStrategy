@@ -362,6 +362,7 @@ MonoBehaviour:
   unitName: SteelGuard
   starLevel: 1
   team: 0
+  classification: 4
   maxHealth: 650
   currentHealth: 650
   attackDamage: 45

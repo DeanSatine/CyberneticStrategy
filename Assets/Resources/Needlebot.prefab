@@ -355,6 +355,7 @@ MonoBehaviour:
   unitName: Needlebot
   starLevel: 1
   team: 0
+  classification: 0
   maxHealth: 400
   currentHealth: 400
   attackDamage: 35

@@ -304,6 +304,7 @@ MonoBehaviour:
   unitName: KillSwitch
   starLevel: 1
   team: 0
+  classification: 3
   maxHealth: 1000
   currentHealth: 1000
   attackDamage: 60

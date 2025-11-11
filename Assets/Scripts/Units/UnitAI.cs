@@ -16,6 +16,10 @@ public class UnitAI : MonoBehaviour
     public int starLevel = 1;
     public Team team = Team.Player;
 
+    [Header("Class")]
+    [Tooltip("Unit role class for filtering and targeting logic")]
+    public UnitClass classification = UnitClass.AttackMarksman;
+
     [Header("Stats")]
     public float maxHealth = 100;
     public float currentHealth;
@@ -67,7 +71,7 @@ public class UnitAI : MonoBehaviour
 
     [Header("UI")]
     public GameObject unitUIPrefab;
-    public UnitUI ui;
+    [HideInInspector] public UnitUI ui;
     private Queue<HexTile> currentPath = new Queue<HexTile>();
 
     private float attackCooldown = 0f;

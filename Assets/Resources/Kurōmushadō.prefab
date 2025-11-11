@@ -396,6 +396,7 @@ MonoBehaviour:
   unitName: "Kur\u014Dmushad\u014D"
   starLevel: 1
   team: 0
+  classification: 3
   maxHealth: 850
   currentHealth: 850
   attackDamage: 45

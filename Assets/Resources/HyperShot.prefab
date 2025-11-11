@@ -439,6 +439,7 @@ MonoBehaviour:
   unitName: HyperShot
   starLevel: 1
   team: 0
+  classification: 7
   maxHealth: 600
   currentHealth: 600
   attackDamage: 60

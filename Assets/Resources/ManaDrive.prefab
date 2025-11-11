@@ -339,6 +339,7 @@ MonoBehaviour:
   unitName: ManaDrive
   starLevel: 1
   team: 0
+  classification: 6
   maxHealth: 600
   currentHealth: 600
   attackDamage: 30
