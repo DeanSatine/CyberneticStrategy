@@ -262,7 +262,7 @@ MonoBehaviour:
   abilityPower: 100
   attackRange: 8
   mana: 0
-  maxMana: 60
+  maxMana: 20
   currentMana: 0
   traits: 
   canMove: 1
@@ -336,12 +336,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damagePerStar:
-  - 400
-  - 900
-  - 1500
+  - 300
+  - 800
+  - 1400
   aimLinePrefab: {fileID: 0}
-  boltPrefab: {fileID: 0}
-  hitVFX: {fileID: 0}
+  boltPrefab: {fileID: 8548050680436672203, guid: 33776bf1a16d90d44bc02f9313ad2443,
+    type: 3}
+  hitVFX: {fileID: 447409866740539227, guid: da34d66431c8cd04aa98411a543a83bf, type: 3}
   aimLineColor: {r: 0, g: 0, b: 0, a: 1}
   aimLineWidth: 0.1
   aimSound: {fileID: 0}
@@ -427,7 +428,8 @@ MonoBehaviour:
     autoAttackProjectile: {fileID: 8548050680436672203, guid: 7ace9ee1cdd0a964296b35a4bdb957ad,
       type: 3}
     autoAttackMuzzleFlash: {fileID: 0}
-    autoAttackHitEffect: {fileID: 0}
+    autoAttackHitEffect: {fileID: 7856939199014537196, guid: 212ef1a41838ce044a9ac54994866708,
+      type: 3}
     abilityEffect: {fileID: 0}
     abilityProjectile: {fileID: 0}
     abilityImpactEffect: {fileID: 0}

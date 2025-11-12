@@ -132,10 +132,12 @@ private static string GetCobaltineDescription(UnitAI unit, float ad, int star)
         var ability = unit.GetComponent<TracerCoreAbility>();
         if (ability == null) return "TracerCore ability missing.";
 
-        float damage = ability.damagePerStar[Mathf.Clamp(star - 1, 0, ability.damagePerStar.Length - 1)];
+        float baseDamage = ability.damagePerStar[Mathf.Clamp(star - 1, 0, ability.damagePerStar.Length - 1)];
+        float totalDamage = baseDamage + (unit.abilityPower * 0.5f);
 
-        return $"Aim at the 2 farthest enemies, shooting a devastating bolt to each target dealing {damage:F0} <color=#00BFFF>magic damage</color> to the first enemy it hits.";
+        return $"Aim at the 2 farthest enemies, shooting a devastating bolt to each target dealing {totalDamage:F0} <color=#00BFFF>magic damage</color> ({baseDamage} + 50% AP) to the first enemy it hits.\n\nIf there is only 1 enemy left, shoot both bullets at them.";
     }
+
 
     private static string GetCoreweaverDescription(UnitAI unit, float ad, int star)
 {

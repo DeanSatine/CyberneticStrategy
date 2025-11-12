@@ -7,6 +7,12 @@ public class TracerCoreAbility : MonoBehaviour, IUnitAbility
 {
     private UnitAI unitAI;
 
+    [Header("Fire Points")]
+    [Tooltip("Left gun fire point")]
+    public Transform leftFirePoint;
+    [Tooltip("Right gun fire point")]
+    public Transform rightFirePoint;
+
     [Header("Ability Stats")]
     [Tooltip("Damage per bolt at each star level")]
     public float[] damagePerStar = { 400f, 900f, 1500f };
@@ -59,6 +65,8 @@ public class TracerCoreAbility : MonoBehaviour, IUnitAbility
 
     public void OnAimTargets()
     {
+        Debug.Log($"🔍 OnAimTargets() called for {unitAI.unitName}");
+
         ClearAimLines();
         targets.Clear();
 
@@ -68,45 +76,77 @@ public class TracerCoreAbility : MonoBehaviour, IUnitAbility
 
         if (targets.Count == 0)
         {
-            Debug.Log($"⚠️ {unitAI.unitName} found no valid targets for TracerCore!");
+            Debug.LogWarning($"⚠️ {unitAI.unitName} found no valid targets for TracerCore!");
             return;
         }
 
-        Vector3 firePoint = unitAI.firePoint != null ? unitAI.firePoint.position : transform.position + Vector3.up * 1.5f;
+        Transform[] firePoints = GetFirePoints();
 
-        foreach (var target in targets)
+        for (int i = 0; i < targets.Count; i++)
         {
+            var target = targets[i];
             if (target != null && target.isAlive)
             {
+                Vector3 firePoint = firePoints[i % firePoints.Length].position;
                 LineRenderer aimLine = CreateAimLine(firePoint, target.transform.position + Vector3.up * 1.2f);
                 aimLines.Add(aimLine);
+                Debug.Log($"🎯 Aiming from gun {i + 1} at {target.unitName}");
             }
         }
 
         Debug.Log($"🎯 {unitAI.unitName} aims at {targets.Count} targets!");
     }
 
+
     public void OnFireBolts()
     {
+        Debug.Log($"🔍 OnFireBolts() called for {unitAI.unitName}");
+
         ClearAimLines();
 
         PlaySound(fireSound);
 
-        Vector3 firePoint = unitAI.firePoint != null ? unitAI.firePoint.position : transform.position + Vector3.up * 1.5f;
+        if (targets.Count == 0)
+        {
+            Debug.LogWarning($"⚠️ {unitAI.unitName} has no targets to fire at!");
+            return;
+        }
+
+        Transform[] firePoints = GetFirePoints();
 
         int starIndex = Mathf.Clamp(unitAI.starLevel - 1, 0, damagePerStar.Length - 1);
-        float damage = damagePerStar[starIndex];
+        float baseDamage = damagePerStar[starIndex];
+        float totalDamage = baseDamage + (unitAI.abilityPower * 0.5f);
 
-        foreach (var target in targets)
+        for (int i = 0; i < targets.Count; i++)
         {
+            var target = targets[i];
             if (target != null && target.isAlive && target.currentState != UnitState.Bench)
             {
-                StartCoroutine(FireBolt(firePoint, target, damage));
+                Vector3 firePoint = firePoints[i % firePoints.Length].position;
+                Debug.Log($"⚡ Firing bolt from gun {i + 1} at {target.unitName}");
+                StartCoroutine(FireBolt(firePoint, target, baseDamage));
             }
         }
 
-        Debug.Log($"⚡ {unitAI.unitName} fires {targets.Count} bolts for {damage} damage each!");
+        Debug.Log($"⚡ {unitAI.unitName} fires {targets.Count} bolts for {totalDamage:F0} damage each!");
     }
+    private Transform[] GetFirePoints()
+    {
+        if (leftFirePoint != null && rightFirePoint != null)
+        {
+            return new Transform[] { leftFirePoint, rightFirePoint };
+        }
+        else if (unitAI.firePoint != null)
+        {
+            return new Transform[] { unitAI.firePoint };
+        }
+        else
+        {
+            return new Transform[] { transform };
+        }
+    }
+
 
     private List<UnitAI> FindTwoFarthestEnemies()
     {
@@ -129,13 +169,21 @@ public class TracerCoreAbility : MonoBehaviour, IUnitAbility
             return distB.CompareTo(distA);
         });
 
-        List<UnitAI> farthestTwo = new List<UnitAI>();
-        for (int i = 0; i < Mathf.Min(2, validEnemies.Count); i++)
+        List<UnitAI> targets = new List<UnitAI>();
+
+        if (validEnemies.Count >= 2)
         {
-            farthestTwo.Add(validEnemies[i]);
+            targets.Add(validEnemies[0]);
+            targets.Add(validEnemies[1]);
+        }
+        else if (validEnemies.Count == 1)
+        {
+            targets.Add(validEnemies[0]);
+            targets.Add(validEnemies[0]);
+            Debug.Log($"⚡ Only 1 enemy found - firing both bolts at {validEnemies[0].unitName}!");
         }
 
-        return farthestTwo;
+        return targets;
     }
 
     private LineRenderer CreateAimLine(Vector3 start, Vector3 end)
@@ -209,7 +257,7 @@ public class TracerCoreAbility : MonoBehaviour, IUnitAbility
 
             if (Vector3.Distance(bolt.transform.position, targetPos) < 0.3f)
             {
-                unitAI.DealMagicDamageWithAP(target, damage, 1.0f);
+                unitAI.DealMagicDamageWithAP(target, damage, 0.5f);
 
                 if (hitVFX != null)
                 {
