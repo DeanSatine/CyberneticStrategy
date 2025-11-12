@@ -320,7 +320,7 @@ MonoBehaviour:
   maxHealth: 650
   currentHealth: 650
   attackDamage: 30
-  attackSpeed: 0.65
+  attackSpeed: 0.75
   armor: 15
   magicResist: 15
   damageReduction: 0
