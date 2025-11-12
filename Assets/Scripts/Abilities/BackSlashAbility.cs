@@ -11,6 +11,9 @@ public class BackSlashAbility : MonoBehaviour, IUnitAbility
     [Tooltip("Slash damage per star level")]
     public float[] slashDamage = { 150f, 250f, 400f };
 
+    [Tooltip("AP scaling ratios per star level (80/120/185%)")]
+    public float[] slashAPRatio = { 0.8f, 1.2f, 1.85f };
+
     [Tooltip("Distance of slash in hexes")]
     public float slashDistance = 3f;
 
@@ -20,6 +23,9 @@ public class BackSlashAbility : MonoBehaviour, IUnitAbility
     [Header("Slam Settings (Every 3rd Cast)")]
     [Tooltip("Slam damage per star level")]
     public float[] slamDamage = { 300f, 500f, 800f };
+
+    [Tooltip("AP scaling ratios per star level (80/120/185%)")]
+    public float[] slamAPRatio = { 0.8f, 1.2f, 1.85f };
 
     [Tooltip("Slam radius in hexes")]
     public float slamRadius = 6f;
@@ -114,7 +120,6 @@ public class BackSlashAbility : MonoBehaviour, IUnitAbility
         }
     }
 
-
     public void OnSlashAnimationEvent()
     {
         PlaySound(slashSound);
@@ -129,16 +134,18 @@ public class BackSlashAbility : MonoBehaviour, IUnitAbility
         }
 
         int starIndex = Mathf.Clamp(unitAI.starLevel - 1, 0, slashDamage.Length - 1);
-        float damage = slashDamage[starIndex];
+        float baseDamage = slashDamage[starIndex];
+        float apRatio = slashAPRatio[starIndex];
 
         List<UnitAI> enemies = FindEnemiesInFront();
 
         foreach (UnitAI enemy in enemies)
         {
-            unitAI.DealMagicDamage(enemy, damage);
+            unitAI.DealMagicDamageWithAP(enemy, baseDamage, apRatio);
         }
 
-        Debug.Log($"⚔️ {unitAI.unitName} slashed, hitting {enemies.Count} enemies for {damage} magic damage! (Cast {castCount})");
+        float totalDamage = baseDamage + (unitAI.abilityPower * apRatio);
+        Debug.Log($"⚔️ {unitAI.unitName} slashed, hitting {enemies.Count} enemies for {totalDamage:F0} magic damage ({baseDamage} + {apRatio * 100:F0}% AP)! (Cast {castCount})");
     }
 
     public void OnSlamAnimationEvent()
@@ -152,7 +159,8 @@ public class BackSlashAbility : MonoBehaviour, IUnitAbility
         }
 
         int starIndex = Mathf.Clamp(unitAI.starLevel - 1, 0, slamDamage.Length - 1);
-        float damage = slamDamage[starIndex];
+        float baseDamage = slamDamage[starIndex];
+        float apRatio = slamAPRatio[starIndex];
 
         Collider[] hits = Physics.OverlapSphere(transform.position, slamRadius);
         HashSet<UnitAI> hitEnemies = new HashSet<UnitAI>();
@@ -162,12 +170,13 @@ public class BackSlashAbility : MonoBehaviour, IUnitAbility
             UnitAI enemy = col.GetComponent<UnitAI>();
             if (enemy != null && enemy.teamID != unitAI.teamID && enemy.isAlive && !hitEnemies.Contains(enemy))
             {
-                unitAI.DealMagicDamage(enemy, damage);
+                unitAI.DealMagicDamageWithAP(enemy, baseDamage, apRatio);
                 hitEnemies.Add(enemy);
             }
         }
 
-        Debug.Log($"💥 {unitAI.unitName} SLAMMED, hitting {hitEnemies.Count} enemies for {damage} magic damage! (3rd cast)");
+        float totalDamage = baseDamage + (unitAI.abilityPower * apRatio);
+        Debug.Log($"💥 {unitAI.unitName} SLAMMED, hitting {hitEnemies.Count} enemies for {totalDamage:F0} magic damage ({baseDamage} + {apRatio * 100:F0}% AP)! (3rd cast)");
 
         waitingForAnimationEvent = false;
     }

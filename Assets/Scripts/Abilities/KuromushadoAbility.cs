@@ -14,10 +14,14 @@ public class KuromushadoAbility : MonoBehaviour, IUnitAbility
     public float coneAngle = 90f;
     [Tooltip("Duration to allow animation rotation (spin duration)")]
     public float spinDuration = 0.5f;
+    [Tooltip("Bonus AD scaling for cone sweep damage (40%)")]
+    public float coneBonusADRatio = 0.4f;
 
     [Header("Active: Jump Kick")]
     [Tooltip("Damage dealt per star level")]
     public float[] jumpKickDamage = { 300f, 450f, 850f };
+    [Tooltip("AD scaling ratios per star level (120/140/160%)")]
+    public float[] jumpKickADRatio = { 1.2f, 1.4f, 1.6f };
     [Tooltip("Distance to knock back target in hexes")]
     public float knockbackDistance = 2f;
     [Tooltip("Knockback speed")]
@@ -109,14 +113,17 @@ public class KuromushadoAbility : MonoBehaviour, IUnitAbility
             Destroy(sweep, 1.5f);
         }
 
+        float bonusDamage = unitAI.attackDamage * coneBonusADRatio;
+
         Debug.Log($"⚔️ {unitAI.unitName} cone sweep hit {enemiesInCone.Count} enemies in {coneSize} hex cone!");
 
         foreach (UnitAI enemy in enemiesInCone)
         {
             if (enemy != target)
             {
-                enemy.TakeDamage(unitAI.attackDamage);
-                Debug.Log($"💥 Cone damage: {unitAI.attackDamage} to {enemy.unitName}");
+                float totalDamage = unitAI.attackDamage + bonusDamage;
+                enemy.TakeDamage(totalDamage);
+                Debug.Log($"💥 Cone damage: {unitAI.attackDamage:F0} + {bonusDamage:F0} ({coneBonusADRatio * 100:F0}% AD bonus) = {totalDamage:F0} to {enemy.unitName}");
             }
         }
     }
@@ -204,9 +211,11 @@ public class KuromushadoAbility : MonoBehaviour, IUnitAbility
         if (abilityTarget.isAlive)
         {
             int starIndex = Mathf.Clamp(unitAI.starLevel - 1, 0, jumpKickDamage.Length - 1);
-            float damage = jumpKickDamage[starIndex];
+            float baseDamage = jumpKickDamage[starIndex];
+            float adRatio = jumpKickADRatio[starIndex];
+            float totalDamage = baseDamage + (unitAI.attackDamage * adRatio);
 
-            abilityTarget.TakeDamage(damage);
+            abilityTarget.TakeDamage(totalDamage);
             PlaySound(impactSound);
 
             if (jumpKickVFX != null)
@@ -216,7 +225,7 @@ public class KuromushadoAbility : MonoBehaviour, IUnitAbility
                 Destroy(kickVFX, 2f);
             }
 
-            Debug.Log($"💥 {unitAI.unitName} Jump Kick: {damage} damage to {abilityTarget.unitName}");
+            Debug.Log($"💥 {unitAI.unitName} Jump Kick: {totalDamage:F0} damage ({baseDamage} + {adRatio * 100:F0}% AD) to {abilityTarget.unitName}");
 
             if (abilityTarget.isAlive)
             {

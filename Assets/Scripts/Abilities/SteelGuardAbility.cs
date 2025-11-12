@@ -12,6 +12,9 @@ public class SteelGuardAbility : MonoBehaviour, IUnitAbility
     [Tooltip("Shield value at 1/2/3 stars")]
     public float[] shieldValue = { 150f, 300f, 600f };
 
+    [Tooltip("AP scaling ratios per star level (260/290/360%)")]
+    public float[] shieldAPRatio = { 2.6f, 2.9f, 3.6f };
+
     [Tooltip("Shield duration in seconds")]
     public float shieldDuration = 4f;
 
@@ -76,7 +79,10 @@ public class SteelGuardAbility : MonoBehaviour, IUnitAbility
         }
 
         int starIndex = Mathf.Clamp(unitAI.starLevel - 1, 0, shieldValue.Length - 1);
-        float myShieldValue = shieldValue[starIndex];
+        float baseShield = shieldValue[starIndex];
+        float apRatio = shieldAPRatio[starIndex];
+
+        float myShieldValue = baseShield + (unitAI.abilityPower * apRatio);
         float allyShieldValue = myShieldValue * 0.5f;
 
         ApplyShield(unitAI, myShieldValue);
@@ -85,11 +91,11 @@ public class SteelGuardAbility : MonoBehaviour, IUnitAbility
         if (nearestAlly != null)
         {
             ApplyShield(nearestAlly, allyShieldValue);
-            Debug.Log($"🛡️ {unitAI.unitName} screamed! Self shield: {myShieldValue}, Ally {nearestAlly.unitName} shield: {allyShieldValue}");
+            Debug.Log($"🛡️ {unitAI.unitName} screamed! Self shield: {myShieldValue:F0} ({baseShield} + {apRatio * 100:F0}% AP), Ally {nearestAlly.unitName} shield: {allyShieldValue:F0}");
         }
         else
         {
-            Debug.Log($"🛡️ {unitAI.unitName} screamed! Self shield: {myShieldValue} (no nearby allies)");
+            Debug.Log($"🛡️ {unitAI.unitName} screamed! Self shield: {myShieldValue:F0} ({baseShield} + {apRatio * 100:F0}% AP) (no nearby allies)");
         }
     }
 

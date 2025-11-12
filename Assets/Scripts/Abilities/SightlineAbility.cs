@@ -10,6 +10,8 @@ public class SightlineAbility : MonoBehaviour, IUnitAbility
     [Header("Active Ability - Laser Turret")]
     public GameObject laserTurretPrefab;
     public float[] damagePerSecond = { 40f, 70f, 200f };
+    [Tooltip("AD scaling ratios per star level (50/60/200%)")]
+    public float[] dpsADRatio = { 0.5f, 0.6f, 2.0f };
     public float[] durationPerStar = { 5f, 5f, 5f };
     public float turretSpawnRadius = 2f;
     public float turretScale = 1.5f;
@@ -85,18 +87,18 @@ public class SightlineAbility : MonoBehaviour, IUnitAbility
             return;
 
         int starIndex = Mathf.Clamp(unitAI.starLevel - 1, 0, 2);
-        float dps = damagePerSecond[starIndex];
+        float baseDPS = damagePerSecond[starIndex];
+        float adRatio = dpsADRatio[starIndex];
+        float totalDPS = baseDPS + (unitAI.attackDamage * adRatio);
         float duration = durationPerStar[starIndex];
 
-        // Increment the cast count
         castsThisRound++;
 
-        Debug.Log($"🔴 [SIGHTLINE] Cast #{castsThisRound}");
+        Debug.Log($"🔴 [SIGHTLINE] Cast #{castsThisRound} - DPS: {totalDPS:F0} ({baseDPS} + {adRatio * 100:F0}% AD)");
 
-        // Spawn 'castsThisRound' turrets this time
         for (int i = 0; i < castsThisRound; i++)
         {
-            SpawnLaserTurret(dps, duration);
+            SpawnLaserTurret(totalDPS, duration);
         }
 
         unitAI.currentMana = 0f;
@@ -150,14 +152,14 @@ public class SightlineAbility : MonoBehaviour, IUnitAbility
         }
 
         turret.Initialize(unitAI, dps, duration, this);
-        Debug.Log($"🔴 [SIGHTLINE] Initialized turret with {dps} DPS for {duration}s");
+        Debug.Log($"🔴 [SIGHTLINE] Initialized turret with {dps:F0} DPS for {duration}s");
 
         activeTurrets.Add(turret);
         Debug.Log($"🔴 [SIGHTLINE] Added to activeTurrets list. New count: {activeTurrets.Count}");
 
         RepositionExistingTurrets();
 
-        Debug.Log($"🔴🔴🔴 [SIGHTLINE] ===== TURRET #{turretIndex + 1} FULLY SPAWNED! Total: {activeTurrets.Count}, Total DPS: {dps * activeTurrets.Count}/s =====");
+        Debug.Log($"🔴🔴🔴 [SIGHTLINE] ===== TURRET #{turretIndex + 1} FULLY SPAWNED! Total: {activeTurrets.Count}, Total DPS: {dps * activeTurrets.Count:F0}/s =====");
     }
 
     private void RepositionExistingTurrets()
