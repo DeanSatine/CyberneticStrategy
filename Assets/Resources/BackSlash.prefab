@@ -671,12 +671,20 @@ MonoBehaviour:
   - 150
   - 250
   - 400
+  slashAPRatio:
+  - 0.8
+  - 1.2
+  - 1.85
   slashDistance: 3
   slashWidth: 2
   slamDamage:
   - 300
   - 500
   - 800
+  slamAPRatio:
+  - 0.8
+  - 1.2
+  - 1.85
   slamRadius: 2
   slashVFX: {fileID: 3153472991145048103, guid: 3407e378c048bb5438424b28c7740b48,
     type: 3}

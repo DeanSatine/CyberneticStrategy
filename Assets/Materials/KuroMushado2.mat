@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-3292162240346454608
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 7
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: KuroMushado2
+  m_Shader: {fileID: -6465566751694194690, guid: d218588e0c43a784d80f97db6953aa71,
+    type: 3}
+  m_Parent: {fileID: 2100000, guid: bbfc2de5dff3ba34289dcc06510d1089, type: 2}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords:
+  - _SPECULAR_HIGHLIGHTS_OFF
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs: []
+    m_Ints: []
+    m_Floats:
+    - _SPECULAR_HIGHLIGHTS_OFF: 1
+    - _X_Blend: 0.66
+    - _Y_Blend: 1
+    - _Z_Blend: 1
+    m_Colors:
+    - _BaseColor: {r: 2, g: 0.3671748, b: 0, a: 1}
+    - _X_Highlights: {r: 1, g: 0.3627424, b: 0, a: 0}
+    - _X_Shadows: {r: 0.52201253, g: 0.09595006, b: 0.02134004, a: 0}
+    - _Y_Highlights: {r: 4.2870936, g: 3.2607405, b: 2.5210264, a: 0}
+    - _Y_Shadows: {r: 0.12138724, g: 1, b: 0, a: 0}
+    - _Z_Highlights: {r: 2.2868972, g: 0.7303703, b: 0, a: 0}
+  m_BuildTextureStacks: []

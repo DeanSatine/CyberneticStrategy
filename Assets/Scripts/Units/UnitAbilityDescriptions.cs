@@ -52,6 +52,9 @@ public static class UnitAbilityDescriptions
             case "TracerCore":
                 return GetTracerCoreDescription(unit, ad, star);
 
+            case "MUNCH-R":
+                return GetMUNCHRDescription(unit, ad, star);
+
             default:
                 return "This unit has no ability description yet.";
         }
@@ -270,7 +273,21 @@ public static class UnitAbilityDescriptions
 
         return $"Scream, gaining a <color=#FFD700>{shieldAmount:F0}</color> shield ({baseShield} + {apRatio * 100:F0}% AP) for {ability.shieldDuration} seconds and granting a <color=#FFD700>{allyShieldAmount:F0}</color> shield to the nearest ally.\n\n";
     }
+    private static string GetMUNCHRDescription(UnitAI unit, float ad, int star)
+    {
+        var ability = unit.GetComponent<MUNCHRAbility>();
+        if (ability == null) return "MUNCH-R ability missing.";
 
+        int starIndex = Mathf.Clamp(star - 1, 0, 2);
+        float dmgReduction = ability.damageReductionPercent[starIndex];
+        float totalDmg = ability.totalEatingDamage[starIndex];
+        float shieldPct = ability.shieldPercent[starIndex] * 100f;
+
+        return $"Passive O.B.C.D: An ally can be fed to MUNCH-R once per prep phase, granting permanent stats based on the unit's class.\n\n" +
+               $"Active: Eat the target, gaining {dmgReduction:F0}% damage reduction and dealing {totalDmg:F0} damage over {ability.eatingDuration} seconds. Target cannot take damage from other sources.\n\n" +
+               $"After eating, spit them out and gain a {shieldPct:F0}% max health shield.\n\n" +
+               $"If the enemy dies, gain permanent stats based on their class and generate loot.";
+    }
     private static string GetTracerCoreDescription(UnitAI unit, float ad, int star)
     {
         var ability = unit.GetComponent<TracerCoreAbility>();

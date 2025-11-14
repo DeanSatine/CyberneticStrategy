@@ -558,10 +558,15 @@ MonoBehaviour:
   coneSizePerStar: 020000000300000004000000
   coneAngle: 90
   spinDuration: 0.5
+  coneBonusADRatio: 0.4
   jumpKickDamage:
   - 300
   - 450
   - 850
+  jumpKickADRatio:
+  - 1.2
+  - 1.4
+  - 1.6
   knockbackDistance: 4
   knockbackSpeed: 8
   sweepVFX: {fileID: 0}
