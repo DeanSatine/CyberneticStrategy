@@ -9831,6 +9831,8 @@ MonoBehaviour:
   rotationSpeed: 180
   damageTickRate: 0.25
   targetAcquisitionRange: 15
+  enablePiercing: 1
+  piercingAlignmentTolerance: 1.5
   beamVisual: {fileID: 2018815738349974138}
   beamParticles:
   - {fileID: 7616973954321807254}
@@ -10057,7 +10059,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 1, g: 1, b: 1, a: 1}
-      maxColor: {r: 0.6666667, g: 1, b: 0.7647059, a: 1}
+      maxColor: {r: 0.31436643, g: 0.5345911, b: 0.3763046, a: 1}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}

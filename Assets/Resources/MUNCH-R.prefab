@@ -327,7 +327,8 @@ Animation:
   - {fileID: -203655887218126122, guid: 3b0f73cd9f6b9bb41a4e3d4dd759ef3b, type: 3}
   - {fileID: -203655887218126122, guid: f89b56c7d4d95c94dbb5baa635b120af, type: 3}
   - {fileID: -203655887218126122, guid: fd5379139e7f1d34cb1a9f5b6a92932f, type: 3}
-  - {fileID: 7400000, guid: 42b42e87e926b3347b8b1209588ce4bf, type: 2}
+  - {fileID: 7400000, guid: c4e63e2f953baf6408a477a811694d9c, type: 2}
+  - {fileID: -203655887218126122, guid: 8caa57b4dfbd3c8469a05dcecac451d4, type: 3}
   m_WrapMode: 0
   m_PlayAutomatically: 1
   m_AnimatePhysics: 0
@@ -394,8 +395,8 @@ MonoBehaviour:
   threeStarHealth: 9999
   twoStarAD: 130
   threeStarAD: 999
-  twoStarScale: 1.1
-  threeStarScale: 1.25
+  twoStarScale: 1.7
+  threeStarScale: 3
   traitBonusMaxHealth: 0
   baseMaxHealth: 0
   bonusMaxHealth: 0
