@@ -19,8 +19,8 @@ ModelImporter:
     rigImportErrors: 
     rigImportWarnings: "Copied Avatar Rig Configuration mis-match. Bone length in
       copied configuration does not match position in animation file:\n\t'L_Elbow'
-      : position error = 71.605553 mm\n\t'L_Hand' : position error = 72.080208 mm\n\t'R_Elbow'
-      : position error = 63.936100 mm\n\t'R_Hand' : position error = 63.735619 mm\n"
+      : position error = 14.096469 mm\n\t'L_Hand' : position error = 14.189863 mm\n\t'R_Elbow'
+      : position error = 12.586654 mm\n\t'R_Hand' : position error = 12.547139 mm\n"
     animationImportErrors: 
     animationImportWarnings: "\nClip 'Skeleton|Dance' has import animation warnings
       that might lower retargeting quality:\nNote: Activate translation DOF on avatar
@@ -71,13 +71,13 @@ ModelImporter:
       lastFrame: 208
       wrapMode: 0
       orientationOffsetY: 0
-      level: 0
+      level: -0.3
       cycleOffset: 0
       loop: 0
       hasAdditiveReferencePose: 0
       loopTime: 0
       loopBlend: 0
-      loopBlendOrientation: 1
+      loopBlendOrientation: 0
       loopBlendPositionY: 1
       loopBlendPositionXZ: 0
       keepOriginalOrientation: 0

@@ -19,13 +19,12 @@ ModelImporter:
     rigImportErrors: 
     rigImportWarnings: "Copied Avatar Rig Configuration mis-match. Bone length in
       copied configuration does not match position in animation file:\n\t'L_KneeUpper'
-      : position error = 339.744171 mm\n\t'L_Foot' : position error = 385.761993
-      mm\n\t'R_KneeUpper' : position error = 167.995972 mm\n\t'R_Foot' : position
-      error = 190.756836 mm\n\t'Spine1' : position error = 79.645088 mm\n\t'Spine2'
-      : position error = 79.658348 mm\n\t'Chest' : position error = 79.663925 mm\n\t'L_Elbow'
-      : position error = 172.857849 mm\n\t'L_Hand' : position error = 179.813019
-      mm\n\t'R_Elbow' : position error = 174.416275 mm\n\t'R_Hand' : position error
-      = 181.443726 mm\n"
+      : position error = 66.882919 mm\n\t'L_Foot' : position error = 75.942108 mm\n\t'R_KneeUpper'
+      : position error = 33.072147 mm\n\t'R_Foot' : position error = 37.552925 mm\n\t'Spine1'
+      : position error = 15.679132 mm\n\t'Spine2' : position error = 15.681755 mm\n\t'Chest'
+      : position error = 15.682844 mm\n\t'L_Elbow' : position error = 34.029255 mm\n\t'L_Hand'
+      : position error = 35.398418 mm\n\t'R_Elbow' : position error = 34.336063 mm\n\t'R_Hand'
+      : position error = 35.719463 mm\n"
     animationImportErrors: 
     animationImportWarnings: "\nClip 'Skeleton|Death' has import animation warnings
       that might lower retargeting quality:\nNote: Activate translation DOF on avatar
@@ -61,13 +60,13 @@ ModelImporter:
       lastFrame: 106
       wrapMode: 0
       orientationOffsetY: 0
-      level: 0
+      level: -0.3
       cycleOffset: 0
       loop: 0
       hasAdditiveReferencePose: 0
       loopTime: 0
       loopBlend: 0
-      loopBlendOrientation: 1
+      loopBlendOrientation: 0
       loopBlendPositionY: 1
       loopBlendPositionXZ: 0
       keepOriginalOrientation: 0
