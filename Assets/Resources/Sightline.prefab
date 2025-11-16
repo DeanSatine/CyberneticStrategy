@@ -1393,8 +1393,8 @@ MonoBehaviour:
   moveOffsetRange: 0.2
   deathAnimLength: 3
   startingTile: {fileID: 0}
-  twoStarHealth: 650
-  threeStarHealth: 900
+  twoStarHealth: 1650
+  threeStarHealth: 2700
   twoStarAD: 105
   threeStarAD: 165
   twoStarScale: 1.1
@@ -1420,6 +1420,10 @@ MonoBehaviour:
   - 100
   - 200
   - 500
+  dpsADRatio:
+  - 0.5
+  - 0.6
+  - 2
   durationPerStar:
   - 6
   - 7

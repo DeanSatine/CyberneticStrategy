@@ -10,6 +10,9 @@ public static class UnitAbilityDescriptions
 
         switch (unit.unitName)
         {
+            case "Aphelios":
+                return GetApheliosDescription(unit, ad, star);
+
             case "BackSlash":
                 return GetBackSlashDescription(unit, ad, star);
 
@@ -58,6 +61,20 @@ public static class UnitAbilityDescriptions
             default:
                 return "This unit has no ability description yet.";
         }
+    }
+    private static string GetApheliosDescription(UnitAI unit, float ad, int star)
+    {
+        var ability = unit.GetComponent<ApheliosAbility>();
+        if (ability == null) return "Aphelios ability missing.";
+
+        int starIndex = Mathf.Clamp(star - 1, 0, 2);
+        float coneDmg = ability.coneDamage[starIndex];
+        float heal = ability.healAmount[starIndex];
+        float shotDmg = ability.shotDamage[starIndex];
+        float blastDmg = ability.blastDamage[starIndex];
+
+        return $"Passive: Alternate between 2 attacks - deal {coneDmg:F0} <color=#FF6600>physical damage</color> in a cone, or heal {heal:F0} HP.\n\n" +
+               $"Active: Fire 2 shots at the highest HP target for {shotDmg:F0} <color=#FF6600>physical damage</color> each, then blast the largest enemy clump for {blastDmg:F0} <color=#FF6600>physical damage</color> in a {ability.blastRadius} hex radius.";
     }
 
     private static string GetBackSlashDescription(UnitAI unit, float ad, int star)
