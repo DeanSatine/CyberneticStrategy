@@ -6,6 +6,7 @@ using static UnitAI;
 public class ApheliosAbility : MonoBehaviour, IUnitAbility
 {
     private UnitAI unitAI;
+    public bool OverridesAutoAttack() => true;
 
     [Header("Passive - Alternating Attacks")]
     [Tooltip("Damage dealt in cone attack per star level")]

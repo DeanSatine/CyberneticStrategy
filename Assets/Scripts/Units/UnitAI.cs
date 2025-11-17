@@ -6,7 +6,7 @@ public enum Team
 {
     Player,
     Enemy,
-    Neutral // optional if you want non-fighting dummies
+    Neutral
 }
 
 public class UnitAI : MonoBehaviour
@@ -420,6 +420,12 @@ public class UnitAI : MonoBehaviour
 
     public void DealAutoAttackDamage()
     {
+        var ability = GetComponent<IUnitAbility>();
+        if (ability != null && ability.OverridesAutoAttack())
+        {
+            Debug.Log($"⚡ [{unitName}] Ability is handling auto attack, skipping base behavior");
+            return;
+        }
         Debug.Log($"🎯 [ATTACK EVENT] {unitName} (⭐{starLevel}) FIRING auto attack event! Current target: {(currentTarget != null ? currentTarget.name : "NULL")}");
 
         if (currentTarget != null && currentTarget.TryGetComponent(out UnitAI enemy))
@@ -799,6 +805,8 @@ public class UnitAI : MonoBehaviour
     {
         void Cast(UnitAI target);
         void OnRoundEnd();
+
+        bool OverridesAutoAttack() => false;
     }
     public void ResetAbilityState()
     {

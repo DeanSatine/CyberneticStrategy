@@ -316,6 +316,7 @@ MonoBehaviour:
   unitName: Needlebot
   starLevel: 1
   team: 1
+  classification: 1
   maxHealth: 400
   currentHealth: 400
   attackDamage: 35
@@ -359,13 +360,15 @@ MonoBehaviour:
   moveOffsetRange: 0.2
   deathAnimLength: 1.2
   startingTile: {fileID: 0}
-  twoStarMultiplier: 1.8
-  threeStarMultiplier: 2.5
+  twoStarHealth: 650
+  threeStarHealth: 900
+  twoStarAD: 18
+  threeStarAD: 27
   twoStarScale: 1.1
+  threeStarScale: 1.25
   traitBonusMaxHealth: 0
   baseMaxHealth: 0
   bonusMaxHealth: 0
-  threeStarScale: 1.25
 --- !u!114 &5542962458511737843
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -379,6 +382,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isDragging: 0
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineIntensity: 0.5
 --- !u!114 &2893095200650880339
 MonoBehaviour:
   m_ObjectHideFlags: 0

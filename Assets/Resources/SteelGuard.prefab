@@ -341,6 +341,10 @@ MonoBehaviour:
   - 150
   - 300
   - 600
+  shieldAPRatio:
+  - 2.6
+  - 2.9
+  - 3.6
   shieldDuration: 4
   allySearchRadius: 8
   shieldVFX: {fileID: 1289543790355709915, guid: b99922c2f59b1a542bdd06ae8bee47ae,
