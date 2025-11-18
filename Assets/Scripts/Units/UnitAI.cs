@@ -255,10 +255,34 @@ public class UnitAI : MonoBehaviour
 
         attackCooldown -= Time.deltaTime;
 
-        // Retarget if invalid
+        // ✅ IMPROVED: Retarget if invalid OR out of range with closer targets
+        bool shouldRetarget = false;
+
         if (currentTarget == null
             || !currentTarget.GetComponent<UnitAI>().isAlive
             || currentTarget.GetComponent<UnitAI>().currentState == UnitState.Bench)
+        {
+            shouldRetarget = true;
+        }
+        else
+        {
+            float distToCurrentTarget = Vector3.Distance(transform.position, currentTarget.position);
+
+            // Check if current target is out of range AND there's a closer target available
+            if (distToCurrentTarget > attackRange)
+            {
+                Transform closerTarget = FindCloserEnemyInRange(distToCurrentTarget);
+                if (closerTarget != null)
+                {
+                    Debug.Log($"🎯 {unitName} switching from {currentTarget.GetComponent<UnitAI>().unitName} (dist: {distToCurrentTarget:F1}) to {closerTarget.GetComponent<UnitAI>().unitName}");
+                    currentTarget = closerTarget;
+                    currentPath.Clear();
+                    attackCooldown = 0f;
+                }
+            }
+        }
+
+        if (shouldRetarget)
         {
             currentTarget = FindNearestEnemy();
             currentPath.Clear();
@@ -269,27 +293,50 @@ public class UnitAI : MonoBehaviour
         {
             float dist = Vector3.Distance(transform.position, currentTarget.position);
 
-            // ✅ FIX: Stop movement when in attack range
             if (dist <= attackRange)
             {
-                // Stop all movement immediately
                 if (animator) animator.SetBool("IsRunning", false);
                 hasReachedDestination = true;
                 currentPath.Clear();
 
-                // Attack on cooldown
                 if (attackCooldown <= 0f)
                 {
                     Attack(currentTarget);
                     attackCooldown = 1f / attackSpeed;
                 }
             }
-            // ✅ FIX: Only move if we're NOT in attack range
             else if (canMove)
             {
                 MoveTowards(currentTarget.position);
             }
         }
+    }
+
+    private Transform FindCloserEnemyInRange(float currentTargetDistance)
+    {
+        UnitAI[] allUnits = FindObjectsOfType<UnitAI>();
+        Transform betterTarget = null;
+        float bestDistance = currentTargetDistance;
+
+        foreach (var unit in allUnits)
+        {
+            if (unit == this || !unit.isAlive) continue;
+            if (unit.team == this.team) continue;
+            if (unit.currentState != UnitState.Combat) continue;
+
+            float dist = Vector3.Distance(transform.position, unit.transform.position);
+
+            // Only consider targets that are:
+            // 1. Closer than current target
+            // 2. Within attack range
+            if (dist < bestDistance && dist <= attackRange)
+            {
+                bestDistance = dist;
+                betterTarget = unit.transform;
+            }
+        }
+
+        return betterTarget;
     }
 
     private void Attack(Transform target)
