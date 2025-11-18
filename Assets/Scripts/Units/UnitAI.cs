@@ -100,7 +100,7 @@ public class UnitAI : MonoBehaviour
     [HideInInspector] public HexTile currentTile;
 
     [Header("Movement")]
-    [SerializeField] private float movementSpeed = 3f;
+    [SerializeField] public float movementSpeed = 3f;
     [SerializeField] private float stoppingDistance = 1.4f; // How close to get before attacking
     [SerializeField] private float obstacleAvoidance = 2f; // Radius for avoiding other units
 
@@ -255,7 +255,7 @@ public class UnitAI : MonoBehaviour
 
         attackCooldown -= Time.deltaTime;
 
-        // ✅ IMPROVED: Retarget if invalid OR out of range with closer targets
+        //Retarget if invalid OR out of range with closer targets
         bool shouldRetarget = false;
 
         if (currentTarget == null

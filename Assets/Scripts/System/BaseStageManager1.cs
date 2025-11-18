@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class StageManager : MonoBehaviour
+public class BaseStageManager : MonoBehaviour
 {
     public enum GamePhase { Prep, Combat }
 
-    public static StageManager Instance;
+    public static BaseStageManager Instance;
 
     [Header("Stage settings")]
     public int currentStage = 1;
@@ -76,7 +76,7 @@ public class StageManager : MonoBehaviour
         currentPhase = GamePhase.Prep;
 
         GameManager.Instance.ResetPlayerUnits();  // snap players back
-        //EnemyWaveManager.Instance.SpawnEnemyWave(currentStage, roundInStage);
+        EnemyWaveManager.Instance.SpawnEnemyWave(currentStage, roundInStage);
         // Call this when a round ends or starts
         HaymakerAbility.CleanupAllDuplicateClones();
 
@@ -91,48 +91,31 @@ public class StageManager : MonoBehaviour
     {
         Debug.Log("⚔️ Entering Combat Phase");
         currentPhase = GamePhase.Combat;
-
         if (AugmentManager.Instance != null)
         {
             AugmentManager.Instance.OnCombatStart();
         }
-
         CombatManager.Instance.ClearProjectiles();
+
         UIManager.Instance.ShowFightButton(false);
-
-        // ✅ NETWORKED: Use NetworkedBattleManager instead of direct enemy spawn
-        if (NetworkedBattleManager.Instance != null && NetworkedBattleManager.Instance.IsNetworkedBattle())
-        {
-            NetworkedBattleManager.Instance.StartNetworkedBattle();
-        }
-        else
-        {
-            // Fallback to AI battle
-            if (NetworkedBattleManager.Instance != null)
-            {
-                NetworkedBattleManager.Instance.StartAIBattle();
-            }
-        }
-
         CombatManager.Instance.StartCombat();
     }
-
 
     private void ResetToPrepPhase()
     {
         Debug.Log("🔄 Starting ResetToPrepPhase");
-
+        
         CombatManager.Instance.ForceResetCombatState();
-
+        
         currentPhase = GamePhase.Prep;
         Debug.Log("✅ Phase set to Prep");
-
+        
         EradicatorTrait.ResetAllEradicators();
         HyperdriveTrait.ResetAllHyperdriveStacks();
         CombatManager.Instance.ClearProjectiles();
 
         CombatManager.Instance.RestorePlayerUnitsFromSnapshots();
-
+        
         HaymakerAbility.CleanupAllDuplicateClones();
 
         foreach (var kvp in CombatManager.Instance.GetSavedPlayerPositions())
@@ -146,25 +129,24 @@ public class StageManager : MonoBehaviour
                 unit.AssignToTile(tile);
             }
         }
-
+        
         if (AugmentManager.Instance != null)
         {
             AugmentManager.Instance.OnCombatEnd();
         }
-
+        
         TraitManager.Instance.EvaluateTraits(GameManager.Instance.playerUnits);
         TraitManager.Instance.ApplyTraits(GameManager.Instance.playerUnits);
 
         ShopManager.Instance.GenerateShop();
         Debug.Log("🛒 Shop reset for new round!");
 
-        // EnemyWaveManager.Instance.SpawnEnemyWave(currentStage, roundInStage);
-
+        EnemyWaveManager.Instance.SpawnEnemyWave(currentStage, roundInStage);
+        
         UIManager.Instance.ShowFightButton(true);
-
+        
         Debug.Log("✅ ResetToPrepPhase complete");
     }
-
 
     private void CheckForAugmentSelection()
     {
