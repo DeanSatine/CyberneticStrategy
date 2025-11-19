@@ -103,7 +103,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         PhotonNetwork.CurrentRoom.IsOpen = false;
         PhotonNetwork.CurrentRoom.IsVisible = false;
 
-        PhotonNetwork.LoadLevel("Test");
+        PhotonNetwork.LoadLevel("Game");
     }
 
     public override void OnPlayerEnteredRoom(Player newPlayer)
