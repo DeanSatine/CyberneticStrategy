@@ -58,20 +58,23 @@ public class BoardManager : MonoBehaviour
     public void OverrideTiles(List<HexTile> playerTiles, List<HexTile> enemyTiles, List<HexTile> benchTiles)
     {
         tiles.Clear();
-
+        allTiles.Clear();
         foreach (var tile in playerTiles)
         {
             tiles[tile.gridPosition] = tile;
+            allTiles.Add(tile);
         }
 
         foreach (var tile in enemyTiles)
         {
             tiles[tile.gridPosition] = tile;
+            allTiles.Add(tile);
         }
 
         foreach (var tile in benchTiles)
         {
             tiles[tile.gridPosition] = tile;
+            allTiles.Add(tile);
         }
 
         Debug.Log($"✅ BoardManager now managing {tiles.Count} tiles from assigned board");

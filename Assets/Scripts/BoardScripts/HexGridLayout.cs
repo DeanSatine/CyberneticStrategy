@@ -38,7 +38,10 @@ public class HexGridLayout : MonoBehaviour
             for (int x = 0; x < gridSize.x; x++)
             {
                 GameObject tile = new GameObject($"Hex {x},{y}", typeof(HexRenderer), typeof(HexTile));
-                tile.transform.position = GetPositionForHexFromCoordinate(new Vector2Int(x, y));
+
+                // ✅ CRITICAL: Parent FIRST, then set local position
+                tile.transform.SetParent(transform, false);  // ← false = use local space
+                tile.transform.localPosition = GetPositionForHexFromCoordinate(new Vector2Int(x, y));
 
                 HexRenderer hexRenderer = tile.GetComponent<HexRenderer>();
                 hexRenderer.isFlatTopped = isFlatTopped;
@@ -49,7 +52,6 @@ public class HexGridLayout : MonoBehaviour
                 hexRenderer.selectedMaterial = selectedMaterial;
                 hexRenderer.m_renderer.material = idlematerial;
                 hexRenderer.DrawMesh();
-                tile.transform.SetParent(transform, true);
 
                 HexTile hexTile = tile.GetComponent<HexTile>();
                 hexTile.gridPosition = new Vector2Int(x, y);
@@ -86,6 +88,7 @@ public class HexGridLayout : MonoBehaviour
             }
         }
     }
+
 
 
     public Vector3 GetPositionForHexFromCoordinate(Vector2Int coordinate)
@@ -130,7 +133,7 @@ public class HexGridLayout : MonoBehaviour
             yPosition = (row * verticalDistance) - offset;
         }
 
-        return new Vector3(xPosition, 0, -yPosition);
+        return new Vector3(xPosition, 0, -yPosition + 0.02f);
     }
 
 
