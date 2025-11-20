@@ -121,7 +121,6 @@ public class CombatManager : MonoBehaviour
     {
         Debug.Log("⚔️ Starting Combat");
 
-        // ✅ Reset round end checking state
         isCheckingForRoundEnd = false;
         if (roundEndCheckCoroutine != null)
         {
@@ -129,34 +128,41 @@ public class CombatManager : MonoBehaviour
             roundEndCheckCoroutine = null;
         }
 
-        // ✅ Clear any previous death tracking
         unitsDeadThisCombat.Clear();
 
-        // ✅ Take snapshots RIGHT before setting combat state
         TakePlayerUnitSnapshots();
-
         SavePlayerPositions();
 
-        foreach (var unit in GameManager.Instance.GetPlayerUnits())
+        // ✅ Set player units to combat state
+        List<UnitAI> playerUnits = GameManager.Instance.GetPlayerUnits();
+        Debug.Log($"🎮 Setting {playerUnits.Count} player units to Combat state");
+
+        foreach (var unit in playerUnits)
         {
             if (unit != null && unit.currentState != UnitAI.UnitState.Bench)
             {
                 unit.SetState(UnitAI.UnitState.Combat);
+                Debug.Log($"   ✅ {unit.unitName} → Combat state");
             }
         }
 
-        foreach (var enemy in EnemyWaveManager.Instance.GetActiveEnemies())
+        // ✅ FIX: Use GameManager for enemy units instead of EnemyWaveManager
+        List<UnitAI> enemyUnits = GameManager.Instance.GetEnemyUnits();
+        Debug.Log($"👹 Setting {enemyUnits.Count} enemy units to Combat state");
+
+        foreach (var enemy in enemyUnits)
         {
             if (enemy != null && enemy.isAlive)
             {
                 enemy.SetState(UnitAI.UnitState.Combat);
+                Debug.Log($"   ✅ {enemy.unitName} (Team {enemy.team}) → Combat state");
             }
         }
 
+        Debug.Log("✅ All units set to Combat - starting monitor");
         StartCoroutine(MonitorCombat());
     }
 
-    // ✅ Add this method
     private void SavePlayerPositions()
     {
         savedPlayerPositions.Clear();

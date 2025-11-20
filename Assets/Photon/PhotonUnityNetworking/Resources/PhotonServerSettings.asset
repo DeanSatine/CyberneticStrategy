@@ -42,6 +42,22 @@ MonoBehaviour:
   - RPC_SetPlayerReady
   - RPC_ReceiveOpponentBoard
   - RPC_ReportBattleResult
+  - RPC_AnnounceWinner
+  - RPC_ApplyDamage
+  - RPC_EnterPhase
+  - RPC_ReceiveBoardData
+  - RPC_SyncMatchups
+  - RPC_SyncRound
+  - RPC_SyncTimer
+  - RPC_StartBoardSync
+  - RPC_StartCombat
+  - RPC_EndCombat
+  - RPC_StartLiveCombat
+  - RPC_SyncArenaAssignments
+  - RPC_TeleportToArena
+  - RPC_ReturnToHomeBoard
+  - RPC_SyncBoardAssignments
+  - RPC_TeleportToCombat
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

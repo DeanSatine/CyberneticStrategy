@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
 
 public enum Team
 {
@@ -1421,5 +1422,24 @@ public class UnitAI : MonoBehaviour
         }
 
         return Vector3.zero;
+    }
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.IsWriting)
+        {
+            // Send to other players
+            stream.SendNext(currentHealth);
+            stream.SendNext(currentMana);
+            stream.SendNext(isAlive);
+            stream.SendNext((int)currentState);
+        }
+        else
+        {
+            // Receive from other players
+            currentHealth = (float)stream.ReceiveNext();
+            currentMana = (float)stream.ReceiveNext();
+            isAlive = (bool)stream.ReceiveNext();
+            currentState = (UnitState)stream.ReceiveNext();
+        }
     }
 }

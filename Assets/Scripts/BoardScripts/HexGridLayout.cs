@@ -25,11 +25,14 @@ public class HexGridLayout : MonoBehaviour
         LayoutGrid();
     }
 
-    
+
 
 
     private void LayoutGrid()
     {
+        // ✅ Check if we're in PvP mode
+        bool isPvPMode = PvPGameManager.Instance != null && PvPGameManager.Instance.enabled;
+
         for (int y = 0; y < gridSize.y; y++)
         {
             for (int x = 0; x < gridSize.x; x++)
@@ -65,8 +68,13 @@ public class HexGridLayout : MonoBehaviour
                     hexTile.owner = TileOwner.Player;
                 }
 
-                BoardManager.Instance.RegisterTile(hexTile.gridPosition, hexTile);
-                // AFTER registering all tiles (inside the x/y loops is fine right after RegisterTile)
+                // ✅ Only register in single-player mode
+                if (!isPvPMode && BoardManager.Instance != null)
+                {
+                    BoardManager.Instance.RegisterTile(hexTile.gridPosition, hexTile);
+                }
+
+                // AFTER registering all tiles
                 Collider[] hits = Physics.OverlapSphere(tile.transform.position, 0.2f);
                 foreach (var h in hits)
                 {
@@ -75,10 +83,10 @@ public class HexGridLayout : MonoBehaviour
                         unit.AssignToTile(hexTile);
                     }
                 }
-
             }
         }
     }
+
 
     public Vector3 GetPositionForHexFromCoordinate(Vector2Int coordinate)
     {

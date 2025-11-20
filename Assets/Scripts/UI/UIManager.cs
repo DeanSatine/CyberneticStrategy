@@ -45,6 +45,7 @@ public class UIManager : MonoBehaviour
         if (livesText != null)
             livesText.text = $"{lives}";
     }
+
     public void ShowStaticAugmentSelection(int currentStage, int currentRound)
     {
         if (AugmentManager.Instance != null)
@@ -63,16 +64,23 @@ public class UIManager : MonoBehaviour
         if (fightButton != null)
             fightButton.SetActive(visible);
     }
-
-    // ✅ NEW: Check and update fight button based on units on board
     public void UpdateFightButtonVisibility()
     {
-        bool hasUnitsOnBoard = HasUnitsOnBoard();
-        ShowFightButton(hasUnitsOnBoard);
+        // ✅ Hide fight button in PvP mode
+        if (PvPGameManager.Instance != null && PvPGameManager.Instance.enabled)
+        {
+            ShowFightButton(false);
+            return;
+        }
 
-        Debug.Log($"🎯 Fight button visibility: {hasUnitsOnBoard} (Units on board: {GetUnitsOnBoardCount()})");
+        // Original logic for single-player
+        if (StageManager.Instance != null)
+        {
+            bool shouldShow = StageManager.Instance.currentPhase == StageManager.GamePhase.Prep;
+            ShowFightButton(shouldShow);
+        }
     }
-    // ✅ ENHANCED: Color-coded win/lose display
+
     public IEnumerator ShowWinLose(bool playerWon)
     {
         string message = playerWon ? "WIN!" : "LOSE!";

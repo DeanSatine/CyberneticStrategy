@@ -1,23 +1,17 @@
-using UnityEngine;
+﻿using UnityEngine;
+using Photon.Pun;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviourPun
 {
     [Header("Movement Settings")]
-    [Tooltip("How fast the little legend moves")]
     public float moveSpeed = 5f;
-
-    [Tooltip("How fast the legend rotates to face movement direction")]
     public float rotationSpeed = 10f;
-
-    [Tooltip("How close to target before stopping")]
     public float stoppingDistance = 0.1f;
 
     [Header("Animation (Optional)")]
-    [Tooltip("Animator component if you want walk/idle animations")]
     public Animator animator;
 
     [Header("Ground Detection")]
-    [Tooltip("What layers count as ground (probably just Default or Stage)")]
     public LayerMask groundLayer = ~0;
 
     private Vector3 targetPosition;
@@ -39,12 +33,45 @@ public class PlayerController : MonoBehaviour
             characterController.center = new Vector3(0, 0.5f, 0);
         }
 
+        // ✅ Find main camera, but don't error if it's not ready yet
         mainCamera = Camera.main;
+        if (mainCamera == null)
+        {
+            Debug.LogWarning("⚠️ Camera.main not found in Awake, will search in Update");
+        }
+
         targetPosition = transform.position;
     }
 
     private void Update()
     {
+        // ✅ Only control your own player
+        if (!photonView.IsMine)
+            return;
+
+        // ✅ Try to find camera if we don't have one yet
+        if (mainCamera == null)
+        {
+            mainCamera = Camera.main;
+            if (mainCamera == null)
+            {
+                // Find first enabled camera
+                Camera[] cameras = FindObjectsOfType<Camera>();
+                foreach (Camera cam in cameras)
+                {
+                    if (cam.enabled)
+                    {
+                        mainCamera = cam;
+                        Debug.Log($"✅ Found enabled camera: {cam.name}");
+                        break;
+                    }
+                }
+            }
+
+            if (mainCamera == null)
+                return; // Still no camera, skip this frame
+        }
+
         HandleRightClick();
         MoveToTarget();
         UpdateAnimation();
@@ -52,6 +79,9 @@ public class PlayerController : MonoBehaviour
 
     private void HandleRightClick()
     {
+        if (mainCamera == null)
+            return;
+
         if (Input.GetMouseButtonDown(1))
         {
             Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
@@ -59,17 +89,9 @@ public class PlayerController : MonoBehaviour
 
             if (Physics.Raycast(ray, out hit, 1000f))
             {
-                Debug.Log($"[LittleLegend] Right-click detected hit: {hit.collider.gameObject.name} on layer {LayerMask.LayerToName(hit.collider.gameObject.layer)}");
-
-                if (hit.collider.GetComponent<AugmentViewer>() != null)
+                if (hit.collider.GetComponent<AugmentViewer>() != null ||
+                    hit.collider.GetComponent<Draggable>() != null)
                 {
-                    Debug.Log($"[LittleLegend] Hit AugmentViewer - ignoring movement");
-                    return;
-                }
-
-                if (hit.collider.GetComponent<Draggable>() != null)
-                {
-                    Debug.Log($"[LittleLegend] Hit Draggable unit - ignoring movement");
                     return;
                 }
 
@@ -78,7 +100,6 @@ public class PlayerController : MonoBehaviour
                     targetPosition = hit.point;
                     targetPosition.y = transform.position.y;
                     isMoving = true;
-                    Debug.Log($"[LittleLegend] Moving to {targetPosition}");
                 }
             }
         }
@@ -112,16 +133,6 @@ public class PlayerController : MonoBehaviour
         {
             float speed = isMoving ? moveSpeed : 0f;
             animator.SetFloat(SpeedParam, speed);
-        }
-    }
-
-    private void OnDrawGizmos()
-    {
-        if (isMoving)
-        {
-            Gizmos.color = Color.cyan;
-            Gizmos.DrawWireSphere(targetPosition, 0.3f);
-            Gizmos.DrawLine(transform.position, targetPosition);
         }
     }
 }

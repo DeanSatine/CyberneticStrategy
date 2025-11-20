@@ -57,6 +57,10 @@ public class GameManager : MonoBehaviour
         Debug.Log("✅ GameManager state reset complete");
     }
 
+    public void SetActiveBoardTiles(List<HexTile> boardTiles)
+    {
+        Debug.Log($"✅ GameManager now using {boardTiles.Count} board tiles");
+    }
 
     // --- Register / Unregister ---
     public void RegisterUnit(UnitAI unit, bool isPlayer)

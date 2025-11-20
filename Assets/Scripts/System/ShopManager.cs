@@ -36,12 +36,51 @@ public class ShopManager : MonoBehaviour
 
     private void Start()
     {
+        // ✅ DON'T generate shop immediately in PvP mode
+        if (PvPGameManager.Instance != null && PvPGameManager.Instance.enabled)
+        {
+            Debug.Log("🛒 PvP Mode: Waiting for board assignment before generating shop");
+
+            // ✅ Clear any existing bench slots from inspector
+            if (benchSlots != null && benchSlots.Length > 0)
+            {
+                Debug.Log($"🛒 Clearing {benchSlots.Length} inspector-assigned bench slots (will be set dynamically)");
+                benchSlots = new Transform[0];
+            }
+
+            return;
+        }
+
+        // Single-player mode: generate immediately
         GenerateShop();
     }
+
+
+    // ✅ Add this method to be called after board is assigned
+    public void InitializeForPvP()
+    {
+        Debug.Log("🛒 Initializing shop for PvP mode");
+        GenerateShop();
+    }
+
 
     public void GenerateShop()
     {
         Debug.Log("🛒 Generating new shop...");
+
+        // ✅ CRITICAL: Check if shop slots are set up
+        if (shopSlotParents == null || shopSlotParents.Length == 0)
+        {
+            Debug.LogError("❌ shopSlotParents is null or empty! Shop cannot generate.");
+            return;
+        }
+
+        // ✅ Check if we have available cards
+        if (availableCards == null || availableCards.Length == 0)
+        {
+            Debug.LogError("❌ availableCards is null or empty! Shop cannot generate.");
+            return;
+        }
 
         // ✅ CLEAR existing shop first
         ClearShop();
@@ -49,17 +88,30 @@ public class ShopManager : MonoBehaviour
         // Get cards available for current stage
         List<ShopCard> availableForStage = GetCardsForStage();
 
+        if (availableForStage == null || availableForStage.Count == 0)
+        {
+            Debug.LogError("❌ No cards available for current stage!");
+            return;
+        }
+
         // Randomly select 5 cards
         List<ShopCard> selectedCards = SelectRandomCards(availableForStage, 5);
 
         // Instantiate selected cards in slots
         for (int i = 0; i < selectedCards.Count && i < shopSlotParents.Length; i++)
         {
+            if (shopSlotParents[i] == null)
+            {
+                Debug.LogError($"❌ shopSlotParents[{i}] is null!");
+                continue;
+            }
+
             InstantiateCardInSlot(selectedCards[i], i);
         }
 
         Debug.Log($"✅ Shop generated with {selectedCards.Count} units!");
     }
+
 
     // ✅ CRITICAL: This method clears the shop properly
     private void ClearShop()
@@ -74,17 +126,38 @@ public class ShopManager : MonoBehaviour
 
         Debug.Log("🧹 Cleared existing shop cards");
     }
+    public void SetBenchSlots(List<HexTile> newBenchTiles)
+    {
+        benchSlots = new Transform[newBenchTiles.Count];
+        for (int i = 0; i < newBenchTiles.Count; i++)
+        {
+            benchSlots[i] = newBenchTiles[i].transform;
+        }
+        Debug.Log($"✅ ShopManager bench updated to {benchSlots.Length} slots");
+    }
 
     private List<ShopCard> GetCardsForStage()
     {
-        int stage = StageManager.Instance.currentStage;
+        int stage = 1;
+
+        if (PvPGameManager.Instance != null && PvPGameManager.Instance.enabled)
+        {
+            int round = PvPGameManager.Instance.currentRound;
+            stage = round <= 3 ? 1 : round <= 6 ? 2 : 3;
+            Debug.Log($"🛒 PvP Mode: Round {round} → Stage {stage} shop pool");
+        }
+        else if (StageManager.Instance != null)
+        {
+            stage = StageManager.Instance.currentStage;
+            Debug.Log($"🛒 Single-Player Mode: Stage {stage} shop pool");
+        }
+
         List<ShopCard> availableForStage = new List<ShopCard>();
 
         foreach (var card in availableCards)
         {
             if (IsCardAvailableForStage(card.tier, stage))
             {
-                // Add multiple entries for weighted selection
                 int weight = GetCardWeight(card.tier, stage);
                 for (int w = 0; w < weight; w++)
                 {
@@ -95,6 +168,7 @@ public class ShopManager : MonoBehaviour
 
         return availableForStage;
     }
+
 
     private bool IsCardAvailableForStage(int tier, int stage)
     {
@@ -240,23 +314,46 @@ public class ShopManager : MonoBehaviour
 
     public void TryBuyUnit(ShopSlotUI slot)
     {
+        Debug.Log($"🛒 TryBuyUnit called for {slot.unitPrefab.name}, cost: {slot.cost}");
+
         if (!EconomyManager.Instance.SpendGold(slot.cost))
         {
             Debug.Log("💸 Not enough gold!");
             return;
         }
 
-        // ✅ FIXED: Find first empty bench slot using HexTile system
+        // ✅ CRITICAL: Make sure benchSlots is populated
+        if (benchSlots == null || benchSlots.Length == 0)
+        {
+            Debug.LogError("❌ benchSlots is null or empty! Shop not properly initialized.");
+            EconomyManager.Instance.AddGold(slot.cost);
+            return;
+        }
+
+        // ✅ Find first empty bench slot using HexTile system
         Transform freeSlot = null;
         HexTile freeTile = null;
 
         foreach (Transform benchSlot in benchSlots)
         {
+            if (benchSlot == null)
+            {
+                Debug.LogWarning("⚠️ benchSlot is null, skipping");
+                continue;
+            }
+
             HexTile hexTile = benchSlot.GetComponent<HexTile>();
-            if (hexTile != null && hexTile.tileType == TileType.Bench && hexTile.occupyingUnit == null)
+            if (hexTile == null)
+            {
+                Debug.LogWarning($"⚠️ {benchSlot.name} has no HexTile component");
+                continue;
+            }
+
+            if (hexTile.tileType == TileType.Bench && hexTile.occupyingUnit == null)
             {
                 freeSlot = benchSlot;
                 freeTile = hexTile;
+                Debug.Log($"✅ Found free bench slot: {benchSlot.name}");
                 break;
             }
         }
@@ -268,15 +365,31 @@ public class ShopManager : MonoBehaviour
             return;
         }
 
+        // ✅ Calculate spawn position BEFORE instantiating
+        Vector3 spawnPosition = freeTile.transform.position;
+        spawnPosition.y += 0.0f;  
+
+        Debug.Log($"📍 Spawning unit at tile position: {spawnPosition}");
+
         // Spawn unit on free bench slot
-        GameObject unit = Instantiate(slot.unitPrefab, freeSlot.position, Quaternion.identity);
+        GameObject unit = Instantiate(slot.unitPrefab, spawnPosition, Quaternion.identity);
         unit.transform.rotation = Quaternion.Euler(0f, -90f, 0f);
 
-        // ✅ CRITICAL: Properly claim the tile instead of just setting parent
+        Debug.Log($"📍 Unit spawned at final position: {unit.transform.position}");
+
+        // ✅ CRITICAL: Properly claim the tile
         UnitAI newUnit = unit.GetComponent<UnitAI>();
+        if (newUnit == null)
+        {
+            Debug.LogError($"❌ {slot.unitPrefab.name} has no UnitAI component!");
+            Destroy(unit);
+            EconomyManager.Instance.AddGold(slot.cost);
+            return;
+        }
+
         if (!freeTile.TryClaim(newUnit))
         {
-            Debug.LogError("Failed to claim free tile - this shouldn't happen!");
+            Debug.LogError("❌ Failed to claim tile!");
             Destroy(unit);
             EconomyManager.Instance.AddGold(slot.cost);
             return;
@@ -284,21 +397,24 @@ public class ShopManager : MonoBehaviour
 
         // Set proper state
         newUnit.currentState = UnitAI.UnitState.Bench;
+        newUnit.team = Team.Player;
+        newUnit.teamID = 1;
 
-        // ✅ Register new unit with GameManager so it's tracked
+        // ✅ Register new unit with GameManager
         GameManager.Instance.RegisterUnit(newUnit, true);
 
-        Debug.Log($"✅ Bought {slot.unitPrefab.name} for {slot.cost} gold, placed on bench!");
+        Debug.Log($"✅ Bought {slot.unitPrefab.name} for {slot.cost} gold, placed on bench at {freeSlot.name}");
 
-        // ✅ Now merging will work
+        // Try merging
         GameManager.Instance.TryMergeUnits(newUnit);
 
-        // Remove the bought card from shop by destroying it
+        // Remove the bought card from shop
         if (currentShopInstances.Contains(slot.gameObject))
         {
             currentShopInstances.Remove(slot.gameObject);
         }
         Destroy(slot.gameObject);
     }
+
 
 }
