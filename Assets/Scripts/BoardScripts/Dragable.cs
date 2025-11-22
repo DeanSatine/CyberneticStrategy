@@ -24,12 +24,17 @@ public class Draggable : MonoBehaviour
     private static readonly int EmissionColor = Shader.PropertyToID("_EmissionColor");
     private bool isHovered = false;
 
+    // ✅ Cache managers to detect networked vs offline mode
+    private bool isNetworkedMode;
+
     private void Awake()
     {
         unitAI = GetComponent<UnitAI>();
-
         renderers = GetComponentsInChildren<Renderer>();
         propBlock = new MaterialPropertyBlock();
+
+        // ✅ Detect which mode we're in
+        isNetworkedMode = (GameManager.Instance != null);
     }
 
     private void OnMouseEnter()
@@ -73,14 +78,12 @@ public class Draggable : MonoBehaviour
 
     private void OnMouseDown()
     {
-        // Disable outline when picking up
         if (isHovered)
         {
             DisableOutline();
             isHovered = false;
         }
 
-        // ✅ BLOCK INTERACTION DURING COMBAT
         if (!CanInteractWithUnit())
         {
             Debug.Log($"❌ Cannot interact with {unitAI.unitName} during combat!");
@@ -93,7 +96,6 @@ public class Draggable : MonoBehaviour
             return;
         }
 
-        // ✅ Prevent picking up another unit if one is already being dragged
         if (!isDragging)
         {
             if (currentlyDragging != null && currentlyDragging != this)
@@ -102,15 +104,11 @@ public class Draggable : MonoBehaviour
                 return;
             }
 
-            // Pick up the unit
             isDragging = true;
             currentlyDragging = this;
             oldPosition = transform.position;
-
-            // ✅ STORE original tile before clearing it
             originalTile = unitAI.currentTile;
 
-            // Free its previously occupied tile immediately
             if (unitAI != null && unitAI.currentTile != null)
             {
                 if (unitAI.currentTile.occupyingUnit == unitAI)
@@ -122,7 +120,6 @@ public class Draggable : MonoBehaviour
         }
         else
         {
-            // Drop the unit
             isDragging = false;
             currentlyDragging = null;
             ClearTileHighlights();
@@ -164,44 +161,34 @@ public class Draggable : MonoBehaviour
 
     private bool CanInteractWithUnit()
     {
-        // ✅ Allow interaction with benched units even during combat
         if (unitAI != null && unitAI.currentState == UnitState.Bench)
         {
-            Debug.Log($"✅ {unitAI.unitName} is benched and can be moved during combat");
             return true;
         }
 
-        // ✅ Check 1: No interaction during combat phase (except for benched units)
+        // ✅ Check StageManager in either mode
         if (StageManager.Instance != null && StageManager.Instance.currentPhase == StageManager.GamePhase.Combat)
         {
-            Debug.Log("🚫 Units on the board cannot be moved during combat phase!");
             return false;
         }
 
-        // ✅ Check 2: No interaction if unit is in combat state
         if (unitAI != null && unitAI.currentState == UnitState.Combat)
         {
-            Debug.Log($"🚫 {unitAI.unitName} is in combat and cannot be moved!");
             return false;
         }
 
-        // ✅ Check 3: No interaction if unit is dead
         if (unitAI != null && !unitAI.isAlive)
         {
-            Debug.Log($"🚫 {unitAI.unitName} is dead and cannot be moved!");
             return false;
         }
 
-        // ✅ Check 4: Only allow player units to be dragged (prevent enemy unit interaction)
         if (unitAI != null && unitAI.team != Team.Player)
         {
-            Debug.Log($"🚫 Cannot interact with enemy unit {unitAI.unitName}!");
             return false;
         }
 
         return true;
     }
-
 
     private void Update()
     {
@@ -224,34 +211,26 @@ public class Draggable : MonoBehaviour
 
     private bool CanPlayerPlaceOnTile(HexTile tile)
     {
-        // ✅ CRITICAL: Block ALL board placement during combat
         if (tile.tileType == TileType.Board)
         {
             if (StageManager.Instance != null && StageManager.Instance.currentPhase == StageManager.GamePhase.Combat)
             {
-                Debug.Log($"🚫 COMBAT ACTIVE: Cannot place any units on the board during combat!");
                 return false;
             }
 
-            // Normal row restrictions during prep phase
             if (tile.gridPosition.x > 3)
             {
-                Debug.Log($"❌ Cannot place unit beyond row 3. Tile {tile.gridPosition} is too far forward.");
                 return false;
             }
 
-            Debug.Log($"✅ Valid board placement at {tile.gridPosition} (prep phase, rows 0-3)");
             return true;
         }
 
-        // ✅ Always allow bench placement
         if (tile.tileType == TileType.Bench)
         {
-            Debug.Log($"✅ Valid bench placement at {tile.gridPosition}");
             return true;
         }
 
-        Debug.Log($"❌ Invalid tile type for placement: {tile.tileType}");
         return false;
     }
 
@@ -307,26 +286,23 @@ public class Draggable : MonoBehaviour
             if (targetTile.tileType == TileType.Board)
             {
                 unitAI.currentState = UnitState.BoardIdle;
-                GameManager.Instance.RegisterUnit(unitAI, unitAI.team == Team.Player);
+                RegisterUnit(unitAI, unitAI.team == Team.Player);
             }
             else if (targetTile.tileType == TileType.Bench)
             {
                 unitAI.currentState = UnitState.Bench;
-                GameManager.Instance.UnregisterUnit(unitAI);
+                UnregisterUnit(unitAI);
             }
 
-            TraitManager.Instance.EvaluateTraits(GameManager.Instance.playerUnits);
-            TraitManager.Instance.ApplyTraits(GameManager.Instance.playerUnits);
+            TraitManager.Instance.EvaluateTraits(GetPlayerUnits());
+            TraitManager.Instance.ApplyTraits(GetPlayerUnits());
 
             if (unitAI.team == Team.Player)
             {
-                GameManager.Instance.TryMergeUnits(unitAI);
+                TryMergeUnits(unitAI);
             }
 
-            if (unitAI.team == Team.Player && UIManager.Instance != null)
-            {
-                UIManager.Instance.UpdateFightButtonVisibility();
-            }
+            UpdateFightButtonVisibility();
 
             Debug.Log($"✅ {unitAI.unitName} placed successfully at {targetTile.gridPosition}");
             return;
@@ -337,31 +313,65 @@ public class Draggable : MonoBehaviour
 
         if (originalTile != null)
         {
-            Debug.Log($"🔄 Restoring {unitAI.unitName} to original tile: {originalTile.gridPosition}");
-
             if (originalTile.TryClaim(unitAI))
             {
                 if (originalTile.tileType == TileType.Board)
                 {
                     unitAI.currentState = UnitState.BoardIdle;
-                    GameManager.Instance.RegisterUnit(unitAI, unitAI.team == Team.Player);
+                    RegisterUnit(unitAI, unitAI.team == Team.Player);
                 }
                 else if (originalTile.tileType == TileType.Bench)
                 {
                     unitAI.currentState = UnitState.Bench;
-                    GameManager.Instance.UnregisterUnit(unitAI);
+                    UnregisterUnit(unitAI);
                 }
-
-                Debug.Log($"✅ {unitAI.unitName} successfully restored to {originalTile.gridPosition} with state {unitAI.currentState}");
-            }
-            else
-            {
-                Debug.LogWarning($"⚠️ Could not reclaim original tile {originalTile.gridPosition}, unit may be in invalid state!");
             }
         }
 
         originalTile = null;
-        return;
+    }
+
+    // ✅ Helper methods that work with both managers
+    private void RegisterUnit(UnitAI unit, bool isPlayer)
+    {
+        if (GameManager.Instance != null)
+            GameManager.Instance.RegisterUnit(unit, isPlayer);
+        else if (TestGameManager.Instance != null)
+            TestGameManager.Instance.RegisterUnit(unit, isPlayer);
+    }
+
+    private void UnregisterUnit(UnitAI unit)
+    {
+        if (GameManager.Instance != null)
+            GameManager.Instance.UnregisterUnit(unit);
+        else if (TestGameManager.Instance != null)
+            TestGameManager.Instance.UnregisterUnit(unit);
+    }
+
+    private void TryMergeUnits(UnitAI unit)
+    {
+        if (GameManager.Instance != null)
+            GameManager.Instance.TryMergeUnits(unit);
+        else if (TestGameManager.Instance != null)
+            TestGameManager.Instance.TryMergeUnits(unit);
+    }
+
+    private List<UnitAI> GetPlayerUnits()
+    {
+        if (GameManager.Instance != null)
+            return GameManager.Instance.GetPlayerUnits();
+        else if (TestGameManager.Instance != null)
+            return TestGameManager.Instance.GetPlayerUnits();
+
+        return new List<UnitAI>();
+    }
+
+    private void UpdateFightButtonVisibility()
+    {
+        if (UIManager.Instance != null)
+            UIManager.Instance.UpdateFightButtonVisibility();
+        else if (TestUIManager.Instance != null)
+            TestUIManager.Instance.UpdateFightButtonVisibility();
     }
 
     private Vector3 GetMouseWorldPos()

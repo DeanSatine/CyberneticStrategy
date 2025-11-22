@@ -299,6 +299,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 4583670255459424481}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f5b788c727c09de4480bdb92c860e59f,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -8694448457029176021}
   m_SourcePrefab: {fileID: 100100000, guid: f5b788c727c09de4480bdb92c860e59f, type: 3}
 --- !u!1 &397472728585410053 stripped
 GameObject:
@@ -518,6 +522,28 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 36
   m_CollisionDetection: 0
+--- !u!114 &-8694448457029176021
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 397472728585410053}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 2
+  ObservedComponents: []
+  sceneViewId: 0
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
 --- !u!4 &1220719919538885788 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1852576806548013000, guid: f5b788c727c09de4480bdb92c860e59f,

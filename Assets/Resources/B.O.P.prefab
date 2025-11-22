@@ -249,6 +249,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 9160613219524851892}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 00dc4eb0c1328b64fadc0173b59146b0,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -489233014634823332}
   m_SourcePrefab: {fileID: 100100000, guid: 00dc4eb0c1328b64fadc0173b59146b0, type: 3}
 --- !u!1 &3915463247227310737 stripped
 GameObject:
@@ -463,3 +467,25 @@ MonoBehaviour:
   firePoint: {fileID: 0}
   chestPoint: {fileID: 0}
   weaponPoint: {fileID: 0}
+--- !u!114 &-489233014634823332
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3915463247227310737}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 2
+  ObservedComponents: []
+  sceneViewId: 0
+  InstantiationId: 0
+  isRuntimeInstantiated: 0

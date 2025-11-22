@@ -621,7 +621,6 @@ public class UnitAI : MonoBehaviour
         Debug.Log($"💀 {unitName} attempting to die - isAlive: {isAlive}, isBeingRestored: {isBeingRestored}");
         Debug.Log($"🔍 OnAnyUnitDeath subscribers: {GetEventSubscriberCount()}");
 
-        // ✅ Enhanced guards: prevent multiple death calls and restoration interference
         if (!isAlive || isBeingRestored)
         {
             if (isBeingRestored) Debug.Log($"🚫 {unitName} death blocked - unit is being restored");
@@ -633,7 +632,6 @@ public class UnitAI : MonoBehaviour
         isAlive = false;
         OnAnyUnitDeath?.Invoke(this);
 
-        // ✅ FIXED: Ensure event actually fires
         if (OnAnyUnitDeath != null)
         {
             Debug.Log($"🔥 Firing OnAnyUnitDeath event for {unitName} to {GetEventSubscriberCount()} subscribers");
@@ -644,31 +642,41 @@ public class UnitAI : MonoBehaviour
             Debug.LogError($"❌ OnAnyUnitDeath is null! Cannot fire death event for {unitName}");
         }
 
+        // ✅ Check for either StageManager (networked) or TestStageManager (offline)
+        bool isInCombatPhase = false;
+        if (StageManager.Instance != null && StageManager.Instance.currentPhase == StageManager.GamePhase.Combat)
+        {
+            isInCombatPhase = true;
+        }
+        else if (TestStageManager.Instance != null && TestStageManager.Instance.currentPhase == TestStageManager.GamePhase.Combat)
+        {
+            isInCombatPhase = true;
+        }
+
         // ✅ TFT-STYLE: Don't destroy or unregister player units during combat
-        // They will be restored from snapshots after combat ends
-        if (team == Team.Player && StageManager.Instance?.currentPhase == StageManager.GamePhase.Combat)
+        if (team == Team.Player && isInCombatPhase)
         {
             Debug.Log($"💀 {unitName} died in combat but will be restored after round ends");
-
-            // ✅ FIX: Play death animation FIRST, then hide after animation completes
-            // Clear from tile but keep registered for restoration
             ClearTile();
-
-            // ✅ NEW: Start death sequence but don't hide immediately
             StartCoroutine(HandleCombatDeath());
-
-            return; // ✅ CRITICAL: Don't destroy player units during combat
+            return;
         }
 
         // ✅ Normal death for enemies or non-combat scenarios
-        GameManager.Instance.UnregisterUnit(this);
+        // Use whichever manager exists (networked or offline)
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.UnregisterUnit(this);
+        }
+        else if (TestGameManager.Instance != null)
+        {
+            TestGameManager.Instance.UnregisterUnit(this);
+        }
 
-        // ✅ Snap to ground (align with tile or y = 0)
+        // Snap to ground
         Vector3 pos = transform.position;
         pos.y = currentTile != null ? currentTile.transform.position.y : 0f;
         transform.position = pos;
-
-        // ✅ Reset move offset so unit doesn't "die in the air"
         moveOffset = Vector3.zero;
 
         if (animator)
@@ -681,6 +689,7 @@ public class UnitAI : MonoBehaviour
             StartCoroutine(FadeAndDestroy(1.5f));
         }
     }
+
 
     // ✅ ENHANCED: Handle death animation during combat without immediate hiding
     private IEnumerator HandleCombatDeath()

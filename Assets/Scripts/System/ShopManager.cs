@@ -401,12 +401,12 @@ public class ShopManager : MonoBehaviour
         newUnit.teamID = 1;
 
         // ✅ Register new unit with GameManager
-        GameManager.Instance.RegisterUnit(newUnit, true);
+        TestGameManager.Instance.RegisterUnit(newUnit, true);
 
         Debug.Log($"✅ Bought {slot.unitPrefab.name} for {slot.cost} gold, placed on bench at {freeSlot.name}");
 
         // Try merging
-        GameManager.Instance.TryMergeUnits(newUnit);
+        TestGameManager.Instance.TryMergeUnits(newUnit);
 
         // Remove the bought card from shop
         if (currentShopInstances.Contains(slot.gameObject))

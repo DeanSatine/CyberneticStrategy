@@ -13,9 +13,21 @@ public class PvPGameManager : MonoBehaviourPunCallbacks
     public float prepPhaseTime = 30f;
     public float combatMaxTime = 60f;
     public int damagePerLoss = 10;
-
+    [System.Serializable]
+    public class UnitPositionDataList
+    {
+        public List<UnitPositionData> positions;
+    }
     [Header("Arena System")]
     public PvPArenaManager arenaManager;
+
+    [System.Serializable]
+    public class UnitPositionData
+    {
+        public string unitPrefabName;
+        public Vector2Int gridPosition;
+        public int ownerActorNumber;
+    }
 
     public Dictionary<int, PvPPlayerState> allPlayers = new Dictionary<int, PvPPlayerState>();
 
@@ -417,22 +429,24 @@ public class PvPGameManager : MonoBehaviourPunCallbacks
             yield break;
         }
 
+        // Determine visitor/home (lower actor number visits higher)
         bool iAmVisitor = myActorNumber < opponentActorNumber;
-        int homeBoardOwner = iAmVisitor ? opponentActorNumber : myActorNumber;
+        int homePlayerActorNumber = iAmVisitor ? opponentActorNumber : myActorNumber;
 
-        PvPArenaManager.PlayerBoard combatBoard = arenaManager.GetPlayerBoard(homeBoardOwner);
+        PvPArenaManager.PlayerBoard combatBoard = arenaManager.GetPlayerBoard(homePlayerActorNumber);
 
         if (combatBoard == null)
         {
-            Debug.LogError($"❌ Combat board not found for player {homeBoardOwner}!");
+            Debug.LogError($"❌ Combat board not found for player {homePlayerActorNumber}!");
             yield break;
         }
 
-        Debug.Log($"🚀 Teleporting to Player {homeBoardOwner}'s board (I am {(iAmVisitor ? "visitor" : "home")})");
+        Debug.Log($"🚀 Teleporting to Player {homePlayerActorNumber}'s board (I am {(iAmVisitor ? "visitor" : "home")})");
 
+        // Activate combat board camera
         combatBoard.ActivateCamera(true);
 
-        // ✅ Get MY networked player
+        // Teleport player avatar
         GameObject player = PhotonNetwork.LocalPlayer.TagObject as GameObject;
         if (player != null)
         {
@@ -440,29 +454,182 @@ public class PvPGameManager : MonoBehaviourPunCallbacks
             player.transform.position = spawnPos;
         }
 
+        // ✅ STEP 1: Collect MY unit positions from home board
         List<UnitAI> myUnits = GameManager.Instance.GetPlayerUnits();
-        List<HexTile> targetTiles = iAmVisitor ? combatBoard.GetEnemyTiles() : combatBoard.GetPlayerTiles();
+        List<UnitPositionData> myUnitPositions = new List<UnitPositionData>();
 
-        int unitIndex = 0;
         foreach (UnitAI unit in myUnits)
         {
-            if (unit != null && unit.currentState != UnitAI.UnitState.Bench && unitIndex < targetTiles.Count)
+            if (unit != null && unit.currentTile != null && unit.currentState != UnitAI.UnitState.Bench)
             {
-                HexTile targetTile = targetTiles[unitIndex];
-                unit.transform.position = targetTile.transform.position + Vector3.up * 0.72f;
-                targetTile.TryClaim(unit);
-                unit.AssignToTile(targetTile);
+                UnitPositionData data = new UnitPositionData
+                {
+                    unitPrefabName = unit.gameObject.name.Replace("(Clone)", "").Trim(),
+                    gridPosition = unit.currentTile.gridPosition,
+                    ownerActorNumber = myActorNumber
+                };
+                myUnitPositions.Add(data);
 
-                unit.team = iAmVisitor ? Team.Enemy : Team.Player;
-                unit.teamID = iAmVisitor ? 2 : 1;
-
-                unitIndex++;
+                // Hide unit on home board (will respawn on combat board)
+                unit.gameObject.SetActive(false);
             }
+        }
+
+        Debug.Log($"📤 Player {myActorNumber}: Sending {myUnitPositions.Count} units to combat board");
+
+        // ✅ STEP 2: Send unit positions to Master for spawning
+        // Pass: unit data, combat board owner, unit owner, and whether unit owner is visitor
+        string jsonData = JsonUtility.ToJson(new UnitPositionDataList { positions = myUnitPositions });
+
+        if (PhotonNetwork.IsMasterClient)
+        {
+            // Master spawns their own units directly
+            StartCoroutine(SpawnUnitsOnCombatBoard(jsonData, homePlayerActorNumber, myActorNumber, iAmVisitor));
+        }
+        else
+        {
+            // Non-master sends positions to master via RPC
+            photonView.RPC("RPC_ReceiveUnitPositions", RpcTarget.MasterClient, jsonData, homePlayerActorNumber, myActorNumber, iAmVisitor);
         }
 
         yield return null;
     }
 
+
+    [PunRPC]
+    private void RPC_ReceiveUnitPositions(string jsonData, int combatBoardOwner, int unitOwner, bool unitOwnerIsVisitor)
+    {
+        if (!PhotonNetwork.IsMasterClient) return;
+
+        Debug.Log($"📥 Master received units from Player {unitOwner} for combat on Board {combatBoardOwner}");
+        StartCoroutine(SpawnUnitsOnCombatBoard(jsonData, combatBoardOwner, unitOwner, unitOwnerIsVisitor));
+    }
+
+    private IEnumerator SpawnUnitsOnCombatBoard(string jsonData, int combatBoardOwner, int unitOwner, bool unitOwnerIsVisitor)
+    {
+        UnitPositionDataList dataList = JsonUtility.FromJson<UnitPositionDataList>(jsonData);
+        PvPArenaManager.PlayerBoard combatBoard = arenaManager.GetPlayerBoard(combatBoardOwner);
+
+        if (combatBoard == null)
+        {
+            Debug.LogError($"❌ Combat board not found for owner {combatBoardOwner}!");
+            yield break;
+        }
+
+        // ✅ Units spawn on visitor side or home side based on who owns them
+        List<HexTile> targetTiles = unitOwnerIsVisitor ? combatBoard.GetEnemyTiles() : combatBoard.GetPlayerTiles();
+
+        Debug.Log($"🎯 Spawning {dataList.positions.Count} units for Player {unitOwner} (isVisitor={unitOwnerIsVisitor}) on Board {combatBoardOwner}");
+
+        foreach (UnitPositionData data in dataList.positions)
+        {
+            // ✅ Mirror grid position if unit owner is visitor
+            Vector2Int spawnGridPos = data.gridPosition;
+
+            if (unitOwnerIsVisitor)
+            {
+                // Mirror X-axis (flip to opposite side)
+                spawnGridPos.x = 7 - data.gridPosition.x;
+            }
+
+            // Find matching tile by grid position
+            HexTile targetTile = targetTiles.FirstOrDefault(t => t.gridPosition == spawnGridPos);
+
+            if (targetTile == null)
+            {
+                Debug.LogWarning($"⚠️ Could not find tile at {spawnGridPos}");
+                continue;
+            }
+
+            if (targetTile.occupyingUnit != null)
+            {
+                Debug.LogWarning($"⚠️ Tile at {spawnGridPos} already occupied");
+                continue;
+            }
+
+            // Spawn unit via network (spawns on ALL clients)
+            Vector3 spawnPos = targetTile.transform.position + Vector3.up * 0.72f;
+            GameObject unitObj = PhotonNetwork.Instantiate(data.unitPrefabName, spawnPos, Quaternion.Euler(0, -90, 0));
+
+            // ✅ Send RPC to ALL clients to configure the unit
+            PhotonView pv = unitObj.GetComponent<PhotonView>();
+            if (pv != null)
+            {
+                // Pass: photonViewID, unit owner, board owner, spawn grid position
+                photonView.RPC("RPC_ConfigureCombatUnit", RpcTarget.AllBuffered,
+                    pv.ViewID,
+                    unitOwner,
+                    combatBoardOwner,
+                    spawnGridPos.x,
+                    spawnGridPos.y);
+            }
+
+            yield return new WaitForSeconds(0.05f);
+        }
+
+        Debug.Log($"✅ Finished spawning units for Player {unitOwner}");
+    }
+
+    [PunRPC]
+    private void RPC_ConfigureCombatUnit(int unitPhotonViewID, int unitOwnerActor, int boardOwnerActor, int gridX, int gridY)
+    {
+        // Find the spawned unit by PhotonView ID
+        PhotonView unitPV = PhotonView.Find(unitPhotonViewID);
+        if (unitPV == null)
+        {
+            Debug.LogError($"❌ Could not find unit with ViewID {unitPhotonViewID}");
+            return;
+        }
+
+        UnitAI unit = unitPV.GetComponent<UnitAI>();
+        if (unit == null) return;
+
+        int myActorNumber = PhotonNetwork.LocalPlayer.ActorNumber;
+
+        // ✅ Get combat board
+        PvPArenaManager.PlayerBoard combatBoard = arenaManager.GetPlayerBoard(boardOwnerActor);
+        if (combatBoard == null)
+        {
+            Debug.LogError($"❌ [RPC_ConfigureCombatUnit] Combat board not found for actor {boardOwnerActor}");
+            return;
+        }
+
+        // ✅ Determine from MY perspective: is this MY unit or ENEMY unit?
+        bool unitBelongsToMe = (unitOwnerActor == myActorNumber);
+
+        // ✅ Get the correct tile list from MY perspective
+        List<HexTile> targetTiles = unitBelongsToMe ? combatBoard.GetPlayerTiles() : combatBoard.GetEnemyTiles();
+
+        // ✅ Find the tile
+        Vector2Int gridPos = new Vector2Int(gridX, gridY);
+        HexTile targetTile = targetTiles.FirstOrDefault(t => t.gridPosition == gridPos);
+
+        if (targetTile != null)
+        {
+            targetTile.TryClaim(unit);
+            unit.AssignToTile(targetTile);
+        }
+        else
+        {
+            Debug.LogWarning($"⚠️ Could not find tile at ({gridX},{gridY}) from my perspective");
+        }
+
+        // ✅ Set team from MY perspective
+        if (unitBelongsToMe)
+        {
+            unit.team = Team.Player;
+            unit.teamID = 1;
+            Debug.Log($"✅ MY unit {unit.name} at ({gridX},{gridY}) → Player team");
+        }
+        else
+        {
+            unit.team = Team.Enemy;
+            unit.teamID = 2;
+            Debug.Log($"✅ ENEMY unit {unit.name} at ({gridX},{gridY}) → Enemy team");
+        }
+
+        unit.SetState(UnitAI.UnitState.BoardIdle);
+    }
 
     [PunRPC]
     private void RPC_StartLiveCombat()
@@ -484,6 +651,7 @@ public class PvPGameManager : MonoBehaviourPunCallbacks
             CombatManager.Instance.StartCombat();
         }
     }
+
 
     [PunRPC]
     private void RPC_EndCombat()

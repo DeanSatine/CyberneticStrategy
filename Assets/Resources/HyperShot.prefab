@@ -399,6 +399,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: -1698372542117361009}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 7661a890a586c6d489fcd6b8b2b1f439,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7434066756426865147}
   m_SourcePrefab: {fileID: 100100000, guid: 7661a890a586c6d489fcd6b8b2b1f439, type: 3}
 --- !u!1 &3440013900039195679 stripped
 GameObject:
@@ -482,13 +486,15 @@ MonoBehaviour:
   moveOffsetRange: 0.2
   deathAnimLength: 3
   startingTile: {fileID: 0}
-  twoStarMultiplier: 1.8
-  threeStarMultiplier: 2.5
+  twoStarHealth: 650
+  threeStarHealth: 900
+  twoStarAD: 18
+  threeStarAD: 27
   twoStarScale: 1.1
+  threeStarScale: 1.25
   traitBonusMaxHealth: 0
   baseMaxHealth: 0
   bonusMaxHealth: 0
-  threeStarScale: 1.25
 --- !u!114 &-7781210302265434978
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -612,6 +618,28 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.4267577, y: 1.6255429, z: 0.37822676}
   m_Center: {x: -0.005289972, y: 0.81456006, z: 0.024154902}
+--- !u!114 &7434066756426865147
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3440013900039195679}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 2
+  ObservedComponents: []
+  sceneViewId: 0
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
 --- !u!4 &4236101029019045510 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1852576806548013000, guid: 7661a890a586c6d489fcd6b8b2b1f439,

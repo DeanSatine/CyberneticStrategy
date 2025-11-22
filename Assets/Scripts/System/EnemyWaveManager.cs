@@ -93,7 +93,7 @@ public class EnemyWaveManager : MonoBehaviour
 
             UnitAI enemyAI = enemyObj.GetComponent<UnitAI>();
             enemyAI.team = Team.Enemy;
-            enemyAI.teamID = 1;
+            enemyAI.teamID = 2;
             enemyAI.SetState(UnitAI.UnitState.BoardIdle);
             enemyObj.transform.rotation = Quaternion.Euler(0, -90f, 0);
 
@@ -109,7 +109,7 @@ public class EnemyWaveManager : MonoBehaviour
             }
 
             activeEnemies.Add(enemyAI);
-            GameManager.Instance.RegisterUnit(enemyAI, false);
+            TestGameManager.Instance.RegisterUnit(enemyAI, false);
         }
 
         if (difficultyStacks > 0)
